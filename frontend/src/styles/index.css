@@ -1,0 +1,66 @@
+/* Main Index CSS - Imports all stylesheets */
+
+@import './theme.css';
+@import './components.css';
+@import './pages.css';
+@import './Navbar.css';
+@import './LiveTracking.css';
+@import './OrderTracking.css';
+
+/* ============================================
+   ROOT APPLICATION STYLES
+   ============================================ */
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+/* ============================================
+   SCROLLBAR STYLES
+   ============================================ */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #667eea;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #764ba2;
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
+@media print {
+  body {
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  a {
+    text-decoration: underline;
+  }
+
+  .btn, button {
+    border: 1px solid #333;
+  }
+}

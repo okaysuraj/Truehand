@@ -1,0 +1,243 @@
+/* Order Tracking Page Styles */
+
+.order-tracking-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+}
+
+.tracking-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.tracking-container h1 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+}
+
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 1.2em;
+  color: #666;
+}
+
+/* Order Summary */
+.order-summary {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.summary-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.summary-details {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item .label {
+  color: #888;
+  font-size: 0.9em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.summary-item .value {
+  color: #333;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+.summary-item .status-badge {
+  display: inline-block;
+  background: #4CAF50;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.95em;
+  width: fit-content;
+}
+
+/* Delivery Details */
+.delivery-details {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  margin-bottom: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.details-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.details-grid {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.detail-card {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid #667eea;
+  transition: transform 0.2s;
+}
+
+.detail-card:hover {
+  transform: translateY(-2px);
+}
+
+.detail-label {
+  color: #888;
+  font-size: 0.85em;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.detail-value {
+  color: #333;
+  font-size: 1em;
+  font-weight: 500;
+}
+
+/* Timeline */
+.timeline {
+  background: white;
+  border-radius: 12px;
+  padding: 0;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.timeline-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px 20px;
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+.timeline-items {
+  padding: 30px 20px;
+  position: relative;
+}
+
+.timeline-items::before {
+  content: '';
+  position: absolute;
+  left: 30px;
+  top: 30px;
+  bottom: 30px;
+  width: 2px;
+  background: #e0e0e0;
+}
+
+.timeline-item {
+  display: flex;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-point {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  border: 3px solid white;
+  margin-right: 20px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  margin-top: 2px;
+  transition: all 0.3s;
+}
+
+.timeline-item.completed .timeline-point {
+  background: #4CAF50;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+}
+
+.timeline-content {
+  padding: 10px 0;
+}
+
+.timeline-title {
+  font-weight: 600;
+  color: #333;
+  font-size: 1.05em;
+  margin-bottom: 5px;
+}
+
+.timeline-time {
+  color: #888;
+  font-size: 0.9em;
+}
+
+.timeline-item.completed .timeline-title {
+  color: #4CAF50;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .tracking-container h1 {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+
+  .summary-details {
+    grid-template-columns: 1fr;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .timeline-items {
+    padding: 20px 20px 20px 40px;
+  }
+
+  .timeline-items::before {
+    left: 12px;
+  }
+
+  .timeline-point {
+    margin-right: 15px;
+  }
+}

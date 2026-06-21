@@ -1,0 +1,242 @@
+/* Navbar.css - Amazon-style Dual-row Header */
+
+.navbar {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+}
+
+/* Top Belt */
+.nav-belt {
+  background-color: var(--amazon-navy);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  height: 60px;
+  gap: 16px;
+}
+
+.nav-belt a {
+  color: var(--white);
+  text-decoration: none;
+}
+
+.nav-belt a:hover {
+  text-decoration: none;
+  outline: 1px solid var(--white);
+}
+
+/* Logo */
+.nav-logo {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 2px;
+}
+
+.nav-logo span {
+  color: var(--amazon-orange);
+  margin-left: 2px;
+}
+
+/* Location */
+.nav-location {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 8px;
+  border-radius: 2px;
+  font-size: 12px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.nav-location-line-1 {
+  color: #ccc;
+}
+
+.nav-location-line-2 {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+/* Search Bar */
+.nav-search {
+  flex-grow: 1;
+  display: flex;
+  height: 40px;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 10px;
+}
+
+.nav-search:focus-within {
+  box-shadow: 0 0 0 3px var(--amazon-orange);
+}
+
+.search-select {
+  background-color: #f3f3f3;
+  border: 1px solid #cdcdcd;
+  border-right: none;
+  color: #555;
+  padding: 0 10px;
+  font-size: 12px;
+  cursor: pointer;
+  width: auto;
+  outline: none;
+}
+
+.search-select:hover {
+  background-color: #dadada;
+  color: #000;
+}
+
+.search-input {
+  flex-grow: 1;
+  border: none;
+  padding: 0 10px;
+  font-size: 15px;
+  outline: none;
+}
+
+.search-btn {
+  background-color: var(--amazon-orange);
+  border: none;
+  width: 45px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+}
+
+.search-btn:hover {
+  background-color: var(--amazon-orange-hover);
+}
+
+/* Nav Tools (Right side) */
+.nav-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-tool-item {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  line-height: 1.1;
+  color: var(--white);
+  border: 1px solid transparent;
+}
+
+.nav-tool-item:hover {
+  border: 1px solid var(--white);
+}
+
+.nav-line-1 {
+  font-size: 12px;
+}
+
+.nav-line-2 {
+  font-size: 14px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+}
+
+/* Cart */
+.nav-cart {
+  display: flex;
+  align-items: flex-end;
+  padding: 8px;
+  position: relative;
+}
+
+.cart-count {
+  color: var(--amazon-orange);
+  font-weight: bold;
+  font-size: 16px;
+  position: absolute;
+  top: 0px;
+  left: 20px;
+}
+
+.cart-icon {
+  font-size: 30px;
+  margin-right: 4px;
+}
+
+.cart-text {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+/* Bottom Belt (Menu) */
+.nav-main {
+  background-color: var(--amazon-dark);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  height: 39px;
+  font-size: 14px;
+  gap: 16px;
+}
+
+.nav-main a {
+  color: var(--white);
+  text-decoration: none;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+}
+
+.nav-main a:hover {
+  border: 1px solid var(--white);
+}
+
+.nav-hamburger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 6px 8px;
+  border: 1px solid transparent;
+}
+
+.nav-hamburger:hover {
+  border: 1px solid var(--white);
+}
+
+/* Logout button hidden in a but styled as link */
+.nav-tool-item button {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+/* Mobile responsive */
+@media (max-width: 800px) {
+  .nav-location, .nav-line-1, .cart-text {
+    display: none;
+  }
+  .nav-search {
+    margin: 0 4px;
+  }
+  .search-select {
+    display: none;
+  }
+}

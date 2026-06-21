@@ -1,0 +1,17 @@
+
+services:
+  truehand_db:
+    image: postgres:18-alpine
+    container_name: truehand_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: truehand
+    ports:
+      - "5436:5432"
+    volumes:
+      - truehand_data:/var/lib/postgresql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+volumes:
+  truehand_data:

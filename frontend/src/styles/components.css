@@ -1,0 +1,250 @@
+/* components.css - UI Components */
+
+/* Buttons */
+.btn {
+  display: inline-block;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 19px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.1s;
+  box-shadow: 0 2px 5px rgba(15,17,17,.15);
+}
+
+.btn:active {
+  box-shadow: 0 1px 3px rgba(15,17,17,.15) inset;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Primary Button (Amazon Yellow) */
+.btn-primary {
+  background-color: var(--amazon-yellow);
+  border-color: #fcd200;
+  color: var(--text-main);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--amazon-yellow-hover);
+  border-color: #f2c200;
+}
+
+/* Secondary Button (Amazon Orange for Buy Now) */
+.btn-secondary {
+  background-color: var(--amazon-orange);
+  border-color: #f08804;
+  color: var(--text-main);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--amazon-orange-hover);
+  border-color: #df7e04;
+}
+
+/* Standard Button (Light gray) */
+.btn-standard {
+  background-color: #fff;
+  border-color: #d5d9d9;
+  color: var(--text-main);
+  box-shadow: 0 2px 5px rgba(15,17,17,.15);
+}
+
+.btn-standard:hover:not(:disabled) {
+  background-color: #f7fafa;
+}
+
+.btn-danger {
+  background-color: var(--white);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn-danger:hover {
+  background-color: #fceceb;
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.form-control {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #a6a6a6;
+  border-top-color: #949494;
+  border-radius: 4px;
+  box-shadow: 0 1px 0 rgba(255,255,255,.5), 0 1px 0 rgba(0,0,0,.07) inset;
+  transition: all 0.1s;
+}
+
+.form-control:focus {
+  border-color: var(--amazon-orange);
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(240,136,4,.5);
+}
+
+/* Cards */
+.card {
+  background: var(--white);
+  border-radius: 4px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.a-box {
+  border: 1px solid #D5D9D9;
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.a-box-inner {
+  padding: 14px 18px;
+}
+
+/* Product Card */
+.product-card {
+  background: var(--white);
+  border: 1px solid var(--amazon-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+  padding: 16px;
+}
+
+.product-card:hover {
+  box-shadow: var(--shadow-card);
+}
+
+.product-img-container {
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.product-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.product-title {
+  font-size: 16px;
+  color: var(--text-main);
+  margin-bottom: 4px;
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.product-title:hover {
+  color: var(--amazon-orange);
+}
+
+.product-seller {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+/* Star Rating */
+.star-rating {
+  color: var(--amazon-orange);
+  font-size: 14px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+}
+.rating-count {
+  color: var(--amazon-blue);
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+/* Price Display */
+.price-display {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.price-symbol {
+  font-size: 12px;
+  margin-top: 2px;
+}
+.price-whole {
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
+}
+.price-fraction {
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.prime-badge {
+  color: #00a8e1;
+  font-weight: bold;
+  font-style: italic;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 2px;
+}
+
+.badge-bestseller {
+  background-color: #e67a00;
+  color: white;
+}
+.badge-deal {
+  background-color: #CC0C39;
+  color: white;
+}
+
+/* Alerts */
+.a-alert {
+  padding: 14px 18px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-bottom: 14px;
+}
+.a-alert-success {
+  border-color: #067d62;
+  background-color: #f2fcf8;
+  color: #0f1111;
+}
+.a-alert-error {
+  border-color: #c40000;
+  background-color: #fff4f4;
+  color: #c40000;
+}
