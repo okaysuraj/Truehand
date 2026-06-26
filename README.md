@@ -9,7 +9,7 @@ A full-stack e-commerce application tailored for handcrafted, artisanal goods. T
 | **Web Frontend** | React 19, Vite, React Router 6, Axios, Leaflet |
 | **Mobile App** | React Native, Expo, React Navigation, Axios |
 | **Backend API** | Spring Boot 3.1, Spring Security, JPA/Hibernate |
-| **Database** | PostgreSQL 12+ (Production) / H2 (Testing) |
+| **Database** | Neon Cloud Postgres (Production/Dev) / H2 (Testing) |
 | **Testing** | JUnit 5, Mockito, Spring Boot Test, Vitest, React Testing Library |
 | **Auth** | JWT (jjwt 0.12) with BCrypt |
 | **Build/Runtime**| Maven 3.6+, Node.js 18+, npm |
@@ -56,14 +56,18 @@ Truehand/
 
 ## Quick Start
 
-> **Prerequisites:** Java 17+, Node.js 18+, PostgreSQL 12+, Maven 3.6+
+> **Prerequisites:** Java 17+, Node.js 18+, Neon Cloud PostgreSQL database, Maven 3.6+
 
 ### 1. Database Setup
-Create a PostgreSQL database named `truehand`. Ensure it runs on `localhost:5432`.
-Configure the credentials in `backend/src/main/resources/application.properties`.
+1. Create a PostgreSQL project on [Neon Cloud](https://neon.tech/).
+2. Copy your connection details and set them in a `backend/.env` file (see `backend/.env.example`).
+3. Load the schema into your Neon database:
+   ```bash
+   psql "postgresql://[user]:[password]@[neon-hostname]/neondb?sslmode=require" -f database/schema.sql
+   ```
 
 ### 2. Backend (Spring Boot)
-Open a terminal and start the backend server (runs on `http://localhost:8080`):
+Ensure your database credentials are set as environment variables (`DATABASE_URL`, `DATABASE_USERNAME`, `DATABASE_PASSWORD`) or configured in the environment, then start the backend server (runs on `http://localhost:8080`):
 ```bash
 cd backend
 mvn spring-boot:run

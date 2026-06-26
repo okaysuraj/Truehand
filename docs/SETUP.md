@@ -14,34 +14,45 @@
 
 ---
 
-## 1. Database Setup (PostgreSQL)
+## 1. Database Setup (Neon Cloud Postgres)
 
-### Create the database and load the schema
+### Create the Neon Postgres Database
+1. Sign up/Log in to [Neon Console](https://neon.tech/).
+2. Create a project and retrieve the database URL.
+
+### Load the schema
+Run the following command in your terminal using the psql CLI and your Neon connection string:
 
 ```bash
-createdb truehand
-psql truehand < database/schema.sql
+psql "postgresql://[user]:[password]@[neon-hostname]/neondb?sslmode=require" -f database/schema.sql
 ```
 
 ### Verify tables were created
-
-```bash
-psql truehand -c "\dt"
+In your database console or client, run:
+```sql
+\dt
 ```
-
 You should see 7 tables: `users`, `products`, `orders`, `order_items`, `deliveries`, `locations`, `reviews`.
 
 ---
 
 ## 2. Backend Configuration (Spring Boot)
 
-Edit `backend/src/main/resources/application.properties`:
+Create a `backend/.env` file (copied from `backend/.env.example`) or configure your environment variables:
+
+```env
+DATABASE_URL=jdbc:postgresql://<neon-hostname>/neondb?sslmode=require
+DATABASE_USERNAME=<neon-username>
+DATABASE_PASSWORD=<neon-password>
+```
+
+The database configuration in `backend/src/main/resources/application.properties` uses environment variables with defaults:
 
 ```properties
 # Database
-spring.datasource.url=jdbc:postgresql://localhost:5432/truehand
-spring.datasource.username=postgres
-spring.datasource.password=YOUR_PASSWORD_HERE
+spring.datasource.url=${DATABASE_URL:jdbc:postgresql://localhost:5432/truehand}
+spring.datasource.username=${DATABASE_USERNAME:postgres}
+spring.datasource.password=${DATABASE_PASSWORD:admin}
 
 # JWT
 jwt.secret=change_this_to_a_secure_random_string_at_least_32_chars
@@ -116,8 +127,12 @@ npm install
 
 ### Environment variables
 
-Create `truehand-mobile/.env` if you need to connect to a remote backend.
-*Note: Ensure your API URL matches your computer's local IP address if running on a physical device, because `localhost` resolves to the phone itself.*
+Create a `truehand-mobile/.env` file (copied from `truehand-mobile/.env.example`) to configure:
+
+```env
+EXPO_PUBLIC_API_URL=http://localhost:8080
+```
+*Note: Ensure your API URL matches your computer's local IP address (e.g. `http://192.168.1.10:8080`) if running on a physical device, because `localhost` resolves to the phone itself.*
 
 ### Start the Expo bundler
 

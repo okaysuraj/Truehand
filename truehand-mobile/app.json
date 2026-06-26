@@ -27,7 +27,8 @@
           "merchantIdentifier": "merchant.com.truehand",
           "enableGooglePay": true
         }
-      ]
+      ],
+      "expo-font"
     ]
   }
 }

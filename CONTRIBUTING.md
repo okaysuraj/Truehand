@@ -65,8 +65,7 @@ npm run build              # Production build
 npm test                   # Run tests
 
 # Database
-createdb grocery_delivery                        # Create
-psql grocery_delivery < database/schema.sql      # Load schema
-psql grocery_delivery                            # Connect
-dropdb grocery_delivery                          # Drop (reset)
+# Use your Neon Cloud Postgres connection string to load schema or connect
+psql "postgresql://[user]:[password]@[neon-hostname]/neondb?sslmode=require" -f database/schema.sql   # Load schema
+psql "postgresql://[user]:[password]@[neon-hostname]/neondb?sslmode=require"                          # Connect
 ```
