@@ -18,7 +18,8 @@ const Login = () => {
       if (data.role === 'SELLER') navigate('/seller/dashboard');
       else navigate('/profile');
     } catch (err) {
-      setError(err?.response?.data || 'Invalid email or password');
+      const errorMessage = err?.message || err?.response?.data || 'Invalid email or password';
+      setError(errorMessage);
     }
     setLoading(false);
   };
