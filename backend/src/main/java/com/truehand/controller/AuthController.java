@@ -1,5 +1,6 @@
 package com.truehand.controller;
 
+import com.truehand.dto.FirebaseLoginRequest;
 import com.truehand.dto.LoginRequest;
 import com.truehand.dto.LoginResponse;
 import com.truehand.dto.RegisterRequest;
@@ -16,12 +17,17 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<LoginResponse> register(@RequestBody RegisterRequest request) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/firebase-login")
+    public ResponseEntity<LoginResponse> firebaseLogin(@RequestBody FirebaseLoginRequest request) {
+        return ResponseEntity.ok(authService.firebaseLogin(request));
     }
 }

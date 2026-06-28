@@ -22,6 +22,8 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
+    private String firebaseUid;
+
     @Column(nullable = false)
     private String passwordHash;
 
@@ -36,6 +38,15 @@ public class User {
     private String city;
     private String state;
     private String postalCode;
+
+    @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean emailVerified;
+
+    private String emailVerificationToken;
+    private LocalDateTime emailVerificationTokenExpiry;
+
+    private String resetPasswordToken;
+    private LocalDateTime resetPasswordTokenExpiry;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean isActive;

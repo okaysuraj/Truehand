@@ -25,11 +25,23 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     const res = await authService.register(payload);
     const data = res.data;
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data));
-    setUser(data);
     setLoading(false);
     return data;
+  };
+
+  const verifyEmail = async (token) => {
+    const res = await authService.verifyEmail(token);
+    return res.data;
+  };
+
+  const forgotPassword = async (email) => {
+    const res = await authService.forgotPassword({ email });
+    return res.data;
+  };
+
+  const resetPassword = async (payload) => {
+    const res = await authService.resetPassword(payload);
+    return res.data;
   };
 
   const logout = () => {
@@ -38,7 +50,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, login, register, verifyEmail, forgotPassword, resetPassword, logout, loading, isAuthenticated: !!user }}>
       {children}
     </AuthContext.Provider>
   );

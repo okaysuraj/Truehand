@@ -16,7 +16,7 @@ const Login = () => {
     try {
       const data = await login(email, password);
       if (data.role === 'SELLER') navigate('/seller/dashboard');
-      else navigate('/');
+      else navigate('/profile');
     } catch (err) {
       setError(err?.response?.data || 'Invalid email or password');
     }
@@ -66,7 +66,7 @@ const Login = () => {
               <div className="flex items-center justify-between mb-unit">
                 <label className="block font-label-sm text-label-sm text-on-surface-variant" htmlFor="password">Password</label>
                 <div className="text-sm">
-                  <Link to="#" className="font-label-sm text-label-sm text-primary hover:text-primary-container transition-colors underline decoration-transparent hover:decoration-primary underline-offset-4">Forgot password?</Link>
+                  <Link to="/forgot-password" className="font-label-sm text-label-sm text-primary hover:text-primary-container transition-colors underline decoration-transparent hover:decoration-primary underline-offset-4">Forgot password?</Link>
                 </div>
               </div>
               <div className="relative">

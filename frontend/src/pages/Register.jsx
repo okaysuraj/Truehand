@@ -15,21 +15,20 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     
-    // Split full name
     const nameParts = fullName.trim().split(' ');
     const fName = nameParts[0] || '';
     const lName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
-    
+
     try {
-      const data = await register({
+      await register({
         ...form,
         firstName: fName,
         lastName: lName
       });
-      if (data.role === 'SELLER') navigate('/seller/dashboard');
-      else navigate('/');
+      setError(null);
+      navigate('/login');
     } catch (err) {
-      setError(err?.response?.data || 'Error creating account');
+      setError(err?.message || 'Error creating account');
     }
     setLoading(false);
   };
