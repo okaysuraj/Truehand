@@ -21,6 +21,9 @@ public class FirebaseConfig {
     @Value("${firebase.credentials.path:}")
     private String firebaseCredentialsPath;
 
+    @Value("${FIREBASE_CREDENTIALS:}")
+    private String firebaseCredentialsJson;
+
     @PostConstruct
     public void init() throws IOException {
         if (FirebaseApp.getApps().isEmpty()) {
@@ -30,7 +33,11 @@ public class FirebaseConfig {
                     .findFirst()
                     .orElse("");
 
-            if (StringUtils.hasText(resolvedPath)) {
+            if (StringUtils.hasText(firebaseCredentialsJson)) {
+                try (InputStream serviceAccount = new java.io.ByteArrayInputStream(firebaseCredentialsJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
+                    credentials = GoogleCredentials.fromStream(serviceAccount);
+                }
+            } else if (StringUtils.hasText(resolvedPath)) {
                 try (InputStream serviceAccount = new FileInputStream(resolvedPath)) {
                     credentials = GoogleCredentials.fromStream(serviceAccount);
                 }
