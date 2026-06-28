@@ -33,8 +33,13 @@ public class FirebaseConfig {
                     .findFirst()
                     .orElse("");
 
-            if (StringUtils.hasText(firebaseCredentialsJson)) {
-                try (InputStream serviceAccount = new java.io.ByteArrayInputStream(firebaseCredentialsJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
+            String envJson = System.getenv("FIREBASE_CREDENTIALS");
+            if (!StringUtils.hasText(envJson)) {
+                envJson = firebaseCredentialsJson;
+            }
+
+            if (StringUtils.hasText(envJson)) {
+                try (InputStream serviceAccount = new java.io.ByteArrayInputStream(envJson.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
                     credentials = GoogleCredentials.fromStream(serviceAccount);
                 }
             } else if (StringUtils.hasText(resolvedPath)) {
