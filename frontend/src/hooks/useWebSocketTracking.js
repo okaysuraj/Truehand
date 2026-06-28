@@ -9,9 +9,22 @@ export const useWebSocketTracking = (orderId) => {
   useEffect(() => {
     if (!orderId) return;
 
-    // Determine WebSocket URL
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${wsProtocol}//localhost:8080/ws/tracking`;
+    const getWsUrl = () => {
+      const configuredWsUrl = import.meta.env.VITE_WS_URL;
+      if (configuredWsUrl) return configuredWsUrl;
+
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
+      try {
+        const parsedApiUrl = new URL(apiUrl);
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${wsProtocol}//${parsedApiUrl.host}/ws/tracking`;
+      } catch {
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${wsProtocol}//localhost:8080/ws/tracking`;
+      }
+    };
+
+    const wsUrl = getWsUrl();
 
     try {
       const ws = new WebSocket(wsUrl);
