@@ -59,6 +59,10 @@ public class AuthService {
         }
 
         Optional<User> existingUser = userRepository.findByFirebaseUid(token.getUid());
+        if (existingUser.isEmpty() && token.getEmail() != null) {
+            existingUser = userRepository.findByEmail(token.getEmail());
+        }
+
         User user = existingUser.orElseGet(() -> {
             String email = token.getEmail() != null ? token.getEmail() : token.getUid() + "@firebase.local";
             String displayName = Optional.ofNullable(token.getName())

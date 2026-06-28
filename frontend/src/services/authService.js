@@ -25,6 +25,13 @@ const mapFirebaseAuthError = (error) => {
 export const authService = {
   register: async (data) => {
     try {
+      await api.post('/auth/register', {
+        email: data.email,
+        password: data.password,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: data.role
+      });
       const cred = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ').trim();
       if (fullName) {
@@ -49,7 +56,7 @@ export const authService = {
         throw new Error('Please verify your email before logging in.');
       }
       const idToken = await cred.user.getIdToken();
-      const backendRes = await api.post('/auth/firebase-login', { idToken, role: 'CUSTOMER' });
+      const backendRes = await api.post('/auth/firebase-login', { idToken });
       return backendRes;
     } catch (error) {
       throw new Error(mapFirebaseAuthError(error));
