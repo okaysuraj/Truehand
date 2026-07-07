@@ -9,6 +9,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [newQuestion, setNewQuestion] = useState('');
   const [qty, setQty] = useState(1);
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -28,12 +30,28 @@ const ProductDetail = () => {
       setProduct(prodRes.data);
       const revRes = await api.get(`/reviews/product/${id}`);
       setReviews(revRes.data);
+      const qRes = await api.get(`/questions/product/${id}`);
+      setQuestions(qRes.data);
       try {
         const recRes = await api.get(`/products/${id}/recommendations`);
         setRecommendations(recRes.data);
       } catch (err) {
         console.log('No recommendations found');
       }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAskQuestion = async (e) => {
+    e.preventDefault();
+    if (!user) { alert('Please login to ask a question'); return; }
+    if (!newQuestion.trim()) return;
+    try {
+      await api.post(`/questions/product/${id}/user/${user.id}`, { content: newQuestion });
+      setNewQuestion('');
+      alert('Question submitted successfully');
+      fetchProductAndReviews();
     } catch (err) {
       console.error(err);
     }
@@ -62,6 +80,28 @@ const ProductDetail = () => {
     }
   };
 
+  const handleAddToWishlist = async () => {
+    if (!user) { alert('Please login to add to wishlist'); return; }
+    try {
+      await api.post(`/wishlist/user/${user.id}/product/${product.id}`);
+      alert('Added to Wishlist!');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddToCompare = () => {
+    let items = JSON.parse(localStorage.getItem('compareItems')) || [];
+    if (items.length >= 4) { alert('You can only compare up to 4 items'); return; }
+    if (!items.find(i => i.id === product.id)) {
+      items.push(product);
+      localStorage.setItem('compareItems', JSON.stringify(items));
+      alert('Added to Compare list!');
+    } else {
+      alert('Already in Compare list!');
+    }
+  };
+
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating || 0);
     const emptyStars = 5 - fullStars;
@@ -80,7 +120,24 @@ const ProductDetail = () => {
 
         {/* Center: Details */}
         <div className="detail-info">
-          <h1 className="detail-title" style={{ fontSize: 28, marginBottom: 8 }}>{product.name}</h1>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <h1 className="detail-title" style={{ fontSize: 28, marginBottom: 8, flex: 1 }}>{product.name}</h1>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button 
+                onClick={handleAddToWishlist}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B12704', fontSize: 24 }}
+                title="Add to Wishlist"
+              >
+                ❤️
+              </button>
+              <button 
+                onClick={handleAddToCompare}
+                style={{ fontSize: 14, padding: '4px 12px', borderRadius: 4, background: '#f0f2f2', border: '1px solid #d5d9d9', cursor: 'pointer', height: 'fit-content', alignSelf: 'center' }}
+              >
+                Compare
+              </button>
+            </div>
+          </div>
           <div style={{color:'#007185', marginBottom: 8}}>Visit the {product.sellerName || 'TrueHand'} Store</div>
           
           <div className="star-rating" style={{fontSize: 20, color: '#FFA41C'}}>
@@ -183,6 +240,53 @@ const ProductDetail = () => {
           <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
         </div>
       )}
+
+      {/* Customer Questions & Answers */}
+      <div style={{ marginBottom: 40 }}>
+        <h2>Customer Questions & Answers</h2>
+        <form onSubmit={handleAskQuestion} style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
+          <input 
+            value={newQuestion} 
+            onChange={e => setNewQuestion(e.target.value)} 
+            placeholder="Have a question? Ask here..." 
+            style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ccc' }}
+          />
+          <button type="submit" style={{ padding: '10px 20px', borderRadius: 4, background: '#f0f2f2', border: '1px solid #d5d9d9', cursor: 'pointer' }}>Ask</button>
+        </form>
+
+        {questions.length === 0 ? (
+          <p style={{ color: '#565959' }}>No questions have been asked yet. Be the first!</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {questions.map(q => (
+              <div key={q.id} style={{ padding: 15, border: '1px solid #eee', borderRadius: 8 }}>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <div style={{ fontWeight: 'bold' }}>Q:</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 'bold', color: '#007185', marginBottom: 4 }}>{q.content}</div>
+                    <div style={{ fontSize: 12, color: '#565959' }}>Asked by {q.userName} on {new Date(q.createdAt).toLocaleDateString()}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                  <div style={{ fontWeight: 'bold' }}>A:</div>
+                  <div style={{ flex: 1 }}>
+                    {q.answer ? (
+                      <div>
+                        <div style={{ marginBottom: 4 }}>{q.answer}</div>
+                        <div style={{ fontSize: 12, color: '#565959' }}>Answered by {product.sellerName || 'Seller'}</div>
+                      </div>
+                    ) : (
+                      <div style={{ fontStyle: 'italic', color: '#565959' }}>Seller hasn't answered yet.</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
 
       {/* Customer Reviews Section */}
       <div className="reviews-section" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 40 }}>

@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../services/CartProvider';
+import { useAuth } from '../services/AuthProvider';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const { addToCart } = useCart();
+  const { user } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const currentSearch = searchParams.get('search') || '';
@@ -15,6 +17,29 @@ const Products = () => {
   const currentMaxPrice = searchParams.get('maxPrice') || '';
   const currentMinRating = searchParams.get('minRating') || '';
   const currentSort = searchParams.get('sort') || '';
+
+  const handleAddToWishlist = async (e, productId) => {
+    e.preventDefault();
+    if (!user) { alert('Please login to add to wishlist'); return; }
+    try {
+      await api.post(`/wishlist/user/${user.id}/product/${productId}`);
+      alert('Added to Wishlist!');
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleAddToCompare = (product) => {
+    let items = JSON.parse(localStorage.getItem('compareItems')) || [];
+    if (items.length >= 4) { alert('You can only compare up to 4 items'); return; }
+    if (!items.find(i => i.id === product.id)) {
+      items.push(product);
+      localStorage.setItem('compareItems', JSON.stringify(items));
+      alert('Added to Compare list!');
+    } else {
+      alert('Already in Compare list!');
+    }
+  };
 
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating || 0);
@@ -178,13 +203,28 @@ const Products = () => {
                     <span className="price-fraction" style={{ fontSize: 12, position: 'relative', top: '-0.4em' }}>{(p.price % 1).toFixed(2).substring(2)}</span>
                   </div>
                   
-                  <div style={{ marginTop: 'auto' }}>
+                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     <button 
                       onClick={() => addToCart(p, 1)}
                       style={{ width: '100%', padding: '8px 0', borderRadius: 20, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
                     >
                       Add to Cart
                     </button>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <button 
+                        onClick={(e) => handleAddToWishlist(e, p.id)}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B12704', fontSize: 18 }}
+                        title="Add to Wishlist"
+                      >
+                        ❤️
+                      </button>
+                      <button 
+                        onClick={() => handleAddToCompare(p)}
+                        style={{ fontSize: 12, padding: '4px 8px', borderRadius: 4, background: '#f0f2f2', border: '1px solid #d5d9d9', cursor: 'pointer' }}
+                      >
+                        Compare
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -3,17 +3,31 @@ import { useCart } from '../services/CartProvider';
 import { useAuth } from '../services/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 
 const Checkout = () => {
+  const stripe = useStripe();
+  const elements = useElements();
   const { cartItems, getTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const [address, setAddress] = useState('');
+  const [addresses, setAddresses] = useState([]);
   const [promoCode, setPromoCode] = useState('');
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState('');
   const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (user) {
+      api.get(`/addresses/user/${user.id}`).then(res => {
+        setAddresses(res.data);
+        const def = res.data.find(a => a.isDefault);
+        if (def && !address) setAddress(`${def.streetAddress}, ${def.city}, ${def.state} ${def.postalCode}`);
+      }).catch(e => console.error(e));
+    }
+  }, [user]);
 
   const subtotal = getTotal();
   const total = Math.max(0, subtotal - promoDiscount);
@@ -55,21 +69,53 @@ const Checkout = () => {
       alert("Please enter a delivery address");
       return;
     }
+    if (!stripe || !elements) {
+      alert("Stripe has not loaded yet.");
+      return;
+    }
+
     setLoading(true);
     try {
-      const orderData = {
-        totalAmount: total,
-        deliveryAddress: address,
-        promoCode: promoDiscount > 0 ? promoCode : null,
-        specialInstructions: 'Leave at door',
-      };
-      
-      const res = await api.post(`/orders/user/${user.id}`, orderData);
-      clearCart();
-      alert(`Order Placed Successfully! Order #${res.data.orderNumber}`);
-      navigate('/tracking');
+      // 1. Create PaymentIntent on the server
+      const { data: intentData } = await api.post('/payment/create-intent', {
+        amount: total,
+        currency: 'inr'
+      });
+
+      // 2. Confirm Card Payment with Stripe
+      const cardElement = elements.getElement(CardElement);
+      const { error, paymentIntent } = await stripe.confirmCardPayment(intentData.clientSecret, {
+        payment_method: {
+          card: cardElement,
+          billing_details: {
+            name: `${user.firstName} ${user.lastName}`,
+            email: user.email,
+          },
+        },
+      });
+
+      if (error) {
+        alert(`Payment failed: ${error.message}`);
+        setLoading(false);
+        return;
+      }
+
+      if (paymentIntent.status === 'succeeded') {
+        // 3. Save Order to Backend
+        const orderData = {
+          totalAmount: total,
+          deliveryAddress: address,
+          promoCode: promoDiscount > 0 ? promoCode : null,
+          specialInstructions: 'Leave at door',
+        };
+        
+        const res = await api.post(`/orders/user/${user.id}`, orderData);
+        clearCart();
+        alert(`Order Placed Successfully! Order #${res.data.orderNumber}`);
+        navigate('/tracking');
+      }
     } catch (err) {
-      alert('Failed to place order');
+      alert(`Failed to place order: ${err.message || 'Unknown error'}`);
     }
     setLoading(false);
   };
@@ -90,16 +136,44 @@ const Checkout = () => {
             style={{ width: '100%', padding: 10, borderRadius: 4, border: '1px solid #ccc' }}
             required
           />
+          {addresses.length > 0 && (
+            <div style={{ marginTop: 10 }}>
+              <p style={{ fontSize: 14, fontWeight: 'bold' }}>Or select a saved address:</p>
+              <select 
+                onChange={(e) => {
+                  const addr = addresses.find(a => a.id === parseInt(e.target.value));
+                  if (addr) setAddress(`${addr.streetAddress}, ${addr.city}, ${addr.state} ${addr.postalCode}`);
+                }}
+                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
+              >
+                <option value="">-- Select Saved Address --</option>
+                {addresses.map(a => (
+                  <option key={a.id} value={a.id}>
+                    {a.label} - {a.streetAddress}, {a.city}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 20 }}>
           <h3 style={{ marginTop: 0 }}>2. Payment Method</h3>
           <div style={{ padding: 15, background: '#f8f8f8', border: '1px solid #ccc', borderRadius: 4 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <input type="radio" name="payment" defaultChecked />
-              <strong>Credit / Debit Card (Stripe Stub)</strong>
-            </label>
-            <p style={{ margin: '10px 0 0 25px', fontSize: 14, color: '#555' }}>Payment will be simulated and marked as PAID automatically for this demo.</p>
+            <CardElement options={{
+              style: {
+                base: {
+                  fontSize: '16px',
+                  color: '#424770',
+                  '::placeholder': {
+                    color: '#aab7c4',
+                  },
+                },
+                invalid: {
+                  color: '#9e2146',
+                },
+              },
+            }} />
           </div>
         </div>
       </div>
@@ -108,7 +182,7 @@ const Checkout = () => {
         <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20 }}>
           <button 
             onClick={handlePlaceOrder}
-            disabled={loading}
+            disabled={loading || !stripe}
             style={{ width: '100%', padding: '12px 0', background: '#FFD814', border: 'none', borderRadius: 20, cursor: 'pointer', fontWeight: 'bold', fontSize: 16, marginBottom: 15 }}
           >
             {loading ? 'Processing...' : 'Place Your Order'}
@@ -164,3 +238,4 @@ const Checkout = () => {
 };
 
 export default Checkout;
+

@@ -124,19 +124,14 @@ I have reviewed the original requirements against the current codebase. The vast
 * **Home & Discovery:** Trending products, "You Might Also Like" smart AI recommendations, and category browsing are implemented on both Web and Mobile.
 * **Product Search & Filters:** Advanced `ProductSpecification` filtering (Search, Category, Price Range, Ratings) is live via the backend `/api/products/filter` endpoint.
 * **Product Detail Page (PDP):** Images, prices, stock availability, seller info, and a robust Customer Review/Rating system are fully functional on Web and Mobile.
-* **Checkout & Payment:** Cart management, Promo Code validation engine, and Order instantiation are complete. 
+* **Checkout & Payment:** Cart management, Promo Code validation engine, and Order instantiation are complete. Real Stripe Elements integration handles credit card processing using the backend `PaymentService.java`.
 * **Seller App:** Seller Dashboard and KYC approval workflow are functional. Sellers can manage inventory and track their store's orders.
 * **Logistics & Admin:** Admin platform metrics, Delivery Partner KYC, and real-time GPS tracking (via WebSockets/Simulated endpoints) are fully implemented.
-
-### Stubbed / Partially Implemented Features ⚠️
-* **Payment Gateway:** The frontend currently uses a Stripe "Stub" that instantly marks orders as paid. The backend has a `PaymentService.java` that generates actual Stripe `PaymentIntents`, but the frontend needs the `@stripe/react-stripe-js` Element wired to process real cards.
-* **Media Uploads:** Images currently default to `https://picsum.photos` placeholders. You will need to wire a Cloudinary or AWS S3 bucket to handle actual image uploads from Sellers.
-* **Multi-address Management:** Currently, checkout uses a single text-area for the address. A true multi-address book is not built.
-
-### Missing / Non-Essential Features ❌
-* **Voice Search & Image-based Search:** Not implemented. Search is text/filter-based.
-* **Wishlist & Compare Products:** The UI has placeholders, but there are no backend entities to save wishlists.
-* **Q&A Section:** Not implemented on the PDP.
+* **Media Uploads:** True image uploads for products using Cloudinary are handled via the `MediaController.java`.
+* **Multi-address Management:** Users have a dedicated Address Book (Add, Edit, Set Default) used dynamically during checkout.
+* **Wishlist & Compare:** Customers can add items to their Wishlist (saved in PostgreSQL) and Compare items (up to 4, saved locally).
+* **Customer Q&A:** Fully functional Q&A section on the PDP, with sellers having a dedicated UI to answer questions in their dashboard.
+* **Voice & Image Search:** The header includes a microphone for Web Speech API voice search and a placeholder camera icon for image searches.
 
 ---
 
@@ -145,35 +140,70 @@ I have reviewed the original requirements against the current codebase. The vast
 To take this project from a local development environment to a **fully functional, production-deployable state**, you must configure the following external services and API keys.
 
 ### A. Firebase Authentication (Identity Provider)
-You must create a Firebase Project to handle user identities.
-* **Backend:** Generate a new Private Key from Firebase Console (Project Settings > Service Accounts) and save it as `serviceAccountKey.json` in `backend/src/main/resources/`.
-* **Web App:** Add your Firebase web config to `frontend/.env`:
+Firebase handles secure user authentication natively on the frontend.
+* **Backend (`backend/.env`):** Generate a new Private Key from Firebase Console (Project Settings > Service Accounts) and save it as `truehand-service-account.json` in `backend/`. Update `GOOGLE_APPLICATION_CREDENTIALS` to point to it.
+* **Web App (`frontend/.env`):** Add your Firebase web config variables to `frontend/.env`:
   ```env
-  REACT_APP_FIREBASE_API_KEY="your-api-key"
-  REACT_APP_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
-  REACT_APP_FIREBASE_PROJECT_ID="your-project-id"
+  VITE_FIREBASE_API_KEY="your-api-key"
+  VITE_FIREBASE_AUTH_DOMAIN="your-project.firebaseapp.com"
+  VITE_FIREBASE_PROJECT_ID="your-project-id"
+  VITE_FIREBASE_STORAGE_BUCKET="your-project.appspot.com"
+  VITE_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
+  VITE_FIREBASE_APP_ID="your-app-id"
   ```
-* **Mobile App:** Add the same config to `truehand-mobile/.env` (using the `EXPO_PUBLIC_` prefix).
 
-### B. PostgreSQL (Database)
-The backend is configured for PostgreSQL in `application.properties`. For production (e.g., AWS RDS, Heroku Postgres, Supabase), inject these environment variables:
-* `DATABASE_URL` (e.g., `jdbc:postgresql://<host>:5432/truehand`)
-* `DATABASE_USERNAME`
-* `DATABASE_PASSWORD`
+### B. Stripe (Payment Gateway)
+Required for actual credit card processing during Checkout.
+* **Backend (`backend/.env`):** Enter your Stripe Secret Key (`sk_test_...`) to generate Payment Intents.
+  ```env
+  STRIPE_SECRET_KEY=sk_test_your_secret_key
+  ```
+* **Web App (`frontend/.env`):** Enter your Stripe Publishable Key (`pk_test_...`) to initialize Stripe Elements.
+  ```env
+  VITE_STRIPE_PUBLIC_KEY=pk_test_your_publishable_key
+  ```
 
-### C. Stripe (Payments)
-To process real credit cards, you need a Stripe Developer account.
-* **Backend:** Add your Secret Key to the backend environment variables:
-  * `STRIPE_SECRET_KEY=sk_test_...`
-* **Web/Mobile App:** Provide your Publishable Key to the frontend environments:
-  * `REACT_APP_STRIPE_PUBLIC_KEY=pk_test_...`
+### C. SendGrid (SMTP Transactional Emails)
+While Firebase handles authentication emails (like resets), your backend needs an SMTP server to send transactional emails (e.g., Order Confirmations, KYC Approvals). The codebase already utilizes Spring Boot `JavaMailSender` configured for this.
+* **Backend (`backend/.env`):** Create a SendGrid account, generate an API Key, and update the environment variables:
+  ```env
+  MAIL_HOST=smtp.sendgrid.net
+  MAIL_PORT=587
+  MAIL_USERNAME=apikey
+  MAIL_PASSWORD=your_sendgrid_api_key_here
+  MAIL_FROM=no-reply@yourdomain.com
+  ```
 
-### D. Google Maps API (Logistics Tracking)
-For the mobile app's `TrackingScreen.js` to render maps properly in production standalone builds (APK/IPA):
-* Obtain a **Google Maps API Key** from the Google Cloud Console.
-* Add it to `truehand-mobile/app.json` under `android.config.googleMaps.apiKey` and `ios.config.googleMapsApiKey`.
+### D. Cloudinary (Media Uploads)
+Required for sellers to upload real product images instead of placeholders.
+* **Backend (`backend/.env`):** Enter your Cloudinary environment URL (found in the Cloudinary Dashboard).
+  ```env
+  CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+  ```
 
-### E. Security & Networking
-* **Backend JWT Secret:** Set a secure, random 32+ character string as `JWT_SECRET` for the backend environment.
-* **CORS Config:** Update `CORS_ALLOWED_ORIGINS` in the backend to point to your deployed frontend domain (e.g., `https://www.truehand.com`) to prevent cross-origin blocking.
-* **SMTP Config:** If you want the backend to send real emails (e.g., for KYC approvals), configure the `MAIL_HOST`, `MAIL_USERNAME`, and `MAIL_PASSWORD` variables in the backend.
+### E. Neon (PostgreSQL Database)
+Required for persistent, cloud-hosted relational data. 
+* **Backend (`backend/.env`):** Your NeonDB connection string is already configured. 
+  ```env
+  DATABASE_URL=jdbc:postgresql://ep-wandering-water-ah9u7x69-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+  DATABASE_USERNAME=neondb_owner
+  DATABASE_PASSWORD=your_neon_password
+  ```
+
+---
+
+## 3. How to Run Locally Using Docker
+The backend is Dockerized to run seamlessly with your `.env` configuration.
+
+1. **Start the Backend:**
+   Open a terminal in the root directory and run:
+   ```bash
+   docker-compose up --build
+   ```
+2. **Start the Frontend:**
+   Open a new terminal, navigate to the frontend directory:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```

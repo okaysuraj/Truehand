@@ -12,6 +12,9 @@ const SellerDashboard = () => {
   const [form, setForm] = useState({ name: '', description: '', category: '', price: '', stockQuantity: '', variants: [] });
   const [newVariant, setNewVariant] = useState({ sku: '', size: '', color: '', additionalPrice: '', stockQuantity: '' });
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [questions, setQuestions] = useState([]);
 
   useEffect(() => {
     if (!user || user.role !== 'SELLER') {
@@ -21,7 +24,17 @@ const SellerDashboard = () => {
     fetchProducts();
     fetchStats();
     fetchOrders();
+    fetchQuestions();
   }, [user, navigate]);
+
+  const fetchQuestions = async () => {
+    try {
+      const res = await api.get(`/questions/seller/${user.id}`);
+      setQuestions(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const fetchProducts = async () => {
     try {
@@ -59,12 +72,30 @@ const SellerDashboard = () => {
     }
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/media/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setImageUrl(res.data.url);
+    } catch (err) {
+      alert('Error uploading image');
+    }
+    setUploadingImage(false);
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/products', { ...form, sellerId: user.id });
+      await api.post('/products', { ...form, imageUrl, sellerId: user.id });
       setForm({ name: '', description: '', category: '', price: '', stockQuantity: '', variants: [] });
+      setImageUrl('');
       fetchProducts();
       fetchStats();
     } catch (err) {
@@ -103,6 +134,12 @@ const SellerDashboard = () => {
         <div className="a-box" style={{ background: '#f8f8f8', padding: 20, border: '1px solid #ddd', borderRadius: 8, height: 'fit-content' }}>
           <h3 style={{ marginBottom: 16 }}>Add New Product</h3>
           <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="form-group">
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Product Image</label>
+              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ width: '100%', padding: 8 }} />
+              {uploadingImage && <small style={{ color: 'blue' }}>Uploading...</small>}
+              {imageUrl && <img src={imageUrl} alt="Preview" style={{ width: 100, height: 100, objectFit: 'contain', marginTop: 10 }} />}
+            </div>
             <div className="form-group">
               <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Product Name</label>
               <input required className="form-control" style={{ width: '100%', padding: 8 }} value={form.name} onChange={e=>setForm({...form, name: e.target.value})} />
@@ -146,7 +183,7 @@ const SellerDashboard = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={loading} style={{ padding: '8px 0', borderRadius: 20, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
+            <button type="submit" className="btn btn-primary w-full" disabled={loading || uploadingImage} style={{ padding: '8px 0', borderRadius: 20, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
               {loading ? 'Adding...' : 'Add Product'}
             </button>
           </form>
@@ -238,6 +275,44 @@ const SellerDashboard = () => {
               ))}
             </tbody>
           </table>
+        )}
+      </div>
+
+      {/* Q&A List */}
+      <div style={{ marginTop: 40 }}>
+        <h3 style={{ marginBottom: 16 }}>Customer Questions</h3>
+        {questions.length === 0 ? (
+          <div style={{ padding: 20, background: '#f0f2f2', border: '1px solid #ddd' }}>No questions from customers.</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+            {questions.map((q, i) => (
+              <div key={i} className="a-box" style={{ padding: 16, border: '1px solid #ddd', borderRadius: 8, background: '#fff' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: 8, color: '#007185' }}>Product ID: {q.productId}</div>
+                <div style={{ marginBottom: 8 }}><strong>Q:</strong> {q.content}</div>
+                <div style={{ fontSize: 12, color: '#565959', marginBottom: 12 }}>Asked by {q.userName}</div>
+                {q.answer ? (
+                  <div style={{ padding: 10, background: '#f8f8f8', borderRadius: 4 }}>
+                    <strong>Your Answer:</strong> {q.answer}
+                  </div>
+                ) : (
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    const answer = e.target.answer.value;
+                    if (!answer) return;
+                    api.put(`/questions/${q.id}/answer/seller/${user.id}`, { answer })
+                      .then(() => {
+                        alert('Answer submitted');
+                        fetchQuestions();
+                      })
+                      .catch(() => alert('Error answering question'));
+                  }} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <textarea name="answer" placeholder="Type your answer here..." rows="2" style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}></textarea>
+                    <button type="submit" style={{ padding: '6px 12px', background: '#FFD814', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}>Submit Answer</button>
+                  </form>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

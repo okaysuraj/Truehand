@@ -26,6 +26,12 @@ import Tracking from './pages/Tracking';
 import DeliveryDashboard from './pages/DeliveryDashboard';
 import DeliveryKYC from './pages/DeliveryKYC';
 import AdminDashboard from './pages/AdminDashboard';
+import Wishlist from './pages/Wishlist';
+import Compare from './pages/Compare';
+import { Elements } from '@stripe/react-stripe-js';
+import { loadStripe } from '@stripe/stripe-js';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_placeholder');
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
@@ -55,8 +61,10 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/checkout" element={<Elements stripe={stripePromise}><Checkout /></Elements>} />
             <Route path="/orders" element={<Orders />} />
+            <Route path="/wishlist" element={<Wishlist />} />
+            <Route path="/compare" element={<Compare />} />
             <Route path="/track/:orderId" element={<OrderTracking />} />
             <Route path="/tracking/:id" element={<Tracking />} />
             <Route path="/profile" element={<Profile />} />

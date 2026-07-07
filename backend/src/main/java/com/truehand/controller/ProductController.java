@@ -86,4 +86,13 @@ public class ProductController {
         response.put("status", "pending_implementation");
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/image-search")
+    public ResponseEntity<java.util.Map<String, String>> imageSearch(@org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        // Stub for image search processing
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        response.put("message", "Image search is currently a stub.");
+        response.put("status", "pending_implementation");
+        return ResponseEntity.ok(response);
+    }
 }
