@@ -20,9 +20,8 @@ public class OrderDTO {
     private String status;
     private String paymentStatus;
     private String deliveryAddress;
-    private String deliveryCity;
-    private String deliveryPostalCode;
     private String specialInstructions;
+    private String promoCode;
     private LocalDateTime createdAt;
     private List<OrderItemDTO> orderItems;
     private DeliveryDTO delivery;

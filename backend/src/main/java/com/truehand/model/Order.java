@@ -33,9 +33,9 @@ public class Order {
     @Column(columnDefinition = "VARCHAR(50) DEFAULT 'PENDING'")
     private String status;
 
-    private String deliveryAddress;
-    private String deliveryCity;
-    private String deliveryPostalCode;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "address_id")
+    private Address deliveryAddress;
 
     @Column(columnDefinition = "VARCHAR(50) DEFAULT 'PENDING'")
     private String paymentStatus;

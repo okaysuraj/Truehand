@@ -21,7 +21,11 @@ import Orders from './pages/Orders';
 import OrderTracking from './pages/OrderTracking';
 import Profile from './pages/Profile';
 import SellerDashboard from './pages/SellerDashboard';
+import SellerKYC from './pages/SellerKYC';
 import Tracking from './pages/Tracking';
+import DeliveryDashboard from './pages/DeliveryDashboard';
+import DeliveryKYC from './pages/DeliveryKYC';
+import AdminDashboard from './pages/AdminDashboard';
 
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, user } = useAuth();
@@ -57,6 +61,10 @@ function App() {
             <Route path="/tracking/:id" element={<Tracking />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/seller/dashboard" element={<SellerDashboard />} />
+            <Route path="/seller/kyc" element={<SellerKYC />} />
+            <Route path="/delivery/dashboard" element={<DeliveryDashboard />} />
+            <Route path="/delivery/kyc" element={<DeliveryKYC />} />
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
           </Routes>
           <Footer />
         </Router>

@@ -18,11 +18,13 @@ public class ProductSpecification {
 
             if (search != null && !search.isEmpty()) {
                 String searchPattern = "%" + search.toLowerCase() + "%";
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), searchPattern));
+                Predicate namePredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), searchPattern);
+                Predicate descPredicate = criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), searchPattern);
+                predicates.add(criteriaBuilder.or(namePredicate, descPredicate));
             }
 
             if (category != null && !category.isEmpty()) {
-                predicates.add(criteriaBuilder.equal(root.get("category"), category));
+                predicates.add(criteriaBuilder.equal(root.get("category").get("name"), category));
             }
 
             if (minPrice != null) {

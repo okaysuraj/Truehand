@@ -8,6 +8,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const [qty, setQty] = useState(1);
   const { addToCart } = useCart();
   const { user } = useAuth();
@@ -27,6 +28,12 @@ const ProductDetail = () => {
       setProduct(prodRes.data);
       const revRes = await api.get(`/reviews/product/${id}`);
       setReviews(revRes.data);
+      try {
+        const recRes = await api.get(`/products/${id}/recommendations`);
+        setRecommendations(recRes.data);
+      } catch (err) {
+        console.log('No recommendations found');
+      }
     } catch (err) {
       console.error(err);
     }
@@ -158,6 +165,24 @@ const ProductDetail = () => {
       </div>
 
       <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
+
+      {/* Smart Recommendations */}
+      {recommendations.length > 0 && (
+        <div style={{ marginBottom: 40 }}>
+          <h2 style={{ marginBottom: 20 }}>You Might Also Like</h2>
+          <div style={{ display: 'flex', gap: 20, overflowX: 'auto', paddingBottom: 10 }}>
+            {recommendations.map(rec => (
+              <div key={rec.id} style={{ minWidth: 200, border: '1px solid #ddd', borderRadius: 8, padding: 15, background: '#fff', cursor: 'pointer' }} onClick={() => navigate(`/product/${rec.id}`)}>
+                <img src={rec.imageUrl || `https://picsum.photos/200/200?random=${rec.id}`} alt={rec.name} style={{ width: '100%', height: 150, objectFit: 'contain', marginBottom: 10 }} />
+                <h4 style={{ margin: '0 0 5px 0', fontSize: 14, color: '#0f1111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rec.name}</h4>
+                <div style={{ color: '#B12704', fontSize: 18, fontWeight: 'bold' }}>₹{rec.price}</div>
+                <div style={{ color: '#FFA41C', fontSize: 12 }}>{renderStars(rec.averageRating)} ({rec.reviewCount})</div>
+              </div>
+            ))}
+          </div>
+          <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
+        </div>
+      )}
 
       {/* Customer Reviews Section */}
       <div className="reviews-section" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 40 }}>

@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/deliveries")
@@ -19,6 +20,17 @@ public class DeliveryController {
     @GetMapping("/{orderId}")
     public ResponseEntity<Delivery> getDelivery(@PathVariable Integer orderId) {
         return ResponseEntity.ok(deliveryService.getDelivery(orderId));
+    }
+
+    @PostMapping("/{orderId}/assign/{deliveryBoyId}")
+    public ResponseEntity<?> assignDelivery(@PathVariable Integer orderId, @PathVariable Integer deliveryBoyId) {
+        deliveryService.assignDelivery(orderId, deliveryBoyId);
+        return ResponseEntity.ok("Delivery assigned to partner");
+    }
+
+    @GetMapping("/partner/{deliveryBoyId}")
+    public ResponseEntity<List<Delivery>> getDeliveriesByPartner(@PathVariable Integer deliveryBoyId) {
+        return ResponseEntity.ok(deliveryService.getDeliveriesByPartner(deliveryBoyId));
     }
 
     @PostMapping("/{orderId}/start")

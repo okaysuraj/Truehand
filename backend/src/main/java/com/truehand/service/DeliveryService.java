@@ -8,8 +8,10 @@ import com.truehand.websocket.LocationUpdate;
 import com.truehand.websocket.TrackingWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +19,31 @@ public class DeliveryService {
     private final DeliveryRepository deliveryRepository;
     private final LocationRepository locationRepository;
     private final TrackingWebSocketHandler webSocketHandler;
+    private final com.truehand.repository.UserRepository userRepository;
+
+    public void assignDelivery(Integer orderId, Integer deliveryBoyId) {
+        Delivery delivery = deliveryRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new RuntimeException("Delivery not found"));
+        
+        com.truehand.model.User deliveryBoy = userRepository.findById(deliveryBoyId)
+                .orElseThrow(() -> new RuntimeException("Delivery boy not found"));
+
+        delivery.setDeliveryBoy(deliveryBoy);
+        delivery.setStatus("ASSIGNED");
+        deliveryRepository.save(delivery);
+        
+        try {
+            webSocketHandler.broadcastStatusUpdate(orderId, "ASSIGNED", "Delivery partner assigned");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Delivery> getDeliveriesByPartner(Integer deliveryBoyId) {
+        return deliveryRepository.findAll().stream()
+            .filter(d -> d.getDeliveryBoy() != null && d.getDeliveryBoy().getId().equals(deliveryBoyId))
+            .collect(java.util.stream.Collectors.toList());
+    }
 
     public void startDelivery(Integer orderId) {
         Delivery delivery = deliveryRepository.findByOrderId(orderId)

@@ -33,8 +33,13 @@ export default function SearchScreen() {
   ];
 
   useEffect(() => {
-    fetchFilteredProducts();
-  }, [category, minRating, sortBy]); // Automatically fetch when these change
+    const delayDebounceFn = setTimeout(() => {
+      if (query.length === 0 || query.length >= 2) {
+        fetchFilteredProducts();
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [query, category, minRating, sortBy]);
 
   const fetchFilteredProducts = async () => {
     setLoading(true);

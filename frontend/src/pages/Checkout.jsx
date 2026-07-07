@@ -1,212 +1,165 @@
 import React, { useState } from 'react';
 import { useCart } from '../services/CartProvider';
 import { useAuth } from '../services/AuthProvider';
-import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import api from '../services/api';
 
-// Load Stripe (ensure you have your test key in .env)
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY || 'pk_test_placeholder');
-
-const CheckoutContent = () => {
+const Checkout = () => {
   const { cartItems, getTotal, clearCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [address, setAddress] = useState(user?.address || '');
+
+  const [address, setAddress] = useState('');
+  const [promoCode, setPromoCode] = useState('');
+  const [promoDiscount, setPromoDiscount] = useState(0);
+  const [promoMessage, setPromoMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const stripe = useStripe();
-  const elements = useElements();
+  const subtotal = getTotal();
+  const total = Math.max(0, subtotal - promoDiscount);
 
-  const placeOrder = async () => {
-    if (!address) { alert('Enter delivery address'); return; }
-    if (cartItems.length === 0) { alert('Cart is empty'); return; }
-    if (!stripe || !elements) { alert('Stripe is not initialized'); return; }
-    
+  if (!user) {
+    navigate('/login');
+    return null;
+  }
+
+  if (cartItems.length === 0) {
+    return (
+      <div style={{ textAlign: 'center', padding: '50px' }}>
+        <h2>Your cart is empty</h2>
+        <button onClick={() => navigate('/products')} style={{ padding: '10px 20px', marginTop: 20 }}>Shop Now</button>
+      </div>
+    );
+  }
+
+  const handleApplyPromo = async () => {
+    if (!promoCode) return;
+    try {
+      const res = await api.get(`/promo/validate?code=${promoCode}`);
+      const promo = res.data;
+      let discount = (subtotal * promo.discountPercentage) / 100;
+      if (promo.maxDiscountAmount && discount > promo.maxDiscountAmount) {
+        discount = promo.maxDiscountAmount;
+      }
+      setPromoDiscount(discount);
+      setPromoMessage(`Promo code applied! You saved ₹${discount.toFixed(2)}`);
+    } catch (err) {
+      setPromoDiscount(0);
+      setPromoMessage('Invalid or expired promo code.');
+    }
+  };
+
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault();
+    if (!address) {
+      alert("Please enter a delivery address");
+      return;
+    }
     setLoading(true);
     try {
-      // 1. Create Payment Intent on backend
-      const totalAmount = getTotal();
-      const paymentRes = await api.post('/payment/create-intent', {
-        amount: totalAmount,
-        currency: 'inr'
-      });
+      const orderData = {
+        totalAmount: total,
+        deliveryAddress: address,
+        promoCode: promoDiscount > 0 ? promoCode : null,
+        specialInstructions: 'Leave at door',
+      };
       
-      const clientSecret = paymentRes.data.clientSecret;
-
-      // 2. Confirm the payment on the client
-      const result = await stripe.confirmCardPayment(clientSecret, {
-        payment_method: {
-          card: elements.getElement(CardElement),
-          billing_details: {
-            name: user?.firstName + ' ' + user?.lastName,
-          },
-        }
-      });
-
-      if (result.error) {
-        alert(result.error.message);
-        setLoading(false);
-        return;
-      }
-
-      // 3. Payment succeeded, create the order
-      if (result.paymentIntent.status === 'succeeded') {
-        const orderData = {
-          totalAmount: totalAmount,
-          deliveryAddress: address,
-          paymentStatus: 'PAID',
-          status: 'CONFIRMED'
-        };
-        const res = await api.post('/orders', orderData);
-        clearCart();
-        navigate(`/tracking/${res.data.id}`);
-      }
+      const res = await api.post(`/orders/user/${user.id}`, orderData);
+      clearCart();
+      alert(`Order Placed Successfully! Order #${res.data.orderNumber}`);
+      navigate('/tracking');
     } catch (err) {
-      alert(err.response?.data || 'Error processing payment and placing order');
+      alert('Failed to place order');
     }
     setLoading(false);
   };
 
-  const CARD_ELEMENT_OPTIONS = {
-    style: {
-      base: {
-        color: "#32325d",
-        fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-        fontSmoothing: "antialiased",
-        fontSize: "16px",
-        "::placeholder": {
-          color: "#aab7c4"
-        }
-      },
-      invalid: {
-        color: "#fa755a",
-        iconColor: "#fa755a"
-      }
-    }
-  };
-
   return (
-    <div style={{background: '#eaeded', minHeight: '100vh', paddingBottom: 40}}>
-      {/* Checkout Header */}
-      <div style={{background: 'linear-gradient(to bottom, #fff, #f6f6f6)', borderBottom: '1px solid #ddd', padding: '14px 0', textAlign: 'center'}}>
-        <div style={{fontSize: 28, fontWeight: 300}}>
-          <span style={{float: 'left', marginLeft: 20, fontWeight: 'bold', fontSize: 24}}>True<span style={{color: '#f08804'}}>Hand</span></span>
-          Checkout (<span style={{color: '#007185'}}>{cartItems.reduce((a,c)=>a+c.quantity, 0)} items</span>)
-          <span style={{float: 'right', marginRight: 20, fontSize: 20}}>🔒</span>
-        </div>
-      </div>
-
-      <div style={{maxWidth: 1000, margin: '20px auto', display: 'grid', gridTemplateColumns: '1fr 300px', gap: 20}}>
+    <div style={{ maxWidth: 1000, margin: '40px auto', padding: 20, display: 'flex', gap: 30 }}>
+      
+      <div style={{ flex: 2 }}>
+        <h2 style={{ fontSize: 24, marginBottom: 20 }}>Checkout</h2>
         
-        {/* Main flow */}
-        <div>
-          <div className="a-box" style={{marginBottom: 20, background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20}}>
-            <div className="a-box-inner" style={{display: 'flex', gap: 20}}>
-              <div style={{fontWeight: 'bold', width: 20}}>1</div>
-              <div style={{flexGrow: 1}}>
-                <div style={{fontWeight: 'bold', fontSize: 18, marginBottom: 10}}>Delivery address</div>
-                <textarea 
-                  className="form-control" 
-                  rows="3" 
-                  value={address} 
-                  onChange={e => setAddress(e.target.value)} 
-                  placeholder="Enter your full address"
-                  style={{width: '100%', padding: 8}}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="a-box" style={{marginBottom: 20, background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20}}>
-            <div className="a-box-inner" style={{display: 'flex', gap: 20}}>
-              <div style={{fontWeight: 'bold', width: 20}}>2</div>
-              <div style={{flexGrow: 1}}>
-                <div style={{fontWeight: 'bold', fontSize: 18, marginBottom: 10}}>Payment method (Stripe)</div>
-                <div style={{border: '1px solid #ccc', padding: 12, borderRadius: 4, background: '#f8f9fa'}}>
-                  <CardElement options={CARD_ELEMENT_OPTIONS} />
-                </div>
-                <div style={{color: '#007185', fontSize: 12, marginTop: 10}}>
-                  Payments are securely processed by Stripe. TrueHand does not store your credit card information.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="a-box" style={{background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20}}>
-            <div className="a-box-inner" style={{display: 'flex', gap: 20}}>
-              <div style={{fontWeight: 'bold', width: 20}}>3</div>
-              <div style={{flexGrow: 1}}>
-                <div style={{fontWeight: 'bold', fontSize: 18, marginBottom: 10}}>Review items and delivery</div>
-                
-                <div style={{border: '1px solid #d5d9d9', borderRadius: 8, padding: 14}}>
-                  <div style={{color: '#007600', fontWeight: 'bold', marginBottom: 14}}>Guaranteed delivery: Tomorrow</div>
-                  <div style={{fontSize: 12, color: '#565959', marginBottom: 14}}>Items dispatched by TrueHand</div>
-                  
-                  {cartItems.map(item => (
-                    <div key={item.id} style={{display: 'flex', gap: 14, marginBottom: 14}}>
-                      <img src={item.imageUrl || `https://picsum.photos/100/100?random=${item.id}`} alt="" style={{width: 80, height: 80, objectFit: 'contain'}} />
-                      <div>
-                        <div style={{fontWeight: 'bold'}}>{item.name}</div>
-                        <div style={{color: '#B12704', fontWeight: 'bold'}}>₹{item.price.toFixed(2)}</div>
-                        <div style={{fontSize: 12}}>Quantity: {item.quantity}</div>
-                        <div style={{fontSize: 12}}>Sold by: {item.sellerName || 'TrueHand'}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 20 }}>
+          <h3 style={{ marginTop: 0 }}>1. Delivery Address</h3>
+          <textarea 
+            rows="3"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            placeholder="Enter full address details (Street, City, Zip)"
+            style={{ width: '100%', padding: 10, borderRadius: 4, border: '1px solid #ccc' }}
+            required
+          />
         </div>
 
-        {/* Order Summary Sidebar */}
-        <div className="a-box" style={{height: 'fit-content', background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20}}>
-          <div className="a-box-inner">
-            <button 
-              className="btn btn-primary w-full" 
-              style={{width: '100%', padding: '10px 0', borderRadius: 8, fontSize: 14, marginBottom: 10, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold'}}
-              onClick={placeOrder}
-              disabled={loading || !stripe}
-            >
-              {loading ? 'Processing...' : 'Place Your Order'}
-            </button>
-            <div style={{fontSize: 11, color: '#565959', textAlign: 'center', marginBottom: 20}}>
-              By placing your order, you agree to TrueHand's privacy notice and conditions of use.
-            </div>
-            
-            <h3 style={{fontSize: 18, marginBottom: 14}}>Order Summary</h3>
-            
-            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4}}>
-              <span>Items:</span>
-              <span>₹{getTotal().toFixed(2)}</span>
-            </div>
-            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4}}>
-              <span>Delivery:</span>
-              <span>₹0.00</span>
-            </div>
-            
-            <hr style={{margin: '10px 0', border: 'none', borderTop: '1px solid #d5d9d9'}} />
-            
-            <div style={{display: 'flex', justifyContent: 'space-between', fontSize: 18, fontWeight: 'bold', color: '#B12704'}}>
-              <span>Order Total:</span>
-              <span>₹{getTotal().toFixed(2)}</span>
-            </div>
+        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 20 }}>
+          <h3 style={{ marginTop: 0 }}>2. Payment Method</h3>
+          <div style={{ padding: 15, background: '#f8f8f8', border: '1px solid #ccc', borderRadius: 4 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <input type="radio" name="payment" defaultChecked />
+              <strong>Credit / Debit Card (Stripe Stub)</strong>
+            </label>
+            <p style={{ margin: '10px 0 0 25px', fontSize: 14, color: '#555' }}>Payment will be simulated and marked as PAID automatically for this demo.</p>
           </div>
         </div>
-
       </div>
-    </div>
-  );
-};
 
-// Wrap the Checkout component in the Stripe Elements provider
-const Checkout = () => {
-  return (
-    <Elements stripe={stripePromise}>
-      <CheckoutContent />
-    </Elements>
+      <div style={{ flex: 1 }}>
+        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20 }}>
+          <button 
+            onClick={handlePlaceOrder}
+            disabled={loading}
+            style={{ width: '100%', padding: '12px 0', background: '#FFD814', border: 'none', borderRadius: 20, cursor: 'pointer', fontWeight: 'bold', fontSize: 16, marginBottom: 15 }}
+          >
+            {loading ? 'Processing...' : 'Place Your Order'}
+          </button>
+          
+          <h4 style={{ margin: '0 0 15px 0' }}>Order Summary</h4>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
+            <span>Items:</span>
+            <span>₹{subtotal.toFixed(2)}</span>
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
+            <span>Delivery:</span>
+            <span>₹0.00</span>
+          </div>
+          
+          {promoDiscount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8, color: '#b12704' }}>
+              <span>Promo Discount:</span>
+              <span>-₹{promoDiscount.toFixed(2)}</span>
+            </div>
+          )}
+
+          <div style={{ borderTop: '1px solid #ddd', margin: '15px 0' }}></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 20, fontWeight: 'bold', color: '#b12704' }}>
+            <span>Order Total:</span>
+            <span>₹{total.toFixed(2)}</span>
+          </div>
+
+          <div style={{ borderTop: '1px solid #ddd', margin: '15px 0' }}></div>
+          
+          <h5 style={{ margin: '0 0 10px 0' }}>Apply Promo Code</h5>
+          <div style={{ display: 'flex', gap: 10 }}>
+            <input 
+              type="text" 
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder="Enter Code"
+              style={{ flex: 1, padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
+            />
+            <button 
+              onClick={handleApplyPromo}
+              style={{ padding: '8px 15px', background: '#e3e6e6', border: '1px solid #a6a6a6', borderRadius: 4, cursor: 'pointer' }}
+            >
+              Apply
+            </button>
+          </div>
+          {promoMessage && <p style={{ fontSize: 12, marginTop: 10, color: promoDiscount > 0 ? 'green' : 'red' }}>{promoMessage}</p>}
+        </div>
+      </div>
+
+    </div>
   );
 };
 

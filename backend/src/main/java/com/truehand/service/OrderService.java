@@ -17,17 +17,46 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final DeliveryRepository deliveryRepository;
+    private final com.truehand.repository.AddressRepository addressRepository;
+    private final PromoCodeRepository promoCodeRepository;
 
     public OrderDTO createOrder(Integer userId, OrderDTO dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         
+        com.truehand.model.Address address = null;
+        if (dto.getDeliveryAddress() != null && !dto.getDeliveryAddress().isBlank()) {
+            address = com.truehand.model.Address.builder()
+                .user(user)
+                .label("Delivery")
+                .streetAddress(dto.getDeliveryAddress())
+                .city("Unknown")
+                .state("Unknown")
+                .postalCode("Unknown")
+                .isDefault(false)
+                .build();
+            addressRepository.save(address);
+        }
+        BigDecimal finalAmount = dto.getTotalAmount();
+        
+        if (dto.getPromoCode() != null && !dto.getPromoCode().isBlank()) {
+            java.util.Optional<PromoCode> promoOpt = promoCodeRepository.findByCodeAndIsActiveTrue(dto.getPromoCode().toUpperCase());
+            if (promoOpt.isPresent() && promoOpt.get().getValidUntil().isAfter(LocalDateTime.now())) {
+                PromoCode promo = promoOpt.get();
+                BigDecimal discount = finalAmount.multiply(promo.getDiscountPercentage()).divide(new BigDecimal("100"));
+                if (promo.getMaxDiscountAmount() != null && discount.compareTo(promo.getMaxDiscountAmount()) > 0) {
+                    discount = promo.getMaxDiscountAmount();
+                }
+                finalAmount = finalAmount.subtract(discount);
+            }
+        }
+
         Order order = Order.builder()
                 .user(user)
                 .orderNumber(UUID.randomUUID().toString())
-                .totalAmount(dto.getTotalAmount())
+                .totalAmount(finalAmount)
                 .status("CONFIRMED")
                 .paymentStatus("PAID")
-                .deliveryAddress(dto.getDeliveryAddress())
+                .deliveryAddress(address)
                 .specialInstructions(dto.getSpecialInstructions())
                 .build();
         
@@ -63,7 +92,7 @@ public class OrderService {
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus())
                 .paymentStatus(order.getPaymentStatus())
-                .deliveryAddress(order.getDeliveryAddress())
+                .deliveryAddress(order.getDeliveryAddress() != null ? order.getDeliveryAddress().getStreetAddress() : null)
                 .createdAt(order.getCreatedAt())
                 .build();
     }

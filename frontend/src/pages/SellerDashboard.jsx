@@ -9,7 +9,8 @@ const SellerDashboard = () => {
   const [products, setProducts] = useState([]);
   const [stats, setStats] = useState({ totalRevenue: 0, activeOrders: 0, totalProducts: 0 });
   const [orders, setOrders] = useState([]);
-  const [form, setForm] = useState({ name: '', description: '', category: '', price: '', stockQuantity: '' });
+  const [form, setForm] = useState({ name: '', description: '', category: '', price: '', stockQuantity: '', variants: [] });
+  const [newVariant, setNewVariant] = useState({ sku: '', size: '', color: '', additionalPrice: '', stockQuantity: '' });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -49,12 +50,21 @@ const SellerDashboard = () => {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderNumber, status) => {
+    try {
+      await api.put(`/seller/${user.id}/orders/${orderNumber}/status`, { status });
+      fetchOrders();
+    } catch (err) {
+      alert('Error updating order status');
+    }
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
       await api.post('/products', { ...form, sellerId: user.id });
-      setForm({ name: '', description: '', category: '', price: '', stockQuantity: '' });
+      setForm({ name: '', description: '', category: '', price: '', stockQuantity: '', variants: [] });
       fetchProducts();
       fetchStats();
     } catch (err) {
@@ -113,6 +123,29 @@ const SellerDashboard = () => {
               <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Description</label>
               <textarea required className="form-control" rows="3" style={{ width: '100%', padding: 8 }} value={form.description} onChange={e=>setForm({...form, description: e.target.value})} />
             </div>
+
+            {/* Variants Section */}
+            <div style={{ padding: 10, border: '1px dashed #ccc', borderRadius: 4, background: '#fff' }}>
+              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Product Variants</label>
+              {form.variants.map((v, i) => (
+                <div key={i} style={{ fontSize: 12, marginBottom: 4 }}>
+                  {v.size && `Size: ${v.size} `}{v.color && `Color: ${v.color} `}
+                  (Qty: {v.stockQuantity}) +₹{v.additionalPrice || 0}
+                </div>
+              ))}
+              <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
+                <input placeholder="Size" style={{width:'50px', padding:4}} value={newVariant.size} onChange={e=>setNewVariant({...newVariant, size:e.target.value})} />
+                <input placeholder="Color" style={{width:'60px', padding:4}} value={newVariant.color} onChange={e=>setNewVariant({...newVariant, color:e.target.value})} />
+                <input type="number" placeholder="Qty" style={{width:'50px', padding:4}} value={newVariant.stockQuantity} onChange={e=>setNewVariant({...newVariant, stockQuantity:e.target.value})} />
+                <button type="button" onClick={() => {
+                  if(newVariant.size || newVariant.color) {
+                    setForm({...form, variants: [...form.variants, newVariant]});
+                    setNewVariant({ sku: '', size: '', color: '', additionalPrice: '', stockQuantity: '' });
+                  }
+                }} style={{background:'#eee', border:'1px solid #ccc', padding:'2px 8px', cursor:'pointer'}}>+</button>
+              </div>
+            </div>
+
             <button type="submit" className="btn btn-primary w-full" disabled={loading} style={{ padding: '8px 0', borderRadius: 20, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
               {loading ? 'Adding...' : 'Add Product'}
             </button>
@@ -182,13 +215,24 @@ const SellerDashboard = () => {
                   <td style={{ padding: 12, borderBottom: '1px solid #ddd', fontWeight: 'bold' }}>₹{(o.priceAtPurchase * o.quantity).toFixed(2)}</td>
                   <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>{o.customerCity}</td>
                   <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
-                    <span style={{ 
-                      padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 'bold',
-                      background: o.orderStatus === 'PENDING' ? '#fcf3cf' : (o.orderStatus === 'SHIPPED' ? '#d4efdf' : '#fadbd8'),
-                      color: o.orderStatus === 'PENDING' ? '#b9770e' : (o.orderStatus === 'SHIPPED' ? '#1d8348' : '#922b21')
-                    }}>
-                      {o.orderStatus}
-                    </span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ 
+                        padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 'bold',
+                        background: o.orderStatus === 'PENDING' ? '#fcf3cf' : (o.orderStatus === 'SHIPPED' ? '#d4efdf' : (o.orderStatus === 'DELIVERED' ? '#d5f5e3' : '#fadbd8')),
+                        color: o.orderStatus === 'PENDING' ? '#b9770e' : (o.orderStatus === 'SHIPPED' ? '#1d8348' : (o.orderStatus === 'DELIVERED' ? '#145a32' : '#922b21'))
+                      }}>
+                        {o.orderStatus}
+                      </span>
+                      {o.orderStatus === 'PENDING' && (
+                        <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'SHIPPED')} style={{ fontSize: 11, padding: '2px 6px', cursor: 'pointer', background: '#3498db', color: 'white', border: 'none', borderRadius: 3 }}>Ship</button>
+                      )}
+                      {o.orderStatus === 'SHIPPED' && (
+                        <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'DELIVERED')} style={{ fontSize: 11, padding: '2px 6px', cursor: 'pointer', background: '#2ecc71', color: 'white', border: 'none', borderRadius: 3 }}>Mark Delivered</button>
+                      )}
+                      {o.orderStatus !== 'CANCELLED' && o.orderStatus !== 'DELIVERED' && (
+                        <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'CANCELLED')} style={{ fontSize: 11, padding: '2px 6px', cursor: 'pointer', background: '#e74c3c', color: 'white', border: 'none', borderRadius: 3 }}>Cancel</button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

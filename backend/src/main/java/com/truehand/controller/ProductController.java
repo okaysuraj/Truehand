@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
@@ -23,6 +24,16 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProduct(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getProduct(id));
+    }
+
+    @GetMapping("/trending")
+    public ResponseEntity<List<ProductDTO>> getTrendingProducts() {
+        return ResponseEntity.ok(productService.getTrendingProducts());
+    }
+
+    @GetMapping("/{id}/recommendations")
+    public ResponseEntity<List<ProductDTO>> getRecommendations(@PathVariable Integer id) {
+        return ResponseEntity.ok(productService.getRecommendations(id));
     }
 
     @GetMapping("/filter")
@@ -62,8 +73,17 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);
-        return ResponseEntity.ok("Product deleted successfully");
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/bulk-upload")
+    public ResponseEntity<java.util.Map<String, String>> bulkUploadProducts(@org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        // Stub for bulk upload processing (Phase 2 advanced feature)
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        response.put("message", "Bulk upload functionality is currently a stub.");
+        response.put("status", "pending_implementation");
+        return ResponseEntity.ok(response);
     }
 }

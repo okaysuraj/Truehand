@@ -34,10 +34,17 @@ public class User {
     @Column(columnDefinition = "VARCHAR(50) DEFAULT 'CUSTOMER'")
     private String role;
 
-    private String address;
-    private String city;
-    private String state;
-    private String postalCode;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Cart cart;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private SellerProfile sellerProfile;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private DeliveryPersonnel deliveryPersonnel;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean emailVerified;
