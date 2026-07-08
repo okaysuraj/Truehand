@@ -100,7 +100,7 @@ public class ProductService {
     }
 
     public List<ProductDTO> getByCategory(String category) {
-        return productRepository.findByCategory(category)
+        return productRepository.findByCategoryName(category)
                 .stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
@@ -147,7 +147,7 @@ public class ProductService {
         if (category == null) return List.of();
 
         // Smart Recommendation Stub: Same category, high stock, excluding self, limit 5
-        return productRepository.findByCategory(category.getName())
+        return productRepository.findByCategoryName(category.getName())
                 .stream()
                 .filter(p -> !p.getId().equals(productId) && Boolean.TRUE.equals(p.getIsAvailable()))
                 .sorted((p1, p2) -> {

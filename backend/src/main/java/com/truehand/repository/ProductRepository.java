@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
-    List<Product> findByCategory(String category);
+    List<Product> findByCategoryName(String categoryName);
     List<Product> findByNameContainingIgnoreCase(String name);
     Page<Product> findByIsAvailableTrue(Pageable pageable);
     List<Product> findBySellerId(Integer sellerId);
