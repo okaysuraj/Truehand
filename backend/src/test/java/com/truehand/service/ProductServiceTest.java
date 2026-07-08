@@ -39,7 +39,7 @@ public class ProductServiceTest {
                 .id(1)
                 .name("Test Product")
                 .description("Test Description")
-                .category("Home")
+                .category(com.truehand.model.Category.builder().id(1).name("Home").build())
                 .price(new BigDecimal("19.99"))
                 .stockQuantity(10)
                 .isAvailable(true)
