@@ -4,6 +4,7 @@
 *.swp
 *.swo
 .gemini/
+skills/
 
 # Node
 node_modules/

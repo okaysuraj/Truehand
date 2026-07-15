@@ -58,78 +58,142 @@ const DeliveryDashboard = () => {
   if (!user || user.role !== 'DELIVERY') return null;
 
   return (
-    <div style={{ maxWidth: 1000, margin: '40px auto', padding: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <h2 style={{ margin: 0, fontSize: 24 }}>Delivery Partner Dashboard</h2>
-        {profile && (
-          <button 
-            onClick={handleToggleAvailability}
-            style={{ 
-              padding: '8px 16px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 'bold',
-              background: profile.isAvailable ? '#2ecc71' : '#95a5a6', color: '#fff' 
-            }}
-          >
-            {profile.isAvailable ? 'Go Offline' : 'Go Online'}
-          </button>
-        )}
-      </div>
-
-      {!profile || profile.kycStatus !== 'APPROVED' ? (
-        <div style={{ padding: 20, background: '#fcf3cf', borderRadius: 8, color: '#b9770e', fontWeight: 'bold' }}>
-          Please complete your KYC onboarding and wait for approval to start accepting deliveries.
-          <br /><br />
-          <button onClick={() => navigate('/delivery/kyc')} style={{ padding: '8px 16px', background: '#e67e22', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
-            Go to KYC Profile
+    <div className="min-h-screen bg-surface-linen text-on-surface font-body-md flex">
+      {/* SideNavBar */}
+      <nav className="bg-surface shadow-sm h-screen w-64 fixed left-0 top-0 flex flex-col py-stack-lg border-r border-outline-variant/30 z-40">
+        <div className="px-6 mb-8">
+          <h2 className="font-display-lg text-headline-md text-forest-green leading-tight">Logistics Hub</h2>
+          <p className="font-label-md text-label-md text-on-surface-variant/70">Premium Fulfillment</p>
+        </div>
+        <div className="flex-1 overflow-y-auto px-4 space-y-2">
+          <button className={`w-full flex items-center gap-3 px-4 py-3 font-label-md text-label-md transition-all group border-r-2 border-forest-green bg-surface-container-low text-forest-green font-bold`}>
+            <span className="material-symbols-outlined text-[20px]">local_shipping</span>
+            Active Deliveries
           </button>
         </div>
-      ) : (
-        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20 }}>
-          <h3 style={{ marginTop: 0, marginBottom: 15, fontSize: 18 }}>Assigned Deliveries</h3>
-          {deliveries.length === 0 ? (
-            <p>No active deliveries assigned.</p>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead>
-                <tr>
-                  <th style={{ padding: 12, borderBottom: '2px solid #ddd' }}>Order ID</th>
-                  <th style={{ padding: 12, borderBottom: '2px solid #ddd' }}>Customer Address</th>
-                  <th style={{ padding: 12, borderBottom: '2px solid #ddd' }}>Status</th>
-                  <th style={{ padding: 12, borderBottom: '2px solid #ddd' }}>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {deliveries.map(d => (
-                  <tr key={d.id}>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>#{d.order.orderNumber}</td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
-                      {d.order.shippingAddress.street}, {d.order.shippingAddress.city}, {d.order.shippingAddress.zipCode}
-                    </td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
-                      <span style={{ 
-                        padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 'bold',
-                        background: d.status === 'PENDING' || d.status === 'ASSIGNED' ? '#fcf3cf' : (d.status === 'IN_TRANSIT' ? '#d4efdf' : (d.status === 'DELIVERED' ? '#d5f5e3' : '#fadbd8')),
-                        color: d.status === 'PENDING' || d.status === 'ASSIGNED' ? '#b9770e' : (d.status === 'IN_TRANSIT' ? '#1d8348' : (d.status === 'DELIVERED' ? '#145a32' : '#922b21'))
-                      }}>
-                        {d.status}
-                      </span>
-                    </td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        {(d.status === 'PENDING' || d.status === 'ASSIGNED') && (
-                          <button onClick={() => updateDeliveryStatus(d.order.id, 'start')} style={{ fontSize: 12, padding: '4px 8px', cursor: 'pointer', background: '#3498db', color: 'white', border: 'none', borderRadius: 4 }}>Start Delivery</button>
-                        )}
-                        {d.status === 'IN_TRANSIT' && (
-                          <button onClick={() => updateDeliveryStatus(d.order.id, 'complete')} style={{ fontSize: 12, padding: '4px 8px', cursor: 'pointer', background: '#2ecc71', color: 'white', border: 'none', borderRadius: 4 }}>Complete</button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className="px-6 py-6 border-t border-surface-variant/30 mt-auto">
+          {profile && (
+            <button 
+              onClick={handleToggleAvailability}
+              className={`w-full py-3 rounded-sm font-label-md text-label-md hover:opacity-90 transition-opacity active:scale-[0.98] mb-6 ${profile.isAvailable ? 'bg-error-red text-white' : 'bg-forest-green text-white'}`}
+            >
+              {profile.isAvailable ? 'Go Offline' : 'Go Online'}
+            </button>
           )}
+          <div className="flex items-center mb-6">
+            <img className="w-10 h-10 rounded-full object-cover border border-outline-variant" src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.firstName} ${user.lastName}&backgroundColor=163428&textColor=ffffff`} alt="Courier Avatar" />
+            <div className="ml-3">
+              <p className="font-label-sm text-label-sm text-on-surface font-semibold">{user.firstName} {user.lastName}</p>
+            </div>
+          </div>
+          <button onClick={() => navigate('/')} className="w-full border border-charcoal text-charcoal font-label-md text-label-md py-2 px-4 rounded-sm hover:bg-surface-container transition-colors flex items-center justify-center">
+            <span>View Storefront</span>
+            <span className="material-symbols-outlined ml-2 text-[18px]">open_in_new</span>
+          </button>
         </div>
-      )}
+      </nav>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col md:ml-64 w-full pt-10">
+        
+        <div className="p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full space-y-section-gap pb-24">
+          
+          {/* Page Header */}
+          <header className="flex flex-col md:flex-row md:items-end justify-between gap-stack-md border-b border-outline-variant/20 pb-4">
+            <div className="space-y-2">
+              <span className="font-label-md text-label-md text-terracotta tracking-widest uppercase">Courier Operations</span>
+              <h1 className="font-display-lg text-display-lg text-forest-green">Assigned Deliveries</h1>
+              <p className="text-on-surface-variant font-body-md max-w-xl">A curated view of your current logistical commitments. Prioritize based on proximity and collection windows.</p>
+            </div>
+          </header>
+
+          {!profile || profile.kycStatus !== 'APPROVED' ? (
+            <div className="bg-error-container/30 border border-error-container text-terracotta p-6 rounded-sm">
+              <h3 className="font-headline-md text-headline-md mb-2">KYC Approval Pending</h3>
+              <p className="font-body-md mb-4">Please complete your KYC onboarding and wait for approval to start accepting deliveries.</p>
+              <button onClick={() => navigate('/delivery/kyc')} className="bg-terracotta text-white font-label-md text-label-md py-2 px-6 rounded-sm hover:bg-terracotta/90 transition-colors">
+                Go to KYC Profile
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Deliveries Table Container */}
+              <section className="bg-surface shadow-[0_4px_24px_-4px_rgba(22,52,40,0.04)] rounded-sm overflow-hidden border border-outline-variant/20">
+                {deliveries.length === 0 ? (
+                  <div className="p-12 text-center text-outline">
+                    <span className="material-symbols-outlined text-4xl mb-2">local_shipping</span>
+                    <p>No active deliveries assigned.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-surface-container-low border-b border-outline-variant/30">
+                          <th className="px-6 py-5 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Order ID</th>
+                          <th className="px-6 py-5 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Customer Address</th>
+                          <th className="px-6 py-5 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider">Status</th>
+                          <th className="px-6 py-5 font-label-md text-label-md text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/20">
+                        {deliveries.map(d => (
+                          <tr key={d.id} className="group hover:bg-surface-container-lowest transition-colors">
+                            <td className="px-6 py-8 font-label-md text-forest-green">#{d.order.orderNumber}</td>
+                            <td className="px-6 py-8">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-on-surface">{d.order.shippingAddress.fullName || d.order.user.firstName + ' ' + d.order.user.lastName}</span>
+                                <span className="text-on-surface-variant text-label-sm">{d.order.shippingAddress.street}, {d.order.shippingAddress.city}, {d.order.shippingAddress.zipCode}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-8">
+                              {d.status === 'PENDING' || d.status === 'ASSIGNED' ? (
+                                <span className="px-3 py-1 bg-terracotta/10 text-terracotta text-label-sm rounded-full border border-terracotta/20">{d.status}</span>
+                              ) : d.status === 'IN_TRANSIT' ? (
+                                <span className="px-3 py-1 bg-forest-green/10 text-forest-green text-label-sm rounded-full border border-forest-green/20">In Transit</span>
+                              ) : (
+                                <span className="px-3 py-1 bg-outline-variant/30 text-on-surface text-label-sm rounded-full border border-outline-variant/40">{d.status}</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-8 text-right">
+                              <div className="flex justify-end gap-2">
+                                {(d.status === 'PENDING' || d.status === 'ASSIGNED') && (
+                                  <button onClick={() => updateDeliveryStatus(d.order.id, 'start')} className="px-4 py-2 border border-forest-green text-forest-green font-label-sm rounded-sm hover:bg-forest-green hover:text-white transition-colors">Start Delivery</button>
+                                )}
+                                {d.status === 'IN_TRANSIT' && (
+                                  <button onClick={() => updateDeliveryStatus(d.order.id, 'complete')} className="px-4 py-2 bg-forest-green text-white font-label-sm rounded-sm hover:opacity-90 transition-opacity">Complete</button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </section>
+
+              {/* Bottom Dashboard Statistics */}
+              <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+                <div className="bg-surface p-stack-md border border-outline-variant/20 shadow-sm flex items-center justify-between rounded-sm">
+                  <div>
+                    <span className="block text-label-sm text-on-surface-variant uppercase tracking-widest">Total Active</span>
+                    <span className="font-headline-md text-forest-green">{deliveries.filter(d => ['PENDING','ASSIGNED','IN_TRANSIT'].includes(d.status)).length}</span>
+                  </div>
+                  <span className="material-symbols-outlined text-terracotta text-[32px]">local_shipping</span>
+                </div>
+                <div className="bg-surface p-stack-md border border-outline-variant/20 shadow-sm flex items-center justify-between rounded-sm">
+                  <div>
+                    <span className="block text-label-sm text-on-surface-variant uppercase tracking-widest">Completed</span>
+                    <span className="font-headline-md text-forest-green">{deliveries.filter(d => d.status === 'DELIVERED').length}</span>
+                  </div>
+                  <span className="material-symbols-outlined text-terracotta text-[32px]">check_circle</span>
+                </div>
+              </section>
+            </>
+          )}
+
+        </div>
+      </main>
     </div>
   );
 };

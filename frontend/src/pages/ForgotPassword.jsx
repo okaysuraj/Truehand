@@ -26,37 +26,66 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background text-on-background p-4">
-      <div className="w-full max-w-md rounded-2xl border border-surface-variant bg-surface-container-low p-8 shadow-lg">
-        <h1 className="text-2xl font-semibold mb-4">Forgot Password</h1>
-        <p className="text-body-md text-on-surface-variant mb-6">Enter your email to receive a password reset link.</p>
+    <main className="min-h-screen flex items-center justify-center pt-20 px-margin-mobile">
+      {/* Card */}
+      <div className="w-full max-w-[480px] bg-white p-12 rounded-lg shadow-[0_4px_24px_rgba(22,52,40,0.06)] animate-in fade-in slide-in-from-bottom-4 duration-700 z-10">
+        
+        {/* Branding/Heading */}
+        <div className="text-center mb-10">
+          <h1 className="font-headline-lg text-headline-lg text-forest-green mb-2">Forgot Password</h1>
+          <p className="font-body-md text-body-md text-on-surface-variant">Enter your email to receive a password reset link.</p>
+        </div>
 
-        {message && <div className="rounded-lg bg-surface-success p-4 text-success-on-surface mb-4">{message}</div>}
-        {error && <div className="rounded-lg bg-surface-error p-4 text-error-on-surface mb-4">{String(error)}</div>}
+        {message && <div className="text-forest-green bg-primary-fixed text-center mb-4 text-sm font-medium w-full p-3 rounded-md">{message}</div>}
+        {error && <div className="text-error-red bg-error-container text-center mb-4 text-sm font-medium w-full p-3 rounded-md">{String(error)}</div>}
 
-        <form onSubmit={submit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-on-surface-variant mb-2" htmlFor="email">Email address</label>
-            <input
-              id="email"
+        {/* Form */}
+        <form onSubmit={submit} className="space-y-stack-md">
+          <div className="space-y-base">
+            <label className="font-label-sm text-label-sm text-on-surface-variant block ml-1" htmlFor="email">Email</label>
+            <input 
+              className="w-full px-4 py-3 bg-surface-container-lowest border border-clay-outline/20 rounded-lg focus:ring-1 focus:ring-forest-green focus:border-forest-green transition-all outline-none text-body-md" 
+              id="email" 
               type="email"
-              required
+              placeholder="artisanal.life@example.com" 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="block w-full rounded-xl border border-outline-variant bg-surface-container px-4 py-3 text-body-md text-on-surface focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              placeholder="you@example.com"
+              required
             />
           </div>
-          <button disabled={loading} type="submit" className="w-full rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container">
-            {loading ? 'Sending...' : 'Send reset link'}
+
+          <button 
+            disabled={loading}
+            className="w-full bg-forest-green text-white font-label-md text-label-md py-4 rounded-lg hover:shadow-lg active:scale-[0.98] transition-all duration-300 mt-2 flex justify-center items-center h-14" 
+            type="submit"
+          >
+            {loading ? (
+              <span className="material-symbols-outlined animate-spin text-white">progress_activity</span>
+            ) : (
+              'Send reset link'
+            )}
           </button>
         </form>
 
-        <div className="mt-6 text-sm text-on-surface-variant">
-          <Link to="/login" className="font-medium text-primary hover:underline">Back to sign in</Link>
+        {/* Footer Links */}
+        <div className="mt-stack-lg text-center">
+          <p className="font-body-md text-body-md text-on-surface-variant">
+            <Link to="/login" className="text-forest-green font-bold underline underline-offset-4 decoration-forest-green/30 hover:decoration-forest-green transition-all flex items-center justify-center gap-1">
+              <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+              Back to sign in
+            </Link>
+          </p>
         </div>
       </div>
-    </div>
+
+      {/* Decorative Background Element */}
+      <div className="fixed bottom-0 left-0 w-full h-1/3 pointer-events-none -z-10 opacity-30 overflow-hidden">
+        <div 
+          className="w-[120%] h-full bg-no-repeat bg-cover bg-bottom mix-blend-multiply filter blur-[1px]" 
+          style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCm61ZjhZLeX2kPEcrqlYwQVA-MhjMgEiGTA_YEKN-xEBjymVOOu5eY375Zfqz0E1-96aPY0aUQS9QU2Nj5W-z3MpzENOSvoU7vy66yRoVuexKoDsxaYoyWkttfIXFf8NXo9bSGwCJjnm3JrTvh36X0jWWVGjlvoz-DB7gkdbL2kBdtTmHyZjs6ku26TUmeQPkGhyn-y2Rv8NZfbOiRS5SwScAQ2JuiVizCJ4R9yyhwVGA5f4DeyVoT3g')" }}
+        />
+      </div>
+    </main>
   );
 };
 

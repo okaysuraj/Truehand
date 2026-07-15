@@ -1,33 +1,40 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView } from 'react-native';
-import { useAuth } from '../services/AuthProvider';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';;
+import { useAuthStore } from '../store/useAuthStore';
+import { colors, typography, spacing } from '../theme/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RegisterScreen({ navigation }) {
-  const { register } = useAuth();
+  const register = useAuthStore((state) => state.register);
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     password: '',
-    confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleRegister = async () => {
-    if (!form.firstName || !form.email || !form.password) {
+    if (!form.fullName || !form.email || !form.password) {
       Alert.alert('Error', 'Please fill in all required fields.');
       return;
     }
-    if (form.password !== form.confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match.');
+    if (!termsAccepted) {
+      Alert.alert('Error', 'Please agree to the Terms & Conditions.');
       return;
     }
+
+    const nameParts = form.fullName.trim().split(' ');
+    const firstName = nameParts[0];
+    const lastName = nameParts.slice(1).join(' ') || '';
 
     setLoading(true);
     try {
       await register({
-        firstName: form.firstName,
-        lastName: form.lastName,
+        firstName,
+        lastName,
         email: form.email,
         password: form.password,
         role: 'CUSTOMER'
@@ -43,130 +50,226 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Create account</Text>
+    <SafeAreaView style={styles.safeArea}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          <View style={styles.card}>
+            <View style={styles.header}>
+              <Text style={styles.title}>Create Your Account</Text>
+              <Text style={styles.subtitle}>Join the TrueHand collective and explore authentic craftsmanship.</Text>
+            </View>
+            
+            <View style={styles.form}>
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Full Name</Text>
+                <TextInput 
+                  style={styles.input}
+                  placeholder="Jane Doe"
+                  placeholderTextColor={colors.outline}
+                  value={form.fullName}
+                  onChangeText={(val) => setForm({...form, fullName: val})}
+                />
+              </View>
 
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>First name</Text>
-        <TextInput 
-          style={styles.input}
-          placeholder="First name"
-          value={form.firstName}
-          onChangeText={(val) => setForm({...form, firstName: val})}
-        />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Email Address</Text>
+                <TextInput 
+                  style={styles.input}
+                  placeholder="jane@example.com"
+                  placeholderTextColor={colors.outline}
+                  value={form.email}
+                  onChangeText={(val) => setForm({...form, email: val})}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                />
+              </View>
 
-        <Text style={styles.label}>Last name</Text>
-        <TextInput 
-          style={styles.input}
-          placeholder="Last name"
-          value={form.lastName}
-          onChangeText={(val) => setForm({...form, lastName: val})}
-        />
+              <View style={styles.inputGroup}>
+                <Text style={styles.label}>Password</Text>
+                <View style={styles.passwordContainer}>
+                  <TextInput 
+                    style={[styles.input, { flex: 1, borderBottomWidth: 0 }]}
+                    placeholder="••••••••"
+                    placeholderTextColor={colors.outline}
+                    value={form.password}
+                    onChangeText={(val) => setForm({...form, password: val})}
+                    secureTextEntry={!showPassword}
+                  />
+                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
+                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.outline} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.inputBorder} />
+              </View>
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput 
-          style={styles.input}
-          placeholder="Email address"
-          value={form.email}
-          onChangeText={(val) => setForm({...form, email: val})}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
+              <View style={styles.termsContainer}>
+                <TouchableOpacity 
+                  style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}
+                  onPress={() => setTermsAccepted(!termsAccepted)}
+                >
+                  {termsAccepted && <Ionicons name="checkmark" size={14} color={colors['on-primary']} />}
+                </TouchableOpacity>
+                <Text style={styles.termsText}>
+                  I agree to the <Text style={styles.link}>Terms & Conditions</Text> and <Text style={styles.link}>Privacy Policy</Text>.
+                </Text>
+              </View>
 
-        <Text style={styles.label}>Password</Text>
-        <TextInput 
-          style={styles.input}
-          placeholder="At least 6 characters"
-          value={form.password}
-          onChangeText={(val) => setForm({...form, password: val})}
-          secureTextEntry
-        />
+              <TouchableOpacity 
+                style={styles.button} 
+                onPress={handleRegister}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color={colors['on-primary']} />
+                ) : (
+                  <View style={styles.buttonContent}>
+                    <Text style={styles.buttonText}>Join the Collective</Text>
+                    <Ionicons name="arrow-forward" size={18} color={colors['on-primary']} />
+                  </View>
+                )}
+              </TouchableOpacity>
+            </View>
 
-        <Text style={styles.label}>Re-enter password</Text>
-        <TextInput 
-          style={styles.input}
-          placeholder="Confirm password"
-          value={form.confirmPassword}
-          onChangeText={(val) => setForm({...form, confirmPassword: val})}
-          secureTextEntry
-        />
-
-        <TouchableOpacity 
-          style={styles.button} 
-          onPress={handleRegister}
-          disabled={loading}
-        >
-          {loading ? <ActivityIndicator color="#0f1111" /> : <Text style={styles.buttonText}>Continue</Text>}
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.footer}>
-        <Text style={styles.footerText}>Already have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.link}>Sign in</Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.link}>Sign In</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors['surface-linen'],
+  },
   container: {
+    flex: 1,
+  },
+  scrollContent: {
     flexGrow: 1,
-    backgroundColor: '#fff',
-    paddingHorizontal: 24,
-    paddingTop: 60,
-    paddingBottom: 40,
+    justifyContent: 'center',
+    padding: spacing.marginMobile,
+  },
+  card: {
+    backgroundColor: colors['surface-container-lowest'],
+    padding: spacing.stackLg,
+    borderRadius: 8,
+    shadowColor: colors['forest-green'],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: spacing.stackLg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#0f1111',
-    marginBottom: 30,
+    ...typography.headlineLgMobile,
+    color: colors['forest-green'],
+    marginBottom: spacing.stackSm,
+    textAlign: 'center',
   },
-  formContainer: {
-    width: '100%',
+  subtitle: {
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
+    textAlign: 'center',
+  },
+  form: {
+    gap: spacing.stackMd,
+  },
+  inputGroup: {
+    marginBottom: spacing.stackMd,
   },
   label: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#0f1111',
-    marginBottom: 8,
+    ...typography.labelSm,
+    color: colors.charcoal,
+    marginBottom: spacing.base,
   },
   input: {
+    paddingVertical: spacing.stackSm,
+    paddingHorizontal: 0,
+    ...typography.bodyMd,
+    color: colors.charcoal,
+    borderBottomWidth: 1,
+    borderBottomColor: colors['outline-variant'],
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  inputBorder: {
+    height: 1,
+    backgroundColor: colors['outline-variant'],
+  },
+  eyeIcon: {
+    padding: 8,
+  },
+  termsContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: spacing.stackSm,
+    gap: spacing.stackSm,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
     borderWidth: 1,
-    borderColor: '#a6a6a6',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#f8f8f8',
+    borderColor: colors['outline-variant'],
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  checkboxChecked: {
+    backgroundColor: colors['forest-green'],
+    borderColor: colors['forest-green'],
+  },
+  termsText: {
+    ...typography.bodyMd,
+    fontSize: 14,
+    color: colors['on-surface-variant'],
+    flex: 1,
   },
   button: {
-    backgroundColor: '#FFD814',
-    paddingVertical: 14,
-    borderRadius: 8,
+    backgroundColor: colors['forest-green'],
+    paddingVertical: spacing.stackMd,
+    paddingHorizontal: spacing.gutter,
+    borderRadius: 4,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FCD200',
-    marginTop: 10,
+    marginTop: spacing.stackMd,
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.stackSm,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0f1111',
+    ...typography.labelMd,
+    color: colors['on-primary'],
   },
   footer: {
     flexDirection: 'row',
-    marginTop: 30,
+    justifyContent: 'center',
+    marginTop: spacing.stackMd,
   },
   footerText: {
-    color: '#565959',
-    fontSize: 14,
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
   },
   link: {
-    color: '#007185',
-    fontSize: 14,
-    fontWeight: 'bold',
+    ...typography.bodyMd,
+    fontWeight: '500',
+    color: colors['forest-green'],
+    textDecorationLine: 'underline',
   },
 });

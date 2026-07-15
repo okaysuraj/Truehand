@@ -15,6 +15,7 @@ const SellerDashboard = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [activeTab, setActiveTab] = useState('overview');
 
   useEffect(() => {
     if (!user || user.role !== 'SELLER') {
@@ -98,6 +99,7 @@ const SellerDashboard = () => {
       setImageUrl('');
       fetchProducts();
       fetchStats();
+      setActiveTab('inventory');
     } catch (err) {
       alert('Error adding product');
     }
@@ -107,192 +109,300 @@ const SellerDashboard = () => {
   if (!user || user.role !== 'SELLER') return null;
 
   return (
-    <div className="dashboard-container" style={{ maxWidth: 1200, margin: '0 auto', padding: 20 }}>
-      <div className="dashboard-header" style={{ marginBottom: 24 }}>
-        <h2 style={{ fontSize: 28, marginBottom: 8 }}>Seller Central Dashboard</h2>
-        <div style={{ color: '#565959' }}>Store: {user.firstName} {user.lastName}</div>
-      </div>
-
-      {/* Analytics */}
-      <div className="dashboard-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 20, marginBottom: 40 }}>
-        <div className="stat-card" style={{ padding: 24, background: '#fff', border: '1px solid #ddd', borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ color: '#565959', fontSize: 14, marginBottom: 8 }}>Total Products</h3>
-          <p style={{ fontSize: 32, fontWeight: 'bold', color: '#0f1111' }}>{stats.totalProducts}</p>
+    <div className="min-h-screen bg-surface-container-lowest text-on-surface font-body-md relative">
+      
+      {/* SideNavBar */}
+      <nav className="fixed left-0 top-0 h-screen flex flex-col py-margin-desktop bg-surface-linen w-64 border-r border-outline-variant/10 shadow-[4px_0_24px_rgba(22,52,40,0.02)] z-40">
+        <div className="px-gutter mb-section-gap flex flex-col items-center text-center">
+          <div className="w-20 h-20 rounded-full bg-surface-container mb-stack-md flex items-center justify-center border border-outline-variant/20 shadow-sm overflow-hidden">
+            <img 
+              alt="Artisan Profile" 
+              className="w-full h-full object-cover" 
+              src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.firstName} ${user.lastName}&backgroundColor=163428&textColor=ffffff`} 
+            />
+          </div>
+          <h2 className="font-headline-md text-headline-md text-charcoal mb-1">Artisan Portal</h2>
+          <p className="font-body-md text-body-md text-outline">{user.firstName}'s Studio</p>
         </div>
-        <div className="stat-card" style={{ padding: 24, background: '#fff', border: '1px solid #ddd', borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ color: '#565959', fontSize: 14, marginBottom: 8 }}>Total Revenue</h3>
-          <p style={{ fontSize: 32, fontWeight: 'bold', color: '#007185' }}>₹{stats.totalRevenue ? stats.totalRevenue.toFixed(2) : '0.00'}</p>
-        </div>
-        <div className="stat-card" style={{ padding: 24, background: '#fff', border: '1px solid #ddd', borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ color: '#565959', fontSize: 14, marginBottom: 8 }}>Active Orders (Pending/Processing)</h3>
-          <p style={{ fontSize: 32, fontWeight: 'bold', color: '#B12704' }}>{stats.activeOrders}</p>
-        </div>
-      </div>
+        
+        <div className="flex-1 px-4 space-y-2">
+          <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out ${activeTab === 'overview' ? 'bg-surface-container text-terracotta border-r-2 border-terracotta' : 'text-outline hover:text-charcoal hover:bg-surface-container'}`}>
+            <span className="material-symbols-outlined">dashboard</span>
+            <span className="font-label-md text-label-md">Overview</span>
+          </button>
+          
+          <button onClick={() => setActiveTab('orders')} className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out ${activeTab === 'orders' ? 'bg-surface-container text-terracotta border-r-2 border-terracotta' : 'text-outline hover:text-charcoal hover:bg-surface-container'}`}>
+            <span className="material-symbols-outlined">shopping_bag</span>
+            <span className="font-label-md text-label-md">Orders</span>
+          </button>
+          
+          <button onClick={() => setActiveTab('inventory')} className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out ${activeTab === 'inventory' ? 'bg-surface-container text-terracotta border-r-2 border-terracotta' : 'text-outline hover:text-charcoal hover:bg-surface-container'}`}>
+            <span className="material-symbols-outlined">inventory_2</span>
+            <span className="font-label-md text-label-md">Inventory</span>
+          </button>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: 24, marginBottom: 40 }}>
-        {/* Add Product Form */}
-        <div className="a-box" style={{ background: '#f8f8f8', padding: 20, border: '1px solid #ddd', borderRadius: 8, height: 'fit-content' }}>
-          <h3 style={{ marginBottom: 16 }}>Add New Product</h3>
-          <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div className="form-group">
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Product Image</label>
-              <input type="file" accept="image/*" onChange={handleImageUpload} style={{ width: '100%', padding: 8 }} />
-              {uploadingImage && <small style={{ color: 'blue' }}>Uploading...</small>}
-              {imageUrl && <img src={imageUrl} alt="Preview" style={{ width: 100, height: 100, objectFit: 'contain', marginTop: 10 }} />}
-            </div>
-            <div className="form-group">
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Product Name</label>
-              <input required className="form-control" style={{ width: '100%', padding: 8 }} value={form.name} onChange={e=>setForm({...form, name: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Category</label>
-              <input required className="form-control" style={{ width: '100%', padding: 8 }} value={form.category} onChange={e=>setForm({...form, category: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Price (₹)</label>
-              <input required type="number" step="0.01" className="form-control" style={{ width: '100%', padding: 8 }} value={form.price} onChange={e=>setForm({...form, price: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Stock Quantity</label>
-              <input required type="number" className="form-control" style={{ width: '100%', padding: 8 }} value={form.stockQuantity} onChange={e=>setForm({...form, stockQuantity: e.target.value})} />
-            </div>
-            <div className="form-group">
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Description</label>
-              <textarea required className="form-control" rows="3" style={{ width: '100%', padding: 8 }} value={form.description} onChange={e=>setForm({...form, description: e.target.value})} />
-            </div>
+          <button onClick={() => setActiveTab('questions')} className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg font-semibold transition-all duration-300 ease-in-out ${activeTab === 'questions' ? 'bg-surface-container text-terracotta border-r-2 border-terracotta' : 'text-outline hover:text-charcoal hover:bg-surface-container'}`}>
+            <span className="material-symbols-outlined">forum</span>
+            <span className="font-label-md text-label-md">Q&A</span>
+          </button>
+        </div>
+        
+        <div className="px-4 mt-auto space-y-4">
+          <button onClick={() => setActiveTab('add')} className="w-full py-3 px-4 bg-forest-green text-on-primary font-label-md text-label-md rounded-sm shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            New Listing
+          </button>
+        </div>
+      </nav>
 
-            {/* Variants Section */}
-            <div style={{ padding: 10, border: '1px dashed #ccc', borderRadius: 4, background: '#fff' }}>
-              <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Product Variants</label>
-              {form.variants.map((v, i) => (
-                <div key={i} style={{ fontSize: 12, marginBottom: 4 }}>
-                  {v.size && `Size: ${v.size} `}{v.color && `Color: ${v.color} `}
-                  (Qty: {v.stockQuantity}) +₹{v.additionalPrice || 0}
+      {/* Main Content Canvas */}
+      <main className="ml-64 pt-32 pb-section-gap px-margin-desktop max-w-container-max mx-auto">
+        
+        {/* Welcome Header */}
+        <div className="mb-section-gap flex justify-between items-end border-b border-outline-variant/20 pb-4">
+          <div>
+            <p className="font-label-sm text-label-sm text-outline uppercase tracking-widest mb-stack-sm">{activeTab}</p>
+            <h1 className="font-display-lg text-display-lg text-charcoal">
+              {activeTab === 'overview' && `Welcome back, ${user.firstName}`}
+              {activeTab === 'orders' && 'Manage Orders'}
+              {activeTab === 'inventory' && 'Studio Inventory'}
+              {activeTab === 'questions' && 'Customer Questions'}
+              {activeTab === 'add' && 'Create New Listing'}
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 text-outline font-label-md text-label-md">
+            <span className="material-symbols-outlined text-[18px]">calendar_today</span>
+            <span>{new Date().toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        {activeTab === 'overview' && (
+          <>
+            {/* Bento Grid Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-section-gap">
+              {/* Stat Card 1 */}
+              <div className="bg-surface-linen p-6 rounded-xl shadow-[0_4px_24px_rgba(22,52,40,0.04)] border border-outline-variant/10 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+                  <span className="material-symbols-outlined text-[120px] text-forest-green">account_balance_wallet</span>
                 </div>
-              ))}
-              <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
-                <input placeholder="Size" style={{width:'50px', padding:4}} value={newVariant.size} onChange={e=>setNewVariant({...newVariant, size:e.target.value})} />
-                <input placeholder="Color" style={{width:'60px', padding:4}} value={newVariant.color} onChange={e=>setNewVariant({...newVariant, color:e.target.value})} />
-                <input type="number" placeholder="Qty" style={{width:'50px', padding:4}} value={newVariant.stockQuantity} onChange={e=>setNewVariant({...newVariant, stockQuantity:e.target.value})} />
-                <button type="button" onClick={() => {
-                  if(newVariant.size || newVariant.color) {
-                    setForm({...form, variants: [...form.variants, newVariant]});
-                    setNewVariant({ sku: '', size: '', color: '', additionalPrice: '', stockQuantity: '' });
-                  }
-                }} style={{background:'#eee', border:'1px solid #ccc', padding:'2px 8px', cursor:'pointer'}}>+</button>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-stack-lg text-outline">
+                    <span className="material-symbols-outlined">payments</span>
+                    <h3 className="font-label-md text-label-md">Total Revenue</h3>
+                  </div>
+                  <p className="font-headline-lg text-headline-lg text-charcoal mb-stack-sm">${stats.totalRevenue?.toFixed(2) || '0.00'}</p>
+                </div>
+              </div>
+              
+              {/* Stat Card 2 */}
+              <div className="bg-surface-linen p-6 rounded-xl shadow-[0_4px_24px_rgba(22,52,40,0.04)] border border-outline-variant/10 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+                  <span className="material-symbols-outlined text-[120px] text-forest-green">local_shipping</span>
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-stack-lg text-outline">
+                    <span className="material-symbols-outlined">inventory_2</span>
+                    <h3 className="font-label-md text-label-md">Orders to Fulfill</h3>
+                  </div>
+                  <p className="font-headline-lg text-headline-lg text-charcoal mb-stack-sm">{stats.activeOrders || 0}</p>
+                </div>
+              </div>
+
+              {/* Stat Card 3 */}
+              <div className="bg-surface-linen p-6 rounded-xl shadow-[0_4px_24px_rgba(22,52,40,0.04)] border border-outline-variant/10 relative overflow-hidden group">
+                <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
+                  <span className="material-symbols-outlined text-[120px] text-forest-green">category</span>
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 mb-stack-lg text-outline">
+                    <span className="material-symbols-outlined">storefront</span>
+                    <h3 className="font-label-md text-label-md">Active Products</h3>
+                  </div>
+                  <p className="font-headline-lg text-headline-lg text-charcoal mb-stack-sm">{stats.totalProducts || 0}</p>
+                </div>
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={loading || uploadingImage} style={{ padding: '8px 0', borderRadius: 20, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}>
-              {loading ? 'Adding...' : 'Add Product'}
-            </button>
-          </form>
-        </div>
-
-        {/* Product List */}
-        <div className="dashboard-products">
-          <h3 style={{ marginBottom: 16 }}>Manage Inventory</h3>
-          {products.length === 0 ? (
-            <div style={{ padding: 20, background: '#f0f2f2', border: '1px solid #ddd' }}>You haven't added any products yet.</div>
-          ) : (
-            <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
-              <thead style={{ background: '#f8f8f8' }}>
-                <tr>
-                  <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Image</th>
-                  <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Name</th>
-                  <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Category</th>
-                  <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Price</th>
-                  <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Stock</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map(p => (
-                  <tr key={p.id}>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}><img src={p.imageUrl || `https://picsum.photos/50/50?random=${p.id}`} alt="" style={{width: 40, height: 40, objectFit: 'contain'}}/></td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd', fontWeight: 'bold' }}>{p.name}</td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>{p.category}</td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>₹{p.price}</td>
-                    <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>{p.stockQuantity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      </div>
-
-      {/* Orders List */}
-      <div>
-        <h3 style={{ marginBottom: 16 }}>Pending Fulfillment (Your Items)</h3>
-        {orders.length === 0 ? (
-          <div style={{ padding: 20, background: '#f0f2f2', border: '1px solid #ddd' }}>No active orders need fulfillment.</div>
-        ) : (
-          <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #ddd' }}>
-            <thead style={{ background: '#f8f8f8' }}>
-              <tr>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Order #</th>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Date</th>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Product</th>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Qty</th>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Revenue</th>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Ship To</th>
-                <th style={{ padding: 12, borderBottom: '1px solid #ddd', textAlign: 'left' }}>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o, i) => (
-                <tr key={i}>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd', color: '#007185', fontWeight: 'bold' }}>{o.orderNumber}</td>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>{new Date(o.orderDate).toLocaleDateString()}</td>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd', display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <img src={o.productImageUrl || `https://picsum.photos/30/30?random=${i}`} alt="" style={{width: 30, height: 30, objectFit: 'contain'}}/>
-                    {o.productName}
-                  </td>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>{o.quantity}</td>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd', fontWeight: 'bold' }}>₹{(o.priceAtPurchase * o.quantity).toFixed(2)}</td>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>{o.customerCity}</td>
-                  <td style={{ padding: 12, borderBottom: '1px solid #ddd' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ 
-                        padding: '4px 8px', borderRadius: 4, fontSize: 12, fontWeight: 'bold',
-                        background: o.orderStatus === 'PENDING' ? '#fcf3cf' : (o.orderStatus === 'SHIPPED' ? '#d4efdf' : (o.orderStatus === 'DELIVERED' ? '#d5f5e3' : '#fadbd8')),
-                        color: o.orderStatus === 'PENDING' ? '#b9770e' : (o.orderStatus === 'SHIPPED' ? '#1d8348' : (o.orderStatus === 'DELIVERED' ? '#145a32' : '#922b21'))
-                      }}>
+            {/* Recent Activity */}
+            <div className="bg-surface-linen rounded-xl shadow-[0_4px_24px_rgba(22,52,40,0.04)] border border-outline-variant/10 p-6">
+              <div className="flex justify-between items-center mb-stack-lg">
+                <h2 className="font-headline-md text-headline-md text-charcoal">Recent Orders</h2>
+                <button onClick={() => setActiveTab('orders')} className="text-forest-green font-label-md text-label-md hover:underline">View All</button>
+              </div>
+              <div className="flex flex-col gap-4">
+                {orders.slice(0, 3).map((o, i) => (
+                  <div key={i} className="flex items-center gap-4 p-3 rounded-lg hover:bg-surface-container transition-colors border border-transparent hover:border-outline-variant/20 cursor-pointer">
+                    <div className="w-12 h-12 rounded bg-surface-container-highest overflow-hidden flex-shrink-0">
+                      <img src={o.productImageUrl || `https://picsum.photos/50/50?random=${i}`} alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-label-md text-label-md text-charcoal truncate">{o.productName}</h4>
+                      <p className="font-label-sm text-label-sm text-outline truncate">Order #{o.orderNumber} • {new Date(o.orderDate).toLocaleDateString()}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-label-md text-label-md text-charcoal">${(o.priceAtPurchase * o.quantity).toFixed(2)}</p>
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold mt-1 uppercase tracking-widest ${o.orderStatus === 'PENDING' ? 'bg-terracotta/10 text-terracotta' : (o.orderStatus === 'SHIPPED' ? 'bg-surface-tint/10 text-surface-tint' : 'bg-outline/10 text-outline')}`}>
                         {o.orderStatus}
                       </span>
-                      {o.orderStatus === 'PENDING' && (
-                        <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'SHIPPED')} style={{ fontSize: 11, padding: '2px 6px', cursor: 'pointer', background: '#3498db', color: 'white', border: 'none', borderRadius: 3 }}>Ship</button>
-                      )}
-                      {o.orderStatus === 'SHIPPED' && (
-                        <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'DELIVERED')} style={{ fontSize: 11, padding: '2px 6px', cursor: 'pointer', background: '#2ecc71', color: 'white', border: 'none', borderRadius: 3 }}>Mark Delivered</button>
-                      )}
-                      {o.orderStatus !== 'CANCELLED' && o.orderStatus !== 'DELIVERED' && (
-                        <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'CANCELLED')} style={{ fontSize: 11, padding: '2px 6px', cursor: 'pointer', background: '#e74c3c', color: 'white', border: 'none', borderRadius: 3 }}>Cancel</button>
-                      )}
                     </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+                ))}
+                {orders.length === 0 && <p className="text-outline font-body-md">No recent orders.</p>}
+              </div>
+            </div>
+          </>
         )}
-      </div>
 
-      {/* Q&A List */}
-      <div style={{ marginTop: 40 }}>
-        <h3 style={{ marginBottom: 16 }}>Customer Questions</h3>
-        {questions.length === 0 ? (
-          <div style={{ padding: 20, background: '#f0f2f2', border: '1px solid #ddd' }}>No questions from customers.</div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+        {activeTab === 'orders' && (
+          <div className="bg-white rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
+            {orders.length === 0 ? (
+              <div className="p-12 text-center text-outline">No orders found.</div>
+            ) : (
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-surface-container-lowest border-b border-outline-variant/20">
+                  <tr>
+                    <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Order #</th>
+                    <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Product</th>
+                    <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Revenue</th>
+                    <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Status</th>
+                    <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {orders.map((o, i) => (
+                    <tr key={i} className="border-b border-outline-variant/10 hover:bg-surface-container-lowest">
+                      <td className="p-4 font-label-md text-forest-green">{o.orderNumber}</td>
+                      <td className="p-4 flex items-center gap-3">
+                        <img src={o.productImageUrl} className="w-10 h-10 object-cover rounded-sm border border-outline-variant/20" />
+                        <div>
+                          <p className="font-label-md text-on-surface">{o.productName}</p>
+                          <p className="font-label-sm text-outline">Qty: {o.quantity}</p>
+                        </div>
+                      </td>
+                      <td className="p-4 font-label-md text-charcoal">${(o.priceAtPurchase * o.quantity).toFixed(2)}</td>
+                      <td className="p-4">
+                        <span className={`inline-block px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${o.orderStatus === 'PENDING' ? 'bg-terracotta/10 text-terracotta' : (o.orderStatus === 'SHIPPED' ? 'bg-surface-tint/10 text-surface-tint' : (o.orderStatus === 'DELIVERED' ? 'bg-forest-green/10 text-forest-green' : 'bg-error-red/10 text-error-red'))}`}>
+                          {o.orderStatus}
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {o.orderStatus === 'PENDING' && (
+                          <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'SHIPPED')} className="px-4 py-2 bg-surface-tint text-white font-label-sm rounded-sm hover:opacity-90 transition-opacity">Ship</button>
+                        )}
+                        {o.orderStatus === 'SHIPPED' && (
+                          <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'DELIVERED')} className="px-4 py-2 bg-forest-green text-white font-label-sm rounded-sm hover:opacity-90 transition-opacity">Deliver</button>
+                        )}
+                        {o.orderStatus === 'PENDING' && (
+                          <button onClick={() => handleUpdateOrderStatus(o.orderNumber, 'CANCELLED')} className="ml-2 px-4 py-2 border border-error-red text-error-red font-label-sm rounded-sm hover:bg-error-red/5 transition-colors">Cancel</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'inventory' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            {products.map(p => (
+              <div key={p.id} className="bg-white border border-outline-variant/20 rounded-sm overflow-hidden group shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-[4/3] bg-surface-container relative overflow-hidden">
+                  <img src={p.imageUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-sm font-label-sm uppercase tracking-widest text-forest-green">
+                    {p.stockQuantity > 0 ? `${p.stockQuantity} in stock` : 'Out of stock'}
+                  </div>
+                </div>
+                <div className="p-4 border-t border-outline-variant/10">
+                  <span className="font-label-sm text-outline uppercase tracking-widest">{p.category}</span>
+                  <h3 className="font-headline-md text-charcoal mt-1 truncate">{p.name}</h3>
+                  <p className="font-label-md text-terracotta mt-1">${p.price.toFixed(2)}</p>
+                </div>
+              </div>
+            ))}
+            {products.length === 0 && (
+              <div className="col-span-full py-12 text-center border-2 border-dashed border-outline-variant/50 rounded-sm">
+                <span className="material-symbols-outlined text-4xl text-outline mb-2">inventory_2</span>
+                <p className="font-body-md text-on-surface-variant">No products listed yet.</p>
+                <button onClick={() => setActiveTab('add')} className="mt-4 px-6 py-2 border border-forest-green text-forest-green font-label-md rounded-sm">Add First Product</button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {activeTab === 'add' && (
+          <div className="max-w-2xl bg-white p-8 rounded-sm shadow-sm border border-outline-variant/20">
+            <form onSubmit={handleAddProduct} className="space-y-6">
+              
+              <div>
+                <label className="block font-label-md text-charcoal uppercase tracking-widest mb-2">Product Image</label>
+                <div className="border-2 border-dashed border-outline-variant/50 rounded-sm p-6 text-center hover:bg-surface-container-lowest transition-colors cursor-pointer relative">
+                  <input type="file" accept="image/*" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                  {imageUrl ? (
+                    <img src={imageUrl} alt="Preview" className="w-32 h-32 object-cover mx-auto rounded-sm shadow-sm" />
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-4xl text-outline mb-2">add_photo_alternate</span>
+                      <p className="font-body-md text-on-surface-variant">Click or drag image to upload</p>
+                    </>
+                  )}
+                  {uploadingImage && <p className="text-surface-tint font-label-sm mt-2">Uploading...</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="col-span-2">
+                  <label className="block font-label-md text-charcoal uppercase tracking-widest mb-2">Product Name</label>
+                  <input required value={form.name} onChange={e=>setForm({...form, name: e.target.value})} className="w-full border border-outline-variant/50 rounded-sm px-4 py-3 font-body-md focus:outline-none focus:border-forest-green bg-surface-container-lowest" />
+                </div>
+                
+                <div>
+                  <label className="block font-label-md text-charcoal uppercase tracking-widest mb-2">Category</label>
+                  <input required value={form.category} onChange={e=>setForm({...form, category: e.target.value})} className="w-full border border-outline-variant/50 rounded-sm px-4 py-3 font-body-md focus:outline-none focus:border-forest-green bg-surface-container-lowest" />
+                </div>
+
+                <div>
+                  <label className="block font-label-md text-charcoal uppercase tracking-widest mb-2">Price ($)</label>
+                  <input required type="number" step="0.01" value={form.price} onChange={e=>setForm({...form, price: e.target.value})} className="w-full border border-outline-variant/50 rounded-sm px-4 py-3 font-body-md focus:outline-none focus:border-forest-green bg-surface-container-lowest" />
+                </div>
+
+                <div>
+                  <label className="block font-label-md text-charcoal uppercase tracking-widest mb-2">Initial Stock</label>
+                  <input required type="number" value={form.stockQuantity} onChange={e=>setForm({...form, stockQuantity: e.target.value})} className="w-full border border-outline-variant/50 rounded-sm px-4 py-3 font-body-md focus:outline-none focus:border-forest-green bg-surface-container-lowest" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-label-md text-charcoal uppercase tracking-widest mb-2">Description</label>
+                <textarea required rows="4" value={form.description} onChange={e=>setForm({...form, description: e.target.value})} className="w-full border border-outline-variant/50 rounded-sm px-4 py-3 font-body-md focus:outline-none focus:border-forest-green bg-surface-container-lowest resize-none"></textarea>
+              </div>
+
+              <div className="pt-6 border-t border-outline-variant/20 flex justify-end">
+                <button type="submit" disabled={loading || uploadingImage} className="px-8 py-3 bg-forest-green text-white font-label-md uppercase tracking-widest rounded-sm hover:opacity-90 transition-opacity disabled:opacity-50">
+                  {loading ? 'Creating...' : 'Publish Listing'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {activeTab === 'questions' && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
             {questions.map((q, i) => (
-              <div key={i} className="a-box" style={{ padding: 16, border: '1px solid #ddd', borderRadius: 8, background: '#fff' }}>
-                <div style={{ fontWeight: 'bold', marginBottom: 8, color: '#007185' }}>Product ID: {q.productId}</div>
-                <div style={{ marginBottom: 8 }}><strong>Q:</strong> {q.content}</div>
-                <div style={{ fontSize: 12, color: '#565959', marginBottom: 12 }}>Asked by {q.userName}</div>
+              <div key={i} className="bg-white p-6 border border-outline-variant/20 rounded-sm shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex justify-between items-start mb-4">
+                    <span className="font-label-sm text-outline uppercase tracking-widest">Product ID: {q.productId}</span>
+                    <span className="font-label-sm text-outline">{q.userName}</span>
+                  </div>
+                  <p className="font-headline-md text-charcoal mb-6">"{q.content}"</p>
+                </div>
+                
                 {q.answer ? (
-                  <div style={{ padding: 10, background: '#f8f8f8', borderRadius: 4 }}>
-                    <strong>Your Answer:</strong> {q.answer}
+                  <div className="p-4 bg-surface-container-low rounded-sm border-l-4 border-forest-green">
+                    <span className="font-label-sm text-forest-green uppercase tracking-widest block mb-1">Your Answer</span>
+                    <p className="font-body-md text-charcoal">{q.answer}</p>
                   </div>
                 ) : (
                   <form onSubmit={(e) => {
@@ -301,21 +411,26 @@ const SellerDashboard = () => {
                     if (!answer) return;
                     api.put(`/questions/${q.id}/answer/seller/${user.id}`, { answer })
                       .then(() => {
-                        alert('Answer submitted');
                         fetchQuestions();
                       })
                       .catch(() => alert('Error answering question'));
-                  }} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    <textarea name="answer" placeholder="Type your answer here..." rows="2" style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}></textarea>
-                    <button type="submit" style={{ padding: '6px 12px', background: '#FFD814', border: 'none', borderRadius: 4, cursor: 'pointer', fontWeight: 'bold' }}>Submit Answer</button>
+                  }} className="mt-4 pt-4 border-t border-outline-variant/10">
+                    <textarea name="answer" placeholder="Write your response..." rows="2" className="w-full border border-outline-variant/50 rounded-sm px-3 py-2 font-body-md focus:outline-none focus:border-forest-green bg-surface-container-lowest mb-3 resize-none"></textarea>
+                    <button type="submit" className="w-full py-2 bg-surface-tint text-white font-label-md uppercase tracking-widest rounded-sm hover:opacity-90 transition-opacity">Submit Response</button>
                   </form>
                 )}
               </div>
             ))}
+            {questions.length === 0 && (
+              <div className="col-span-full py-12 text-center border-2 border-dashed border-outline-variant/50 rounded-sm">
+                <span className="material-symbols-outlined text-4xl text-outline mb-2">forum</span>
+                <p className="font-body-md text-on-surface-variant">No customer questions to answer.</p>
+              </div>
+            )}
           </div>
         )}
-      </div>
 
+      </main>
     </div>
   );
 };

@@ -1,339 +1,342 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator, Dimensions, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import api from '../services/api';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ImageBackground, Dimensions } from 'react-native';;
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { colors, typography, spacing } from '../theme/theme';
+import { useProductStore } from '../store/useProductStore';
 
 const { width } = Dimensions.get('window');
-const numColumns = 2;
-const ITEM_WIDTH = (width - 45) / numColumns; // adjusting for side padding and gap
+const CARD_WIDTH = width * 0.7;
 
 export default function HomeScreen() {
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
+  const fetchTrendingProducts = useProductStore((state) => state.fetchTrendingProducts);
+  const trendingProducts = useProductStore((state) => state.trendingProducts);
+  const isLoadingTrending = useProductStore((state) => state.isLoadingTrending);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
-    try {
-      const res = await api.get('/products');
-      // Take only the first 4 for 'New Arrivals'
-      setProducts((res.data.content || res.data).slice(0, 4));
-    } catch (err) {
-      console.error('Error fetching products:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const renderHeader = () => (
-    <View>
-      {/* Hero Section */}
-      <View style={styles.heroContainer}>
-        <Image 
-          source={{uri: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&q=80&w=2070'}} 
-          style={styles.heroImage} 
-        />
-        <View style={styles.heroOverlay}>
-          <Text style={styles.heroTitle}>Handmade with Intention</Text>
-          <Text style={styles.heroSubtitle}>
-            Discover curated pieces from independent makers, crafted with care and designed to bring warmth and authenticity into your space.
-          </Text>
-          <TouchableOpacity style={styles.heroBtn}>
-            <Text style={styles.heroBtnText}>Explore the Collection</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Curated Categories */}
-      <View style={styles.sectionContainer}>
-        <Text style={styles.sectionTitle}>Curated Categories</Text>
-        <Text style={styles.sectionSubtitle}>Explore by material and discipline</Text>
-        
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.categoryScroll}>
-          <View style={styles.categoryCard}>
-            <Image source={{uri: 'https://images.unsplash.com/photo-1610701596007-11502861dcfa?auto=format&fit=crop&q=80&w=800'}} style={styles.categoryImg} />
-            <View style={styles.categoryOverlay}>
-              <Text style={styles.categoryName}>Ceramics</Text>
-              <View style={styles.categoryChip}><Text style={styles.categoryChipText}>Earthy Textures</Text></View>
-            </View>
-          </View>
-          
-          <View style={styles.categoryCard}>
-            <Image source={{uri: 'https://images.unsplash.com/photo-1528340155208-25176161aa52?auto=format&fit=crop&q=80&w=800'}} style={styles.categoryImg} />
-            <View style={styles.categoryOverlay}>
-              <Text style={styles.categoryName}>Textiles</Text>
-              <View style={styles.categoryChip}><Text style={styles.categoryChipText}>Woven Comfort</Text></View>
-            </View>
-          </View>
-
-          <View style={styles.categoryCard}>
-            <Image source={{uri: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?auto=format&fit=crop&q=80&w=800'}} style={styles.categoryImg} />
-            <View style={styles.categoryOverlay}>
-              <Text style={styles.categoryName}>Jewelry</Text>
-              <View style={styles.categoryChip}><Text style={styles.categoryChipText}>Fine Details</Text></View>
-            </View>
-          </View>
-        </ScrollView>
-      </View>
-
-      {/* The Human Touch */}
-      <View style={styles.humanTouchContainer}>
-        <Ionicons name="leaf-outline" size={32} color="#4A4A4A" style={{marginBottom: 10}} />
-        <Text style={styles.humanTouchTitle}>The Human Touch</Text>
-        <Text style={styles.humanTouchText}>
-          In a world of mass production, we champion the slow, the deliberate, and the beautifully imperfect. Every piece on TrueHand carries the story of its maker—a testament to skill, patience, and the enduring value of human craftsmanship.
-        </Text>
-        <TouchableOpacity style={styles.secondaryBtn}>
-          <Text style={styles.secondaryBtnText}>Read Our Story</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* New Arrivals Header */}
-      <View style={[styles.sectionContainer, { paddingBottom: 15, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }]}>
-        <Text style={styles.sectionTitle}>New Arrivals</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Products')}>
-          <Text style={styles.viewAllText}>View All &rarr;</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.productCard} 
-      onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-      activeOpacity={0.9}
-    >
-      <Image 
-        source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }} 
-        style={styles.productImage} 
-        resizeMode="cover"
-      />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName} numberOfLines={2}>{item.name}</Text>
-        <Text style={styles.productPrice}>${Number(item.price).toFixed(2)}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  if (loading) {
-    return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#000" />
-      </View>
-    );
-  }
+  React.useEffect(() => {
+    fetchTrendingProducts();
+  }, [fetchTrendingProducts]);
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Top AppBar */}
       <View style={styles.header}>
-        <Text style={styles.logo}>TrueHand</Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
-          <Ionicons name="cart-outline" size={28} color="#000" />
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Search')}>
+          <Ionicons name="search" size={24} color={colors['forest-green']} />
+        </TouchableOpacity>
+        
+        <Text style={styles.headerTitle}>TrueHand</Text>
+        
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Cart')}>
+          <Ionicons name="bag-handle-outline" size={24} color={colors['forest-green']} />
         </TouchableOpacity>
       </View>
-      <FlatList
-        data={products}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        numColumns={numColumns}
-        ListHeaderComponent={renderHeader}
-        contentContainerStyle={styles.listContent}
-        columnWrapperStyle={styles.columnWrapper}
-        showsVerticalScrollIndicator={false}
-      />
-    </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        {/* Hero Story Section */}
+        <TouchableOpacity activeOpacity={0.9} style={styles.heroSection}>
+          <ImageBackground 
+            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAOGnr99AtWlnP-QTnPl8TTqkFRMeIZTnGBMLDW49nYI0PnvWjB0pQihS__8m_IpLQeyKFZu1dz31NoasdK5fVuuKfANndfCtSlDHI1wdc9WEcakGMJh7YwXGEg5Je1wMC8p_6EsFnM6iX6ixuYf98RkoIuzqBvCqI6rdU6vTT6GQnNcFna-e6O-KlNlmAvoL2J7YhcYaKF4hBRn5ITWvamoXZ2Aia162cjYElkwEONZ93aEe3tAVfUTA' }}
+            style={styles.heroImage}
+            imageStyle={{ borderRadius: 12 }}
+          >
+            <View style={styles.heroOverlay}>
+              <View style={styles.heroBadge}>
+                <Text style={styles.heroBadgeText}>Featured Artisan</Text>
+              </View>
+              <Text style={styles.heroTitle}>The Art of Wabi-Sabi</Text>
+              <Text style={styles.heroDesc} numberOfLines={2}>
+                Discover the imperfect beauty of hand-thrown ceramics by master potter Elena Rostova, where every piece tells a story of earth and fire.
+              </Text>
+              <TouchableOpacity style={styles.heroButton}>
+                <Text style={styles.heroButtonText}>Read the Story</Text>
+              </TouchableOpacity>
+            </View>
+          </ImageBackground>
+        </TouchableOpacity>
+
+        {/* New Arrivals */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>New Arrivals</Text>
+          <TouchableOpacity style={styles.viewAllRow} onPress={() => navigation.navigate('CategoryListing')}>
+            <Text style={styles.viewAllText}>View All</Text>
+            <Ionicons name="arrow-forward" size={16} color={colors.outline} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalScroll}
+          snapToInterval={CARD_WIDTH + spacing.gutter}
+          decelerationRate="fast"
+        >
+          {isLoadingTrending ? (
+            <Text style={{ padding: 20 }}>Loading trending products...</Text>
+          ) : trendingProducts.map((item, index) => (
+            <TouchableOpacity 
+              key={item.id || index} 
+              style={[styles.productCard, { width: CARD_WIDTH }]}
+              onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
+              activeOpacity={0.9}
+            >
+              <View style={styles.productImageContainer}>
+                <Image source={{ uri: item.imageUrl || 'https://via.placeholder.com/300x400' }} style={styles.productImage} />
+                <TouchableOpacity style={styles.favButton}>
+                  <Ionicons name="heart-outline" size={20} color={colors['forest-green']} />
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.productName}>{item.name}</Text>
+              <Text style={styles.productPrice}>${item.price}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Shop by Discipline */}
+        <View style={styles.sectionHeaderCentered}>
+          <Text style={styles.sectionTitle}>Shop by Discipline</Text>
+        </View>
+
+        <View style={styles.bentoGrid}>
+          <TouchableOpacity style={[styles.bentoItem, styles.bentoItemLarge]} onPress={() => navigation.navigate('CategoryListing')}>
+            <ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA6GwmgW83s2ap67tb8GlSAfnFgXUbyZIngZYx9_PBjeMA9pJSV4u87oKZWmMreA29D7Cc8UBAkkAlD9jXTYOZSTRbbF1Af6a7AaCeq_bGmor8Qdt5jWTTzkfNkjfS8Tq_biA3vKYNEVthYkVbPkK-I4ivXiJXKZKwHInoDfOj7SxeUXD-_a7uYlZOJLKWenYPCeDqRyEkBI0YsTqhDWnoO_5z9GFUeDr04hFxKbf0w2KGe3MhzwHrd8Q' }} style={styles.bentoImage} imageStyle={styles.bentoImageStyle}>
+              <View style={styles.bentoOverlay} />
+              <View style={styles.bentoContent}>
+                <Text style={styles.bentoTitle}>Stonework</Text>
+                <Text style={styles.bentoExplore}>EXPLORE →</Text>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.bentoItem, styles.bentoItemSmall]} onPress={() => navigation.navigate('CategoryListing')}>
+            <ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAeFMZCCE89b7N1xA8o1xpNRhDr7BSryCI1SmAVSAMevNdF9EgD-sa5bBCYNHajKZ80I6_amCWN29KrivN2A1EyUjRGmb3vaIvJO0HdhtSEPbc_BP_yZSAy02Cjx_LNdmrqVSCwLg93v771RobnZXG6n4ZuTYV66ODYHxRz2TGPyWuPjIVwTKWZvfIkRY1mB-1FLjE_k4qWp9fcw-UNtxpDTBkYKtaO4pM8KT-zRnL2PkuRevdb99C6tQ' }} style={styles.bentoImage} imageStyle={styles.bentoImageStyle}>
+              <View style={styles.bentoOverlay} />
+              <View style={styles.bentoContent}>
+                <Text style={styles.bentoTitle}>Textiles</Text>
+                <Text style={styles.bentoExplore}>EXPLORE →</Text>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.bentoItem, styles.bentoItemSmall]} onPress={() => navigation.navigate('CategoryListing')}>
+            <ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAg102SHUQ_bk_FmLw7HF5aaCC9wX2WJBcTDWJt_ZvzhwRnTTdhMTqqv5j3cHiJEc_GWCrUxXSSr-N8JHgMI3CCcmSjBFSqdr6Rl8UdObCzRIiZemMBpNxjjoAFoWM8pQsED507rFy5Ar3lo31MijIrMyW_yJ60kkEGFNqHdz71w6VGZYlHm8ra7mmSps-dE5Nk2fCgwdMvk84WxXSVDMyXLqLG6alO0GYzq4E_kgTVK0a_ip_wKykcxA' }} style={styles.bentoImage} imageStyle={styles.bentoImageStyle}>
+              <View style={styles.bentoOverlay} />
+              <View style={styles.bentoContent}>
+                <Text style={styles.bentoTitle}>Glass</Text>
+                <Text style={styles.bentoExplore}>EXPLORE →</Text>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.bentoItem, styles.bentoItemLarge]} onPress={() => navigation.navigate('CategoryListing')}>
+            <ImageBackground source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDMCJ0Va09h2ABI2gDrNc3MBV5Mn9gyWQN5bpmidKZBGYnTSdT86oNOpc0RSvJpyPATwlotpx7aA2UJ5VChIXNUIDOyMLDrF3coTyn8Y5VaNN_UJdl2u8NOVVLa9maK7fc80_rMz2j84SyyJstqVcr3aqom8e-Z_6caXziaY_kUyfRYH1xtLMN0_zoIXt53DASWAIP4EZGFZE-64PlPXU1fE7QQKBvXwp-LIab03frZeoL6aubSwHkA9g' }} style={styles.bentoImage} imageStyle={styles.bentoImageStyle}>
+              <View style={styles.bentoOverlay} />
+              <View style={styles.bentoContent}>
+                <Text style={styles.bentoTitle}>Ceramics</Text>
+                <Text style={styles.bentoExplore}>EXPLORE →</Text>
+              </View>
+            </ImageBackground>
+          </TouchableOpacity>
+        </View>
+
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
+// Removed static NEW_ARRIVALS array
+
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#FAF9F6', 
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#FAF9F6', 
+    backgroundColor: colors['surface-linen'],
   },
   header: {
-    backgroundColor: '#FAF9F6',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
+    paddingHorizontal: spacing.marginMobile,
+    height: 64,
+    backgroundColor: 'rgba(252, 249, 248, 0.9)',
     borderBottomWidth: 1,
-    borderBottomColor: '#EAEAEA',
+    borderBottomColor: 'rgba(193, 200, 195, 0.3)',
   },
-  logo: {
-    color: '#333',
-    fontSize: 22,
-    fontWeight: 'bold',
+  iconButton: {
+    padding: spacing.stackSm,
   },
-  heroContainer: {
-    height: 400,
-    position: 'relative',
+  headerTitle: {
+    ...typography.headlineLgMobile,
+    color: colors['forest-green'],
+  },
+  content: {
+    paddingBottom: spacing.sectionGap,
+  },
+  heroSection: {
+    marginHorizontal: spacing.marginMobile,
+    marginTop: spacing.stackLg,
+    marginBottom: spacing.sectionGap,
+    height: 530,
+    borderRadius: 12,
+    shadowColor: colors.charcoal,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 4,
   },
   heroImage: {
-    width: '100%',
-    height: '100%',
+    flex: 1,
+    justifyContent: 'flex-end',
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    padding: 25,
+    backgroundColor: 'rgba(27, 28, 28, 0.4)', // Gradient simulation
+    borderRadius: 12,
+    justifyContent: 'flex-end',
+    padding: spacing.gutter,
+  },
+  heroBadge: {
+    backgroundColor: 'rgba(246, 243, 242, 0.9)',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 4,
+    marginBottom: spacing.stackSm,
+  },
+  heroBadgeText: {
+    ...typography.labelSm,
+    color: colors.charcoal,
   },
   heroTitle: {
-    color: '#fff',
-    fontSize: 36,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    lineHeight: 40,
+    ...typography.displayLg,
+    fontSize: 40,
+    lineHeight: 44,
+    color: colors['on-primary'],
+    marginBottom: spacing.stackSm,
   },
-  heroSubtitle: {
-    color: '#f8f8f8',
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 30,
+  heroDesc: {
+    ...typography.bodyLg,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: spacing.stackMd,
   },
-  heroBtn: {
-    backgroundColor: '#fff',
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    alignSelf: 'flex-start',
-  },
-  heroBtnText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 14,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  sectionContainer: {
-    padding: 20,
-    paddingTop: 40,
-    backgroundColor: '#FAF9F6',
-  },
-  sectionTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#222',
-    marginBottom: 5,
-  },
-  sectionSubtitle: {
-    fontSize: 16,
-    color: '#666',
-    marginBottom: 20,
-  },
-  categoryScroll: {
-    marginLeft: -20,
-    paddingLeft: 20,
-  },
-  categoryCard: {
-    width: 250,
-    height: 320,
-    marginRight: 15,
-    position: 'relative',
-  },
-  categoryImg: {
-    width: '100%',
-    height: '100%',
-  },
-  categoryOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    padding: 20,
-    justifyContent: 'flex-end',
-  },
-  categoryName: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 10,
-  },
-  categoryChip: {
-    backgroundColor: 'rgba(255,255,255,0.95)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignSelf: 'flex-start',
-  },
-  categoryChipText: {
-    color: '#333',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  humanTouchContainer: {
-    backgroundColor: '#EAE5D9',
-    padding: 40,
-    alignItems: 'center',
-    marginTop: 20,
-  },
-  humanTouchTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 15,
-  },
-  humanTouchText: {
-    fontSize: 16,
-    color: '#444',
-    textAlign: 'center',
-    lineHeight: 26,
-    marginBottom: 30,
-  },
-  secondaryBtn: {
-    borderWidth: 1,
-    borderColor: '#333',
+  heroButton: {
+    backgroundColor: colors['primary-container'],
     paddingVertical: 12,
     paddingHorizontal: 24,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
   },
-  secondaryBtnText: {
-    color: '#333',
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+  heroButtonText: {
+    ...typography.labelMd,
+    color: colors['on-primary'],
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    paddingHorizontal: spacing.marginMobile,
+    marginBottom: spacing.stackLg,
+  },
+  sectionHeaderCentered: {
+    alignItems: 'center',
+    marginBottom: spacing.stackLg,
+    marginTop: spacing.sectionGap,
+  },
+  sectionTitle: {
+    ...typography.headlineMd,
+    color: colors['forest-green'],
+  },
+  viewAllRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   viewAllText: {
-    color: '#555',
-    fontSize: 16,
+    ...typography.labelMd,
+    color: colors.outline,
   },
-  listContent: {
-    paddingBottom: 40,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    paddingHorizontal: 15,
+  horizontalScroll: {
+    paddingHorizontal: spacing.marginMobile,
+    gap: spacing.gutter,
   },
   productCard: {
-    backgroundColor: '#fff',
-    width: ITEM_WIDTH,
-    marginBottom: 15,
+    marginRight: spacing.gutter, // Fallback for gap
+  },
+  productImageContainer: {
+    aspectRatio: 3/4,
+    backgroundColor: colors['surface-container-low'],
+    borderRadius: 8,
+    overflow: 'hidden',
+    marginBottom: spacing.stackSm,
   },
   productImage: {
     width: '100%',
-    height: ITEM_WIDTH * 1.25,
+    height: '100%',
   },
-  productInfo: {
-    padding: 12,
+  favButton: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(252, 249, 248, 0.8)',
+    padding: 8,
+    borderRadius: 20,
   },
   productName: {
-    fontSize: 14,
-    color: '#333',
-    marginBottom: 8,
-    lineHeight: 20,
+    ...typography.bodyMd,
+    color: colors.charcoal,
+    textAlign: 'center',
+    marginBottom: 4,
   },
   productPrice: {
-    fontSize: 14,
-    color: '#777',
+    ...typography.labelMd,
+    color: colors.outline,
+    textAlign: 'center',
+  },
+  bentoGrid: {
+    paddingHorizontal: spacing.marginMobile,
+    gap: spacing.stackMd,
+  },
+  bentoItem: {
+    borderRadius: 12,
+    overflow: 'hidden',
+    shadowColor: colors.charcoal,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  bentoItemLarge: {
+    height: 250,
+  },
+  bentoItemSmall: {
+    height: 200,
+  },
+  bentoImage: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: spacing.stackMd,
+  },
+  bentoImageStyle: {
+    borderRadius: 12,
+  },
+  bentoOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(27, 28, 28, 0.2)',
+    borderRadius: 12,
+  },
+  bentoContent: {
+    zIndex: 1,
+  },
+  bentoTitle: {
+    ...typography.headlineMd,
+    color: colors['on-primary'],
+    marginBottom: 4,
+  },
+  bentoExplore: {
+    ...typography.labelSm,
+    color: 'rgba(255, 255, 255, 0.8)',
+    letterSpacing: 2,
   },
 });

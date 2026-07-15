@@ -1,93 +1,137 @@
-import React from 'react';
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { useCart } from '../services/CartProvider';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity } from 'react-native';;
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { colors, typography, spacing } from '../theme/theme';
+import { useCartStore } from '../store/useCartStore';
 
 export default function CartScreen() {
-  const { cartItems, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
   const navigation = useNavigation();
+  const cartItems = useCartStore((state) => state.cartItems);
+  const updateQuantity = useCartStore((state) => state.updateQuantity);
+  const removeFromCart = useCartStore((state) => state.removeFromCart);
+  const getTotal = useCartStore((state) => state.getTotal);
 
-  const handleCheckout = () => {
-    navigation.navigate('Checkout');
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.cartItem}>
-      <Image source={{ uri: item.imageUrl || 'https://via.placeholder.com/150' }} style={styles.itemImage} />
-      
-      <View style={styles.itemDetails}>
-        <Text style={styles.itemName} numberOfLines={2}>{item.name}</Text>
-        <Text style={styles.itemPrice}>${Number(item.price).toFixed(2)}</Text>
-        
-        <View style={styles.actionRow}>
-          <View style={styles.qtyContainer}>
-            <TouchableOpacity 
-              onPress={() => item.quantity > 1 ? updateQuantity(item.id, item.quantity - 1) : removeFromCart(item.id)} 
-              style={styles.qtyBtn}
-            >
-              <Ionicons name="remove" size={16} color="#0f1111" />
-            </TouchableOpacity>
-            <Text style={styles.qtyText}>{item.quantity}</Text>
-            <TouchableOpacity 
-              onPress={() => updateQuantity(item.id, item.quantity + 1)} 
-              style={styles.qtyBtn}
-            >
-              <Ionicons name="add" size={16} color="#0f1111" />
-            </TouchableOpacity>
-          </View>
-          
-          <TouchableOpacity onPress={() => removeFromCart(item.id)}>
-            <Text style={styles.deleteText}>Delete</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
-  );
+  const total = getTotal();
+  const itemCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Top AppBar */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Shopping Cart</Text>
-        {cartItems.length > 0 && (
-          <TouchableOpacity onPress={clearCart}>
-            <Text style={styles.clearText}>Clear</Text>
-          </TouchableOpacity>
-        )}
+        <Text style={styles.headerTitle}>TrueHand</Text>
       </View>
 
-      {cartItems.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Ionicons name="cart-outline" size={80} color="#ccc" />
-          <Text style={styles.emptyText}>Your TrueHand Cart is empty.</Text>
-          <TouchableOpacity 
-            style={styles.shopBtn} 
-            onPress={() => navigation.navigate('Home')}
-          >
-            <Text style={styles.shopBtnText}>Start Shopping</Text>
-          </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        <View style={styles.pageHeader}>
+          <Text style={styles.pageTitle}>Your Collection</Text>
+          <Text style={styles.pageSubtitle}>{itemCount} items carefully selected.</Text>
         </View>
-      ) : (
-        <>
-          <FlatList
-            data={cartItems}
-            renderItem={renderItem}
-            keyExtractor={item => item.id.toString()}
-            contentContainerStyle={styles.listContent}
-          />
 
-          <View style={styles.footer}>
-            <View style={styles.totalRow}>
-              <Text style={styles.subtotalText}>Subtotal ({cartItems.reduce((a,c) => a + c.quantity, 0)} items):</Text>
-              <Text style={styles.totalPrice}>${getTotal().toFixed(2)}</Text>
+        {/* Cart Items */}
+        <View style={styles.cartItemsList}>
+          {cartItems.length === 0 ? (
+            <View style={styles.emptyCartContainer}>
+              <View style={styles.emptyIconWrapper}>
+                <Ionicons name="cart-outline" size={80} color={colors.outline} />
+              </View>
+              <Text style={styles.emptyCartTitle}>Your Gallery is Empty</Text>
+              <Text style={styles.emptyCartSubtitle}>Discover unique pieces crafted by master artisans from around the world.</Text>
+              <TouchableOpacity 
+                style={styles.exploreButton}
+                onPress={() => navigation.navigate('Home')}
+              >
+                <Text style={styles.exploreButtonText}>Start Exploring</Text>
+                <Ionicons name="arrow-forward" size={18} color={colors['on-primary']} />
+              </TouchableOpacity>
             </View>
-            <TouchableOpacity style={styles.checkoutBtn} onPress={handleCheckout}>
-              <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
-            </TouchableOpacity>
+          ) : (
+            cartItems.map((item) => (
+              <View key={item.id} style={styles.cartItem}>
+                <View style={styles.itemImageContainer}>
+                  <Image 
+                    source={{ uri: item.imageUrl || 'https://via.placeholder.com/300' }}
+                    style={styles.itemImage}
+                  />
+                </View>
+                <View style={styles.itemDetails}>
+                  <View style={styles.itemHeaderRow}>
+                    <View style={styles.itemTitleBlock}>
+                      <Text style={styles.itemTitle}>{item.name}</Text>
+                      <Text style={styles.itemArtisan}>by {item.seller?.shopName || 'Unknown Artisan'}</Text>
+                    </View>
+                    <Text style={styles.itemPrice}>${item.price}</Text>
+                  </View>
+                  
+                  {item.category && (
+                    <View style={styles.badgeRow}>
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{item.category}</Text>
+                      </View>
+                    </View>
+                  )}
+
+                  <View style={styles.itemActionsRow}>
+                    <View style={styles.qtyControls}>
+                      <TouchableOpacity style={styles.qtyBtn} onPress={() => updateQuantity(item.id, Math.max(1, (item.quantity || 1) - 1))}>
+                        <Ionicons name="remove" size={16} color={colors.charcoal} />
+                      </TouchableOpacity>
+                      <Text style={styles.qtyText}>{item.quantity || 1}</Text>
+                      <TouchableOpacity style={styles.qtyBtn} onPress={() => updateQuantity(item.id, (item.quantity || 1) + 1)}>
+                        <Ionicons name="add" size={16} color={colors.charcoal} />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    <View style={styles.textActionsRow}>
+                      <TouchableOpacity style={styles.textActionBtn} onPress={() => removeFromCart(item.id)}>
+                        <Ionicons name="trash-outline" size={18} color={colors.outline} />
+                        <Text style={[styles.textActionLabel, { color: colors['error-red'] }]}>Remove</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </View>
+              </View>
+            ))
+          )}
+        </View>
+
+        {/* Summary Section */}
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Summary</Text>
+          
+          <View style={styles.summaryLines}>
+            <View style={styles.summaryLine}>
+              <Text style={styles.summaryLineLabel}>Subtotal</Text>
+              <Text style={styles.summaryLineValue}>${total.toFixed(2)}</Text>
+            </View>
+            <View style={styles.summaryLine}>
+              <Text style={styles.summaryLineLabel}>Shipping</Text>
+              <Text style={styles.summaryLineValue}>Calculated at checkout</Text>
+            </View>
           </View>
-        </>
-      )}
+
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>${total.toFixed(2)}</Text>
+          </View>
+
+          <TouchableOpacity 
+            style={styles.checkoutButton}
+            onPress={() => navigation.navigate('Checkout')}
+          >
+            <Text style={styles.checkoutButtonText}>Proceed to Checkout</Text>
+            <Ionicons name="arrow-forward" size={20} color={colors['on-primary']} />
+          </TouchableOpacity>
+
+          <View style={styles.secureTextRow}>
+            <Ionicons name="lock-closed" size={14} color={colors.outline} />
+            <Text style={styles.secureText}>Secure transaction</Text>
+          </View>
+        </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -95,144 +139,250 @@ export default function CartScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors['surface-linen'],
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 50,
-    paddingBottom: 15,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#0f1111',
-  },
-  clearText: {
-    color: '#007185',
-    fontWeight: '600',
-  },
-  emptyContainer: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#eaeded',
+    paddingHorizontal: spacing.marginMobile,
+    height: 64,
+    backgroundColor: 'rgba(252, 249, 248, 0.8)',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(193, 200, 195, 0.3)',
+    zIndex: 10,
   },
-  emptyText: {
-    fontSize: 18,
-    color: '#555',
-    marginTop: 15,
-    marginBottom: 20,
+  headerTitle: {
+    ...typography.headlineMd,
+    color: colors['forest-green'],
   },
-  shopBtn: {
-    backgroundColor: '#FFD814',
-    paddingHorizontal: 30,
-    paddingVertical: 12,
-    borderRadius: 8,
+  content: {
+    paddingHorizontal: spacing.marginMobile,
+    paddingTop: spacing.stackLg,
+    paddingBottom: spacing.sectionGap,
   },
-  shopBtnText: {
-    color: '#0f1111',
-    fontWeight: 'bold',
-    fontSize: 16,
+  pageHeader: {
+    marginBottom: spacing.stackLg,
   },
-  listContent: {
-    padding: 15,
-    backgroundColor: '#eaeded',
-    flexGrow: 1,
+  pageTitle: {
+    ...typography.headlineLgMobile,
+    color: colors.charcoal,
+  },
+  pageSubtitle: {
+    ...typography.bodyMd,
+    color: colors.outline,
+    marginTop: spacing.stackSm,
+  },
+  cartItemsList: {
+    gap: spacing.stackLg,
+    marginBottom: spacing.sectionGap,
+  },
+  emptyCartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: spacing.sectionGap,
+  },
+  emptyIconWrapper: {
+    marginBottom: spacing.stackLg,
+    opacity: 0.5,
+  },
+  emptyCartTitle: {
+    ...typography.headlineLgMobile,
+    color: colors['forest-green'],
+    marginBottom: spacing.stackSm,
+    textAlign: 'center',
+  },
+  emptyCartSubtitle: {
+    ...typography.bodyLg,
+    color: colors['on-surface-variant'],
+    textAlign: 'center',
+    marginBottom: spacing.stackLg,
+    maxWidth: 300,
+  },
+  exploreButton: {
+    backgroundColor: colors['forest-green'],
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 4,
+    gap: 8,
+  },
+  exploreButtonText: {
+    ...typography.labelMd,
+    color: colors['on-primary'],
   },
   cartItem: {
-    flexDirection: 'row',
-    backgroundColor: '#fff',
+    flexDirection: 'column',
+    gap: spacing.gutter,
+    borderBottomWidth: 1,
+    borderBottomColor: colors['surface-variant'],
+    paddingBottom: spacing.stackLg,
+  },
+  itemImageContainer: {
+    width: '100%',
+    aspectRatio: 4/5,
+    backgroundColor: colors['surface-container'],
     borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    overflow: 'hidden',
   },
   itemImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
-    backgroundColor: '#f6f6f6',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   itemDetails: {
     flex: 1,
-    marginLeft: 15,
-    justifyContent: 'space-between',
   },
-  itemName: {
-    fontSize: 15,
-    color: '#0f1111',
+  itemHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  itemTitleBlock: {
+    flex: 1,
+    paddingRight: 16,
+  },
+  itemTitle: {
+    ...typography.headlineMd,
+    color: colors.charcoal,
+  },
+  itemArtisan: {
+    ...typography.bodyMd,
+    color: colors.outline,
+    marginTop: 4,
   },
   itemPrice: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#B12704',
-    marginTop: 5,
+    ...typography.labelMd,
+    color: colors.charcoal,
+    fontSize: 16,
   },
-  actionRow: {
+  badgeRow: {
+    flexDirection: 'row',
+    marginTop: spacing.stackMd,
+    marginBottom: spacing.stackLg,
+  },
+  badge: {
+    backgroundColor: colors['surface-container-high'],
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  badgeText: {
+    ...typography.labelSm,
+    color: colors.charcoal,
+  },
+  itemActionsRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 10,
+    flexWrap: 'wrap',
+    gap: spacing.stackMd,
   },
-  qtyContainer: {
+  qtyControls: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#d5d9d9',
-    borderRadius: 8,
-    backgroundColor: '#f0f2f2',
+    borderColor: colors['outline-variant'],
+    borderRadius: 4,
   },
   qtyBtn: {
-    padding: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   qtyText: {
-    paddingHorizontal: 10,
-    fontWeight: 'bold',
+    ...typography.labelMd,
+    color: colors.charcoal,
+    paddingHorizontal: 16,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: colors['outline-variant'],
   },
-  deleteText: {
-    color: '#007185',
-    fontSize: 14,
+  textActionsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.stackMd,
   },
-  footer: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
+  textActionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  textActionLabel: {
+    ...typography.labelSm,
+    color: colors.outline,
+  },
+  summaryCard: {
+    backgroundColor: colors['surface-container-lowest'],
+    borderRadius: 8,
+    padding: spacing.gutter,
+    shadowColor: colors['forest-green'],
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  },
+  summaryTitle: {
+    ...typography.headlineMd,
+    color: colors.charcoal,
+    marginBottom: spacing.stackLg,
+  },
+  summaryLines: {
+    gap: spacing.stackMd,
+    borderBottomWidth: 1,
+    borderBottomColor: colors['surface-variant'],
+    paddingBottom: spacing.stackLg,
+    marginBottom: spacing.stackLg,
+  },
+  summaryLine: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  summaryLineLabel: {
+    ...typography.bodyMd,
+    color: colors.outline,
+  },
+  summaryLineValue: {
+    ...typography.bodyMd,
+    color: colors.charcoal,
   },
   totalRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
-    marginBottom: 15,
+    marginBottom: spacing.stackLg,
   },
-  subtotalText: {
-    fontSize: 16,
-    color: '#0f1111',
+  totalLabel: {
+    ...typography.labelMd,
+    color: colors.charcoal,
   },
-  totalPrice: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#B12704',
+  totalValue: {
+    ...typography.headlineMd,
+    color: colors.charcoal,
   },
-  checkoutBtn: {
-    backgroundColor: '#FFD814',
-    paddingVertical: 15,
-    borderRadius: 8,
+  checkoutButton: {
+    backgroundColor: colors['forest-green'],
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 16,
+    borderRadius: 4,
   },
-  checkoutBtnText: {
-    color: '#0f1111',
-    fontWeight: 'bold',
-    fontSize: 16,
-  }
+  checkoutButtonText: {
+    ...typography.labelMd,
+    color: colors['on-primary'],
+  },
+  secureTextRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    marginTop: spacing.stackMd,
+  },
+  secureText: {
+    ...typography.labelSm,
+    color: colors.outline,
+  },
 });

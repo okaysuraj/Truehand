@@ -13,9 +13,6 @@ const Products = () => {
 
   const currentSearch = searchParams.get('search') || '';
   const currentCategory = searchParams.get('category') || '';
-  const currentMinPrice = searchParams.get('minPrice') || '';
-  const currentMaxPrice = searchParams.get('maxPrice') || '';
-  const currentMinRating = searchParams.get('minRating') || '';
   const currentSort = searchParams.get('sort') || '';
 
   const handleAddToWishlist = async (e, productId) => {
@@ -29,33 +26,12 @@ const Products = () => {
     }
   };
 
-  const handleAddToCompare = (product) => {
-    let items = JSON.parse(localStorage.getItem('compareItems')) || [];
-    if (items.length >= 4) { alert('You can only compare up to 4 items'); return; }
-    if (!items.find(i => i.id === product.id)) {
-      items.push(product);
-      localStorage.setItem('compareItems', JSON.stringify(items));
-      alert('Added to Compare list!');
-    } else {
-      alert('Already in Compare list!');
-    }
-  };
-
-  const renderStars = (rating) => {
-    const fullStars = Math.floor(rating || 0);
-    const emptyStars = 5 - fullStars;
-    return '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
-  };
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const params = {};
         if (currentSearch) params.search = currentSearch;
         if (currentCategory) params.category = currentCategory;
-        if (currentMinPrice) params.minPrice = currentMinPrice;
-        if (currentMaxPrice) params.maxPrice = currentMaxPrice;
-        if (currentMinRating) params.minRating = currentMinRating;
         if (currentSort) params.sort = currentSort;
         
         // Always ask for 50 items for now
@@ -74,7 +50,7 @@ const Products = () => {
       }
     };
     fetchProducts();
-  }, [currentSearch, currentCategory, currentMinPrice, currentMaxPrice, currentMinRating, currentSort]);
+  }, [currentSearch, currentCategory, currentSort]);
 
   const updateFilter = (key, value) => {
     setSearchParams(prev => {
@@ -87,144 +63,109 @@ const Products = () => {
     });
   };
 
-  const setPriceFilter = (min, max) => {
-    setSearchParams(prev => {
-      if (min !== null) prev.set('minPrice', min); else prev.delete('minPrice');
-      if (max !== null) prev.set('maxPrice', max); else prev.delete('maxPrice');
-      return prev;
-    });
-  };
-
-  const clearFilters = () => {
-    setSearchParams({});
-  };
-
-  const categories = ['Electronics', 'Fashion', 'Home', 'Groceries', 'Vegetables', 'Fruits', 'Dairy'];
+  const categories = ['All', 'Ceramics', 'Textiles', 'Woodwork', 'Glass', 'Jewelry'];
 
   return (
-    <div className="products-layout" style={{ display: 'flex', gap: 24, maxWidth: 1400, margin: '0 auto', padding: 20 }}>
-      {/* Sidebar Filters */}
-      <div className="sidebar" style={{ width: 260, flexShrink: 0 }}>
+    <main className="pt-24 bg-surface-linen min-h-screen text-charcoal">
+      <div className="px-margin-desktop max-w-container-max mx-auto w-full flex-1 mb-section-gap">
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h3 style={{ margin: 0 }}>Filters</h3>
-          <button onClick={clearFilters} style={{ fontSize: 13, color: '#007185', background: 'none', border: 'none', cursor: 'pointer' }}>Clear All</button>
-        </div>
+        {/* Page Header */}
+        <section className="mb-10">
+          <h1 className="font-display-lg text-display-lg text-forest-green mb-4">
+            {currentSearch ? `Search: "${currentSearch}"` : currentCategory ? currentCategory : 'All Products'}
+          </h1>
+          <p className="font-body-md text-body-md text-on-surface-variant max-w-lg">
+            Discover artisanal pieces crafted with intention and heritage techniques.
+          </p>
+        </section>
 
-        <h4 style={{ marginBottom: 8 }}>Department</h4>
-        <ul style={{ listStyle: 'none', padding: 0, marginBottom: 24 }}>
-          {categories.map(cat => (
-            <li key={cat} style={{ marginBottom: 6 }}>
-              <button 
-                onClick={() => updateFilter('category', cat)}
-                style={{ 
-                  background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-                  color: currentCategory === cat ? '#e47911' : '#111',
-                  fontWeight: currentCategory === cat ? 'bold' : 'normal'
-                }}
-              >
-                {cat}
-              </button>
-            </li>
-          ))}
-        </ul>
-
-        <h4 style={{ marginBottom: 8 }}>Customer Review</h4>
-        <div style={{ marginBottom: 24 }}>
-          {[4, 3, 2, 1].map(rating => (
-            <div key={rating} style={{ marginBottom: 6 }}>
-              <button 
-                onClick={() => updateFilter('minRating', rating)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
-              >
-                <span style={{ color: '#FFA41C', fontSize: 18 }}>{renderStars(rating)}</span>
-                <span style={{ color: currentMinRating == rating ? '#e47911' : '#111', fontWeight: currentMinRating == rating ? 'bold' : 'normal' }}>
-                  & Up
-                </span>
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <h4 style={{ marginBottom: 8 }}>Price</h4>
-        <ul style={{ listStyle: 'none', padding: 0, marginBottom: 24 }}>
-          <li style={{ marginBottom: 6 }}><button onClick={() => setPriceFilter(null, 100)} style={{ background:'none', border:'none', cursor:'pointer', color: currentMaxPrice == 100 ? '#e47911' : '#111' }}>Under ₹100</button></li>
-          <li style={{ marginBottom: 6 }}><button onClick={() => setPriceFilter(100, 500)} style={{ background:'none', border:'none', cursor:'pointer', color: (currentMinPrice == 100 && currentMaxPrice == 500) ? '#e47911' : '#111' }}>₹100 - ₹500</button></li>
-          <li style={{ marginBottom: 6 }}><button onClick={() => setPriceFilter(500, 1000)} style={{ background:'none', border:'none', cursor:'pointer', color: (currentMinPrice == 500 && currentMaxPrice == 1000) ? '#e47911' : '#111' }}>₹500 - ₹1000</button></li>
-          <li style={{ marginBottom: 6 }}><button onClick={() => setPriceFilter(1000, null)} style={{ background:'none', border:'none', cursor:'pointer', color: (currentMinPrice == 1000 && !currentMaxPrice) ? '#e47911' : '#111' }}>Over ₹1000</button></li>
-        </ul>
-      </div>
-
-      {/* Main Content */}
-      <div className="products-content" style={{ flexGrow: 1 }}>
-        <div className="products-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, padding: 10, border: '1px solid #ddd', borderRadius: 8, background: '#f8f8f8' }}>
-          <span style={{ fontWeight: 'bold' }}>
-            {products.length} {products.length === 1 ? 'result' : 'results'} {currentSearch ? `for "${currentSearch}"` : ''}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 14 }}>Sort by:</span>
+        {/* Filters */}
+        <nav className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 border-b border-outline-variant/30 pb-4 gap-4">
+          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto" style={{ scrollbarWidth: 'none' }}>
+            {categories.map(cat => {
+              const isSelected = (currentCategory === cat) || (cat === 'All' && !currentCategory);
+              return (
+                <button 
+                  key={cat}
+                  onClick={() => updateFilter('category', cat === 'All' ? null : cat)}
+                  className={`px-5 py-2 rounded-full font-label-md text-label-md whitespace-nowrap transition-all ${isSelected ? 'bg-forest-green text-white' : 'text-outline hover:bg-surface-container hover:text-charcoal'}`}
+                >
+                  {cat}
+                </button>
+              );
+            })}
+          </div>
+          
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-label-sm font-label-sm text-outline">Sort by:</span>
             <select 
               value={currentSort}
               onChange={(e) => updateFilter('sort', e.target.value)}
-              style={{ padding: '6px', borderRadius: 8, border: '1px solid #ccc', background: '#fff', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
+              className="bg-transparent border-none font-label-md text-label-md text-charcoal cursor-pointer focus:ring-0 outline-none p-0 pr-4"
             >
               <option value="">Featured</option>
               <option value="price,asc">Price: Low to High</option>
               <option value="price,desc">Price: High to Low</option>
-              <option value="averageRating,desc">Avg. Customer Review</option>
+              <option value="averageRating,desc">Highest Rated</option>
             </select>
           </div>
+        </nav>
+
+        {/* Header Results Count */}
+        <div className="mb-6 font-label-sm text-label-sm text-outline tracking-wider uppercase">
+          {products.length} {products.length === 1 ? 'Piece' : 'Pieces'}
         </div>
 
+        {/* Products Grid */}
         {products.length === 0 ? (
-          <div style={{ padding: 40, textAlign: 'center', fontSize: 18, color: '#565959' }}>
-            No products match your selected filters. Try clearing some filters.
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <span className="material-symbols-outlined text-[64px] text-outline-variant mb-4">inventory_2</span>
+            <h3 className="font-headline-md text-headline-md text-charcoal mb-2">No pieces found</h3>
+            <p className="font-body-md text-body-md text-on-surface-variant">Try adjusting your filters or search terms.</p>
+            <button onClick={() => setSearchParams({})} className="mt-6 border border-forest-green text-forest-green px-6 py-2 rounded font-label-md hover:bg-forest-green hover:text-white transition-colors">
+              Clear All Filters
+            </button>
           </div>
         ) : (
-          <div className="products-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 20 }}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
             {products.map(p => (
-              <div key={p.id} className="product-card" style={{ border: '1px solid #ddd', borderRadius: 8, overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#fff', transition: 'box-shadow 0.2s' }}>
-                <div className="product-img-container" style={{ height: 220, padding: 20, background: '#f8f8f8', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Link to={`/product/${p.id}`}>
-                    <img src={p.imageUrl || `https://picsum.photos/200/200?random=${p.id}`} alt={p.name} style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
-                  </Link>
-                </div>
-                <div style={{ padding: 16, display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-                  <Link to={`/product/${p.id}`}><h3 style={{ fontSize: 16, marginBottom: 8, color: '#0f1111', overflow: 'hidden', textOverflow: 'ellipsis', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' }}>{p.name}</h3></Link>
-                  <div style={{ fontSize: 12, color: '#565959', marginBottom: 4 }}>Sold by {p.sellerName || 'TrueHand'}</div>
-                  
-                  <div className="star-rating" style={{ color: '#FFA41C', marginBottom: 8, fontSize: 18 }}>
-                    {renderStars(p.averageRating)} <span className="rating-count" style={{ color: '#007185', fontSize: 14 }}>{p.reviewCount || 0}</span>
+              <div key={p.id} className="group bg-white border border-transparent hover:border-outline-variant/30 transition-all duration-300 overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-lg">
+                <Link to={`/product/${p.id}`} className="relative aspect-[4/5] overflow-hidden bg-surface-container-low block">
+                  <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/5 transition-colors duration-500 z-10 pointer-events-none"></div>
+                  <img 
+                    src={p.imageUrl || `https://picsum.photos/400/500?random=${p.id}`} 
+                    alt={p.name} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                  />
+                  <button 
+                    onClick={(e) => { e.preventDefault(); handleAddToWishlist(e, p.id); }}
+                    className="absolute top-4 right-4 text-on-surface bg-white/80 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20 hover:text-terracotta hover:scale-110 shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[20px]">favorite</span>
+                  </button>
+                </Link>
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex justify-between items-start mb-1 gap-4">
+                    <Link to={`/product/${p.id}`} className="font-body-md text-body-md text-charcoal truncate hover:text-forest-green transition-colors flex-1">
+                      {p.name}
+                    </Link>
+                    <span className="font-label-md text-label-md text-charcoal shrink-0">${Math.floor(p.price)}</span>
                   </div>
+                  <p className="text-label-sm font-label-sm text-outline tracking-wider mb-4 truncate">{p.sellerName || 'TrueHand Collective'}</p>
                   
-                  <div className="price-display" style={{ marginBottom: 12 }}>
-                    <span className="price-symbol" style={{ fontSize: 12, position: 'relative', top: '-0.4em' }}>₹</span>
-                    <span className="price-whole" style={{ fontSize: 24, fontWeight: 'bold' }}>{Math.floor(p.price)}</span>
-                    <span className="price-fraction" style={{ fontSize: 12, position: 'relative', top: '-0.4em' }}>{(p.price % 1).toFixed(2).substring(2)}</span>
-                  </div>
-                  
-                  <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div className="mt-auto flex justify-between items-center pt-4 border-t border-outline-variant/10">
+                    <div className="flex items-center gap-1 text-terracotta">
+                      <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      <span className="font-label-sm text-label-sm font-bold">{p.averageRating ? p.averageRating.toFixed(1) : 'New'}</span>
+                      {p.reviewCount > 0 && <span className="text-outline font-normal">({p.reviewCount})</span>}
+                    </div>
+                    
                     <button 
                       onClick={() => addToCart(p, 1)}
-                      style={{ width: '100%', padding: '8px 0', borderRadius: 20, background: '#FFD814', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                      className="text-forest-green font-label-sm text-label-sm hover:underline underline-offset-4 font-bold flex items-center gap-1"
                     >
-                      Add to Cart
+                      <span className="material-symbols-outlined text-[16px]">add_shopping_cart</span> Add
                     </button>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <button 
-                        onClick={(e) => handleAddToWishlist(e, p.id)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B12704', fontSize: 18 }}
-                        title="Add to Wishlist"
-                      >
-                        ❤️
-                      </button>
-                      <button 
-                        onClick={() => handleAddToCompare(p)}
-                        style={{ fontSize: 12, padding: '4px 8px', borderRadius: 4, background: '#f0f2f2', border: '1px solid #d5d9d9', cursor: 'pointer' }}
-                      >
-                        Compare
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -232,7 +173,7 @@ const Products = () => {
           </div>
         )}
       </div>
-    </div>
+    </main>
   );
 };
 

@@ -85,6 +85,45 @@ public class OrderService {
                 .collect(Collectors.toList());
     }
 
+    public OrderDTO cancelOrder(Integer id, String reason) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        
+        if (!"CONFIRMED".equals(order.getStatus()) && !"PENDING".equals(order.getStatus())) {
+            throw new RuntimeException("Order cannot be cancelled in its current state.");
+        }
+        
+        order.setStatus("CANCELLED");
+        // In a real app, save the cancellation reason to a related entity or audit log
+        return mapToDTO(orderRepository.save(order));
+    }
+
+    public OrderDTO requestReturn(Integer id, String reason, String method, String comments) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        
+        if (!"DELIVERED".equals(order.getStatus())) {
+            throw new RuntimeException("Only delivered orders can be returned.");
+        }
+        
+        order.setStatus("RETURN_REQUESTED");
+        // In a real app, save the return details to a ReturnRequest entity
+        return mapToDTO(orderRepository.save(order));
+    }
+
+    public java.util.Map<String, String> reportIssue(Integer id, String subject, String description) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+        
+        // In a real app, save the issue to a SupportTicket entity
+        java.util.Map<String, String> response = new java.util.HashMap<>();
+        response.put("message", "Issue reported successfully. Support team will contact you soon.");
+        response.put("orderId", id.toString());
+        response.put("status", "TICKET_CREATED");
+        
+        return response;
+    }
+
     private OrderDTO mapToDTO(Order order) {
         return OrderDTO.builder()
                 .id(order.getId())

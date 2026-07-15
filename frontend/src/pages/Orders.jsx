@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState('all'); // all, active, completed
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -17,77 +19,132 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
+  const filteredOrders = orders.filter(o => {
+    if (filter === 'active') return o.status !== 'DELIVERED' && o.status !== 'CANCELLED';
+    if (filter === 'completed') return o.status === 'DELIVERED';
+    return true;
+  });
+
   return (
-    <div className="container" style={{padding: '20px 0'}}>
-      <div style={{display: 'flex', gap: 20, marginBottom: 20}}>
-        <h1 style={{fontSize: 28, fontWeight: 400}}>Your Orders</h1>
+    <main className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop min-h-screen">
+      {/* Header Section */}
+      <header className="mb-stack-lg animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 className="font-display-lg text-display-lg text-forest-green mb-base">Your Acquisitions</h1>
+        <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Refined craftsmanship takes time. Trace the journey of your hand-selected pieces from the artisan's studio to your home.</p>
+      </header>
+
+      {/* Tabbed Navigation */}
+      <div className="relative border-b border-outline-variant mb-12">
+        <div className="flex gap-stack-lg relative">
+          <button 
+            className={`relative pb-4 font-label-md text-label-md transition-all duration-300 cursor-pointer ${filter === 'all' ? 'text-forest-green border-b-2 border-forest-green' : 'text-on-surface-variant hover:text-forest-green'}`}
+            onClick={() => setFilter('all')}
+          >
+            All Orders
+          </button>
+          <button 
+            className={`relative pb-4 font-label-md text-label-md transition-all duration-300 cursor-pointer ${filter === 'active' ? 'text-forest-green border-b-2 border-forest-green' : 'text-on-surface-variant hover:text-forest-green'}`}
+            onClick={() => setFilter('active')}
+          >
+            Active
+          </button>
+          <button 
+            className={`relative pb-4 font-label-md text-label-md transition-all duration-300 cursor-pointer ${filter === 'completed' ? 'text-forest-green border-b-2 border-forest-green' : 'text-on-surface-variant hover:text-forest-green'}`}
+            onClick={() => setFilter('completed')}
+          >
+            Completed
+          </button>
+        </div>
       </div>
 
-      <div style={{display: 'flex', gap: 20, borderBottom: '1px solid #ddd', marginBottom: 20}}>
-        <div style={{paddingBottom: 8, borderBottom: '2px solid #e77600', color: '#111', fontWeight: 'bold'}}>Orders</div>
-        <div style={{paddingBottom: 8, color: '#007185', cursor: 'pointer'}}>Buy Again</div>
-        <div style={{paddingBottom: 8, color: '#007185', cursor: 'pointer'}}>Not Yet Dispatched</div>
-        <div style={{paddingBottom: 8, color: '#007185', cursor: 'pointer'}}>Cancelled Orders</div>
-      </div>
-
-      {orders.length === 0 ? (
-        <p>You have no orders.</p>
+      {/* Orders Grid/List */}
+      {filteredOrders.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-32 text-center">
+          <span className="material-symbols-outlined text-6xl text-outline-variant mb-stack-md">auto_awesome_motion</span>
+          <h2 className="font-headline-lg text-headline-lg text-forest-green mb-2">No acquisitions yet</h2>
+          <p className="font-body-lg text-body-lg text-on-surface-variant mb-stack-lg">Discover timeless pieces crafted by world-class artisans.</p>
+          <Link to="/products" className="px-8 py-3 bg-forest-green text-white font-label-md text-label-md hover:bg-forest-green/90 transition-all duration-300 uppercase tracking-widest rounded-sm">
+            Browse Collections
+          </Link>
+        </div>
       ) : (
-        <div style={{display: 'flex', flexDirection: 'column', gap: 20}}>
-          {orders.map(o => (
-            <div key={o.id} className="a-box">
-              <div style={{background: '#f0f2f2', padding: '14px 18px', borderBottom: '1px solid #d5d9d9', borderTopLeftRadius: 8, borderTopRightRadius: 8, display: 'flex', justifyContent: 'space-between', fontSize: 12}}>
-                <div style={{display: 'flex', gap: 40}}>
-                  <div>
-                    <div style={{color: '#565959', textTransform: 'uppercase'}}>Order Placed</div>
-                    <div>{new Date(o.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}</div>
-                  </div>
-                  <div>
-                    <div style={{color: '#565959', textTransform: 'uppercase'}}>Total</div>
-                    <div>₹{o.totalAmount.toFixed(2)}</div>
-                  </div>
-                  <div>
-                    <div style={{color: '#565959', textTransform: 'uppercase'}}>Dispatch To</div>
-                    <div style={{color: '#007185'}}>TrueHand Customer ▾</div>
-                  </div>
+        <div className="space-y-gutter">
+          {filteredOrders.map(o => {
+            const isCompleted = o.status === 'DELIVERED';
+            const isActive = o.status !== 'DELIVERED' && o.status !== 'CANCELLED';
+            return (
+              <div key={o.id} className="order-card-hover bg-white border border-surface-container-high p-gutter flex flex-col md:flex-row gap-gutter group cursor-default shadow-sm hover:shadow-md transition-all rounded-sm">
+                <div className={`w-full md:w-48 h-48 overflow-hidden bg-surface-container rounded-sm flex-shrink-0 ${isCompleted ? 'opacity-90 group-hover:opacity-100' : ''}`}>
+                  <img src={`https://picsum.photos/400/400?random=${o.id}`} alt="Order Item" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 </div>
-                <div style={{textAlign: 'right'}}>
-                  <div style={{color: '#565959', textTransform: 'uppercase'}}>Order # {o.orderNumber.substring(0, 15)}...</div>
-                  <div style={{display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 4}}>
-                    <span style={{color: '#007185'}}>View order details</span>
-                    <span style={{color: '#ddd'}}>|</span>
-                    <span style={{color: '#007185'}}>Invoice</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="a-box-inner" style={{display: 'flex', gap: 20}}>
-                <div style={{flexGrow: 1}}>
-                  <h3 style={{fontSize: 18, marginBottom: 10}}>
-                    {o.status === 'DELIVERED' ? 'Delivered' : (o.status === 'IN_TRANSIT' ? 'Arriving today' : 'Preparing for Dispatch')}
-                  </h3>
-                  
-                  {/* Using a placeholder for the order items since the DTO structure might not have them detailed, but assuming they are accessible or we just show a generic box */}
-                  <div style={{display: 'flex', gap: 20, marginBottom: 14}}>
-                    <div style={{width: 90, height: 90, background: '#f0f2f2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#565959', fontSize: 12}}>
-                      Items
-                    </div>
+                
+                <div className="flex-grow flex flex-col justify-between py-2">
+                  <div className="flex justify-between items-start">
                     <div>
-                      <Link to={`/tracking/${o.id}`} className="btn btn-primary" style={{marginTop: 10}}>Track package</Link>
+                      <p className="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-widest">Order #{o.orderNumber.substring(0, 15)}</p>
+                      <h3 className="font-headline-md text-headline-md text-forest-green">Curated Collection</h3>
+                      <p className="font-body-md text-body-md text-on-surface-variant mt-1">Placed: {new Date(o.createdAt).toLocaleDateString()}</p>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className={`inline-flex items-center px-3 py-1 font-label-sm text-label-sm rounded-full mb-2 ${
+                        isCompleted ? 'bg-surface-linen text-forest-green border border-outline-variant' : 
+                        isActive ? 'bg-primary-fixed text-on-primary-fixed' : 
+                        'bg-surface-container-high text-on-surface-variant'
+                      }`}>
+                        <span className="material-symbols-outlined text-[14px] mr-1">
+                          {isCompleted ? 'task_alt' : isActive ? 'local_shipping' : 'history_edu'}
+                        </span>
+                        {o.status.replace(/_/g, ' ')}
+                      </span>
+                      <p className="font-label-md text-label-md text-forest-green">${o.totalAmount.toFixed(2)}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-4 md:mt-0 flex flex-col md:flex-row justify-between items-end md:items-center gap-stack-md">
+                    <div className="flex gap-gutter items-center">
+                      <div>
+                        <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{isCompleted ? 'Delivered On' : 'Estimated Arrival'}</p>
+                        <p className="font-body-md text-body-md font-semibold text-forest-green">
+                          {isCompleted ? new Date(o.updatedAt).toLocaleDateString() : 'Processing'}
+                        </p>
+                      </div>
+                      {!isCompleted && (
+                        <>
+                          <div className="h-8 w-px bg-outline-variant"></div>
+                          <div>
+                            <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Delivery To</p>
+                            <p className="font-body-md text-body-md text-forest-green truncate max-w-[150px]">{o.deliveryAddress || 'Home'}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    
+                    <div className="flex gap-stack-sm w-full md:w-auto">
+                      {isActive && (
+                        <button 
+                          onClick={() => navigate(`/tracking/${o.id}`)}
+                          className="flex-1 md:flex-none px-6 py-2 border border-charcoal text-charcoal font-label-md text-label-md hover:bg-charcoal hover:text-white transition-all duration-300 rounded-sm"
+                        >
+                          Track Order
+                        </button>
+                      )}
+                      {isCompleted && (
+                        <button className="flex-1 md:flex-none px-6 py-2 border border-charcoal text-charcoal font-label-md text-label-md hover:bg-charcoal hover:text-white transition-all duration-300 rounded-sm">
+                          Download Invoice
+                        </button>
+                      )}
+                      <button className="flex-1 md:flex-none px-6 py-2 bg-forest-green text-white font-label-md text-label-md hover:bg-forest-green/90 transition-all duration-300 rounded-sm">
+                        Order Details
+                      </button>
                     </div>
                   </div>
                 </div>
-
-                <div style={{width: 250, display: 'flex', flexDirection: 'column', gap: 10}}>
-                  <button className="btn btn-standard w-full">Leave seller feedback</button>
-                  <button className="btn btn-standard w-full">Write a product review</button>
-                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

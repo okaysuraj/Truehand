@@ -18,6 +18,7 @@ const Checkout = () => {
   const [promoDiscount, setPromoDiscount] = useState(0);
   const [promoMessage, setPromoMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isGift, setIsGift] = useState(false);
 
   React.useEffect(() => {
     if (user) {
@@ -39,9 +40,9 @@ const Checkout = () => {
 
   if (cartItems.length === 0) {
     return (
-      <div style={{ textAlign: 'center', padding: '50px' }}>
-        <h2>Your cart is empty</h2>
-        <button onClick={() => navigate('/products')} style={{ padding: '10px 20px', marginTop: 20 }}>Shop Now</button>
+      <div className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop text-center">
+        <h2 className="font-headline-lg text-headline-lg text-forest-green mb-8">Your collection is empty</h2>
+        <button onClick={() => navigate('/products')} className="px-8 py-4 bg-forest-green text-white font-label-md uppercase tracking-widest hover:bg-forest-green/90 transition-colors">Explore Curated Pieces</button>
       </div>
     );
   }
@@ -56,7 +57,7 @@ const Checkout = () => {
         discount = promo.maxDiscountAmount;
       }
       setPromoDiscount(discount);
-      setPromoMessage(`Promo code applied! You saved ₹${discount.toFixed(2)}`);
+      setPromoMessage(`Promo code applied! You saved $${discount.toFixed(2)}`);
     } catch (err) {
       setPromoDiscount(0);
       setPromoMessage('Invalid or expired promo code.');
@@ -106,7 +107,7 @@ const Checkout = () => {
           totalAmount: total,
           deliveryAddress: address,
           promoCode: promoDiscount > 0 ? promoCode : null,
-          specialInstructions: 'Leave at door',
+          specialInstructions: isGift ? 'Gift order' : 'Leave at door',
         };
         
         const res = await api.post(`/orders/user/${user.id}`, orderData);
@@ -121,119 +122,205 @@ const Checkout = () => {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: '40px auto', padding: 20, display: 'flex', gap: 30 }}>
-      
-      <div style={{ flex: 2 }}>
-        <h2 style={{ fontSize: 24, marginBottom: 20 }}>Checkout</h2>
-        
-        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 20 }}>
-          <h3 style={{ marginTop: 0 }}>1. Delivery Address</h3>
-          <textarea 
-            rows="3"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            placeholder="Enter full address details (Street, City, Zip)"
-            style={{ width: '100%', padding: 10, borderRadius: 4, border: '1px solid #ccc' }}
-            required
-          />
-          {addresses.length > 0 && (
-            <div style={{ marginTop: 10 }}>
-              <p style={{ fontSize: 14, fontWeight: 'bold' }}>Or select a saved address:</p>
-              <select 
-                onChange={(e) => {
-                  const addr = addresses.find(a => a.id === parseInt(e.target.value));
-                  if (addr) setAddress(`${addr.streetAddress}, ${addr.city}, ${addr.state} ${addr.postalCode}`);
-                }}
-                style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #ccc' }}
-              >
-                <option value="">-- Select Saved Address --</option>
-                {addresses.map(a => (
-                  <option key={a.id} value={a.id}>
-                    {a.label} - {a.streetAddress}, {a.city}
-                  </option>
-                ))}
-              </select>
+    <main className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop">
+      {/* Multi-step Progress Indicator */}
+      <div className="mb-section-gap max-w-3xl mx-auto">
+        <div className="flex items-center justify-between relative">
+          <div className="flex flex-col items-center z-10">
+            <div className="w-10 h-10 rounded-full bg-forest-green text-white flex items-center justify-center mb-stack-sm">
+              <span className="material-symbols-outlined text-[20px]">check</span>
             </div>
-          )}
+            <span className="font-label-md text-label-md text-on-surface">Cart</span>
+          </div>
+          <div className="flex-1 h-[2px] bg-forest-green mx-4 -mt-6"></div>
+          <div className="flex flex-col items-center z-10">
+            <div className="w-10 h-10 rounded-full border-2 border-forest-green bg-white text-forest-green flex items-center justify-center mb-stack-sm ring-4 ring-forest-green/5">
+              <span className="font-label-md">2</span>
+            </div>
+            <span className="font-label-md text-label-md text-forest-green font-bold">Checkout</span>
+          </div>
+          <div className="flex-1 h-[2px] bg-surface-container-highest mx-4 -mt-6"></div>
+          <div className="flex flex-col items-center z-10">
+            <div className="w-10 h-10 rounded-full border-2 border-surface-container-highest bg-white text-on-surface-variant flex items-center justify-center mb-stack-sm">
+              <span className="font-label-md">3</span>
+            </div>
+            <span className="font-label-md text-label-md text-on-surface-variant">Success</span>
+          </div>
         </div>
+      </div>
 
-        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20, marginBottom: 20 }}>
-          <h3 style={{ marginTop: 0 }}>2. Payment Method</h3>
-          <div style={{ padding: 15, background: '#f8f8f8', border: '1px solid #ccc', borderRadius: 4 }}>
-            <CardElement options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
+      <div className="grid grid-cols-12 gap-gutter items-start">
+        {/* Left Column: Form */}
+        <div className="col-span-12 lg:col-span-8 space-y-stack-lg">
+          {/* Shipping Address */}
+          <section>
+            <div className="mb-stack-lg border-b border-surface-container pb-stack-sm flex justify-between items-end">
+              <h2 className="font-headline-md text-headline-md text-forest-green">1. Shipping Address</h2>
+            </div>
+            <div className="bg-surface border border-surface-container p-stack-lg rounded-sm">
+              <textarea 
+                rows="3"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                placeholder="Enter full address details (Street, City, Zip)"
+                className="w-full bg-transparent border border-outline-variant p-4 font-body-md focus:outline-none focus:border-forest-green rounded-sm mb-4 resize-none"
+                required
+              />
+              {addresses.length > 0 && (
+                <div>
+                  <p className="font-label-sm text-label-sm text-on-surface-variant mb-2 uppercase tracking-widest">Or select a saved address:</p>
+                  <select 
+                    onChange={(e) => {
+                      const addr = addresses.find(a => a.id === parseInt(e.target.value));
+                      if (addr) setAddress(`${addr.streetAddress}, ${addr.city}, ${addr.state} ${addr.postalCode}`);
+                    }}
+                    className="w-full bg-white border border-outline-variant p-3 font-body-md focus:outline-none focus:border-forest-green rounded-sm"
+                  >
+                    <option value="">-- Select Saved Address --</option>
+                    {addresses.map(a => (
+                      <option key={a.id} value={a.id}>
+                        {a.label} - {a.streetAddress}, {a.city}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Payment Method */}
+          <section className="pt-stack-lg">
+            <div className="mb-stack-lg border-b border-surface-container pb-stack-sm">
+              <h2 className="font-headline-md text-headline-md text-forest-green">2. Payment Method</h2>
+            </div>
+            <div className="bg-surface border border-surface-container p-stack-lg rounded-sm">
+              <div className="p-4 bg-white border border-outline-variant rounded-sm shadow-sm">
+                <CardElement options={{
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      fontFamily: '"Hanken Grotesk", sans-serif',
+                      color: '#1b1c1b',
+                      '::placeholder': {
+                        color: '#989692',
+                      },
+                    },
+                    invalid: {
+                      color: '#ba1a1a',
+                    },
                   },
-                },
-                invalid: {
-                  color: '#9e2146',
-                },
-              },
-            }} />
-          </div>
-        </div>
-      </div>
-
-      <div style={{ flex: 1 }}>
-        <div className="a-box" style={{ background: '#fff', border: '1px solid #ddd', borderRadius: 8, padding: 20 }}>
-          <button 
-            onClick={handlePlaceOrder}
-            disabled={loading || !stripe}
-            style={{ width: '100%', padding: '12px 0', background: '#FFD814', border: 'none', borderRadius: 20, cursor: 'pointer', fontWeight: 'bold', fontSize: 16, marginBottom: 15 }}
-          >
-            {loading ? 'Processing...' : 'Place Your Order'}
-          </button>
-          
-          <h4 style={{ margin: '0 0 15px 0' }}>Order Summary</h4>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
-            <span>Items:</span>
-            <span>₹{subtotal.toFixed(2)}</span>
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8 }}>
-            <span>Delivery:</span>
-            <span>₹0.00</span>
-          </div>
-          
-          {promoDiscount > 0 && (
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 8, color: '#b12704' }}>
-              <span>Promo Discount:</span>
-              <span>-₹{promoDiscount.toFixed(2)}</span>
+                }} />
+              </div>
             </div>
-          )}
+          </section>
 
-          <div style={{ borderTop: '1px solid #ddd', margin: '15px 0' }}></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 20, fontWeight: 'bold', color: '#b12704' }}>
-            <span>Order Total:</span>
-            <span>₹{total.toFixed(2)}</span>
-          </div>
-
-          <div style={{ borderTop: '1px solid #ddd', margin: '15px 0' }}></div>
-          
-          <h5 style={{ margin: '0 0 10px 0' }}>Apply Promo Code</h5>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <input 
-              type="text" 
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter Code"
-              style={{ flex: 1, padding: 8, border: '1px solid #ccc', borderRadius: 4 }}
-            />
-            <button 
-              onClick={handleApplyPromo}
-              style={{ padding: '8px 15px', background: '#e3e6e6', border: '1px solid #a6a6a6', borderRadius: 4, cursor: 'pointer' }}
-            >
-              Apply
-            </button>
-          </div>
-          {promoMessage && <p style={{ fontSize: 12, marginTop: 10, color: promoDiscount > 0 ? 'green' : 'red' }}>{promoMessage}</p>}
+          {/* Additional Options */}
+          <section className="pt-stack-lg">
+            <div className="flex items-center gap-stack-md p-stack-md bg-surface-container-low border border-dashed border-outline-variant rounded-sm">
+              <span className="material-symbols-outlined text-forest-green">redeem</span>
+              <div className="flex-1">
+                <p className="font-label-md text-label-md text-on-surface">Is this a gift?</p>
+                <p className="text-label-sm font-label-sm text-on-surface-variant">We'll remove pricing from the invoice.</p>
+              </div>
+              <label className="flex items-center cursor-pointer">
+                <div className="relative">
+                  <input type="checkbox" className="sr-only" checked={isGift} onChange={() => setIsGift(!isGift)} />
+                  <div className={`block w-10 h-6 rounded-full transition-colors ${isGift ? 'bg-forest-green' : 'bg-surface-dim'}`}></div>
+                  <div className={`dot absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${isGift ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+              </label>
+            </div>
+          </section>
         </div>
-      </div>
 
-    </div>
+        {/* Right Column: Order Summary */}
+        <aside className="col-span-12 lg:col-span-4 sticky top-32 space-y-stack-lg">
+          <div className="bg-white p-stack-lg border border-surface-container shadow-sm shadow-forest-green/5 rounded-sm">
+            <h2 className="font-headline-md text-headline-md text-forest-green mb-stack-lg">Order Summary</h2>
+            
+            {/* Items Mini Preview */}
+            <div className="space-y-stack-md mb-stack-lg pb-stack-lg border-b border-surface-container max-h-[300px] overflow-y-auto pr-2">
+              {cartItems.map(item => (
+                <div key={item.id} className="flex gap-stack-md">
+                  <div className="w-16 h-20 bg-surface-container flex-shrink-0 rounded-sm overflow-hidden">
+                    <img src={item.imageUrl || `https://picsum.photos/100/100?random=${item.id}`} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex flex-col justify-between py-1 flex-1">
+                    <div>
+                      <h4 className="font-label-md text-label-md text-forest-green leading-tight truncate w-[180px]">{item.name}</h4>
+                      <p className="text-label-sm font-label-sm text-on-surface-variant mt-1">Qty: {item.quantity}</p>
+                    </div>
+                    <span className="font-label-md text-label-md text-forest-green">${item.price.toFixed(2)}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Cost Breakdown */}
+            <div className="space-y-stack-sm mb-stack-lg">
+              <div className="flex justify-between font-body-md text-body-md text-on-surface-variant">
+                <span>Subtotal</span>
+                <span>${subtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-body-md text-body-md text-on-surface-variant">
+                <span>Shipping</span>
+                <span className="text-on-primary-container">Free</span>
+              </div>
+              {promoDiscount > 0 && (
+                <div className="flex justify-between font-body-md text-body-md text-error-red">
+                  <span>Promo Discount</span>
+                  <span>-${promoDiscount.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between font-body-md text-body-md text-on-surface-variant">
+                <span>Tax (Included)</span>
+                <span>$0.00</span>
+              </div>
+            </div>
+
+            <div className="flex justify-between items-baseline pt-stack-md border-t border-forest-green/10 mb-stack-lg">
+              <span className="font-headline-md text-headline-md text-forest-green">Total</span>
+              <span className="font-display-lg text-[24px] text-forest-green font-bold">${total.toFixed(2)}</span>
+            </div>
+
+            {/* CTA */}
+            <button 
+              onClick={handlePlaceOrder}
+              disabled={loading || !stripe}
+              className="w-full bg-forest-green text-white py-4 font-label-md text-label-md uppercase tracking-widest hover:bg-forest-green/90 transition-all active:scale-[0.98] shadow-lg shadow-forest-green/20 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Processing...' : 'Place Order & Pay'}
+            </button>
+            <div className="mt-stack-md flex items-center justify-center gap-2 text-on-surface-variant opacity-60">
+              <span className="material-symbols-outlined text-[16px]">verified_user</span>
+              <span className="text-label-sm font-label-sm">Secure Encrypted Transaction</span>
+            </div>
+          </div>
+
+          {/* Promo Code */}
+          <div className="p-stack-lg bg-surface border border-surface-container rounded-sm">
+            <label className="block font-label-sm text-label-sm text-on-surface-variant mb-2">Have a gift card or promo code?
+              <div className="flex gap-2 mt-2">
+                <input 
+                  type="text"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  placeholder="Enter code"
+                  className="flex-1 bg-white border border-surface-container px-3 py-2 text-label-sm focus:ring-1 focus:ring-forest-green focus:outline-none placeholder:text-outline-variant rounded-sm"
+                />
+                <button 
+                  onClick={handleApplyPromo}
+                  className="px-4 py-2 border border-forest-green text-forest-green font-label-sm hover:bg-forest-green hover:text-white transition-all rounded-sm"
+                >
+                  Apply
+                </button>
+              </div>
+            </label>
+            {promoMessage && <p className={`text-label-sm font-label-sm mt-2 ${promoDiscount > 0 ? 'text-on-primary-container' : 'text-error-red'}`}>{promoMessage}</p>}
+          </div>
+        </aside>
+      </div>
+    </main>
   );
 };
 

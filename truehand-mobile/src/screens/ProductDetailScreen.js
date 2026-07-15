@@ -1,220 +1,178 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, ActivityIndicator, Modal, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRoute, useNavigation } from '@react-navigation/native';
-import api from '../services/api';
-import { useCart } from '../services/CartProvider';
-import { useAuth } from '../services/AuthProvider';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { colors, typography, spacing } from '../theme/theme';
+import { useProductStore } from '../store/useProductStore';
+import { useCartStore } from '../store/useCartStore';
+
+const { width } = Dimensions.get('window');
 
 export default function ProductDetailScreen() {
-  const route = useRoute();
   const navigation = useNavigation();
-  const { productId } = route.params;
-  const { addToCart } = useCart();
-  const { user } = useAuth();
+  const route = useRoute();
   
-  const [product, setProduct] = useState(null);
-  const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [qty, setQty] = useState(1);
+  const { productId } = route.params || {};
+  const fetchProductById = useProductStore(state => state.fetchProductById);
+  const currentProduct = useProductStore(state => state.currentProduct);
+  const isLoading = useProductStore(state => state.isLoadingCurrentProduct);
   
-  // Review Modal State
-  const [modalVisible, setModalVisible] = useState(false);
-  const [rating, setRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
-  const [submitting, setSubmitting] = useState(false);
+  const addToCart = useCartStore(state => state.addToCart);
 
-  useEffect(() => {
-    fetchData();
-  }, [productId]);
-
-  const fetchData = async () => {
-    try {
-      const [prodRes, revRes] = await Promise.all([
-        api.get(`/products/${productId}`),
-        api.get(`/reviews/product/${productId}`)
-      ]);
-      setProduct(prodRes.data);
-      setReviews(revRes.data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
+  React.useEffect(() => {
+    if (productId) {
+      fetchProductById(productId);
     }
-  };
-
+  }, [productId, fetchProductById]);
+  
   const handleAddToCart = () => {
-    if (product) {
-      addToCart(product, qty);
-      navigation.navigate('MainTabs', { screen: 'Cart' });
+    if (currentProduct) {
+      addToCart(currentProduct, 1);
+      navigation.navigate('Cart');
     }
   };
-
-  const submitReview = async () => {
-    if (!user) {
-      Alert.alert('Login Required', 'Please login to submit a review.');
-      setModalVisible(false);
-      navigation.navigate('Profile');
-      return;
-    }
-    if (!reviewComment.trim()) {
-      Alert.alert('Error', 'Please enter a review comment.');
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      await api.post('/reviews', {
-        productId,
-        rating,
-        comment: reviewComment
-      });
-      Alert.alert('Success', 'Review submitted successfully!');
-      setModalVisible(false);
-      setReviewComment('');
-      setRating(5);
-      fetchData(); // refresh reviews
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'Could not submit review. Did you actually purchase this item?');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  if (loading || !product) {
+  
+  if (isLoading || !currentProduct) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color="#007185" />
-      </View>
+      <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors['forest-green']} />
+      </SafeAreaView>
     );
   }
 
+  const product = currentProduct;
+  
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container} contentContainerStyle={{paddingBottom: 100}}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#0f1111" />
+      {/* Top AppBar */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={colors['on-surface-variant']} />
+        </TouchableOpacity>
+        
+        <Text style={styles.headerTitle}>TrueHand</Text>
+        
+        <View style={styles.headerRight}>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Search')}>
+            <Ionicons name="search" size={24} color={colors['on-surface-variant']} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Cart')}>
+            <Ionicons name="bag-handle-outline" size={24} color={colors['on-surface-variant']} />
           </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Product Image */}
-        <Image 
-          source={{ uri: product.imageUrl || 'https://via.placeholder.com/400' }} 
-          style={styles.image} 
-          resizeMode="contain" 
-        />
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        
+        <ScrollView 
+          horizontal 
+          pagingEnabled 
+          showsHorizontalScrollIndicator={false}
+          style={styles.imageScrollContainer}
+        >
+          <Image 
+            source={{ uri: product.imageUrl || 'https://via.placeholder.com/400x500' }}
+            style={styles.mainImage}
+          />
+        </ScrollView>
 
-        {/* Product Info */}
-        <View style={styles.infoContainer}>
-          <Text style={styles.title}>{product.name}</Text>
-          <View style={styles.ratingRow}>
-            {[1,2,3,4,5].map(star => (
-              <Ionicons 
-                key={star} 
-                name={star <= (product.averageRating || 0) ? "star" : "star-outline"} 
-                size={16} 
-                color="#f0c14b" 
-              />
-            ))}
-            <Text style={styles.ratingCount}> ({product.reviewCount || 0} reviews)</Text>
+        {/* Product Details */}
+        <View style={styles.detailsContainer}>
+          <Text style={styles.productTitle}>{product.name}</Text>
+          <TouchableOpacity>
+            <Text style={styles.artisanName}>{product.seller?.shopName || 'Unknown Artisan'}</Text>
+          </TouchableOpacity>
+          <Text style={styles.price}>${product.price}</Text>
+
+          <View style={styles.badgesRow}>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Hand-thrown Ceramic</Text>
+            </View>
+            <View style={styles.badge}>
+              <Text style={styles.badgeText}>Made in Italy</Text>
+            </View>
           </View>
-          <Text style={styles.price}>${Number(product.price).toFixed(2)}</Text>
-          <Text style={styles.description}>{product.description}</Text>
-        </View>
 
-        {/* Reviews Section */}
-        <View style={styles.reviewsSection}>
-          <View style={styles.reviewHeaderRow}>
-            <Text style={styles.sectionTitle}>Customer Reviews</Text>
-            <TouchableOpacity onPress={() => setModalVisible(true)}>
-              <Text style={styles.writeReviewBtn}>Write a Review</Text>
+          <Text style={styles.description}>
+            {product.description}
+          </Text>
+
+          <View style={styles.actionsContainer}>
+            <TouchableOpacity style={styles.primaryButton} onPress={handleAddToCart} disabled={isLoading}>
+              <Text style={styles.primaryButtonText}>{isLoading ? 'Loading...' : 'Add to Collection'}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.secondaryButton}>
+              <Ionicons name="heart-outline" size={18} color={colors.charcoal} />
+              <Text style={styles.secondaryButtonText}>Save for Later</Text>
             </TouchableOpacity>
           </View>
 
-          {reviews.length === 0 ? (
-            <Text style={styles.noReviews}>No reviews yet. Be the first!</Text>
-          ) : (
-            reviews.map(rev => (
-              <View key={rev.id} style={styles.reviewCard}>
-                <View style={styles.reviewUserRow}>
-                  <Ionicons name="person-circle" size={24} color="#ccc" />
-                  <Text style={styles.reviewerName}>{rev.reviewerName}</Text>
-                  {rev.verifiedPurchase && (
-                    <Text style={styles.verifiedBadge}>Verified Purchase</Text>
-                  )}
-                </View>
-                <View style={styles.reviewStars}>
-                  {[1,2,3,4,5].map(star => (
-                    <Ionicons key={star} name={star <= rev.rating ? "star" : "star-outline"} size={14} color="#f0c14b" />
-                  ))}
-                </View>
-                <Text style={styles.reviewComment}>{rev.comment}</Text>
-              </View>
-            ))
-          )}
-        </View>
-      </ScrollView>
+          <View style={styles.shippingInfo}>
+            <Ionicons name="cube-outline" size={16} color={colors['on-surface-variant']} />
+            <Text style={styles.shippingText}>Ships worldwide from Studio Arancia.</Text>
+          </View>
 
-      {/* Sticky Bottom Bar */}
-      <View style={styles.bottomBar}>
-        <View style={styles.qtyContainer}>
-          <TouchableOpacity onPress={() => setQty(Math.max(1, qty - 1))} style={styles.qtyBtn}>
-            <Ionicons name="remove" size={20} color="#0f1111" />
-          </TouchableOpacity>
-          <Text style={styles.qtyText}>{qty}</Text>
-          <TouchableOpacity onPress={() => setQty(qty + 1)} style={styles.qtyBtn}>
-            <Ionicons name="add" size={20} color="#0f1111" />
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity style={styles.addToCartBtn} onPress={handleAddToCart}>
-          <Text style={styles.addToCartText}>Add to Cart</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Write Review Modal */}
-      <Modal visible={modalVisible} animationType="slide" transparent={true}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Write a Review</Text>
-            <Text style={styles.modalSubtitle}>{product.name}</Text>
-            
-            <View style={styles.modalStars}>
-              {[1,2,3,4,5].map(star => (
-                <TouchableOpacity key={star} onPress={() => setRating(star)}>
-                  <Ionicons name={star <= rating ? "star" : "star-outline"} size={32} color="#f0c14b" />
-                </TouchableOpacity>
-              ))}
+          <TouchableOpacity 
+            style={styles.reviewsButton} 
+            onPress={() => navigation.navigate('RatingsReviews', { productId: product.id })}
+          >
+            <View style={styles.reviewsHeader}>
+              <Text style={styles.reviewsButtonText}>Collector Reviews</Text>
+              <Ionicons name="chevron-forward" size={20} color={colors.charcoal} />
             </View>
+            <View style={styles.starsRow}>
+              <Ionicons name="star" size={16} color={colors.terracotta} />
+              <Ionicons name="star" size={16} color={colors.terracotta} />
+              <Ionicons name="star" size={16} color={colors.terracotta} />
+              <Ionicons name="star" size={16} color={colors.terracotta} />
+              <Ionicons name="star-half" size={16} color={colors.terracotta} />
+              <Text style={styles.ratingScore}>4.8 (124)</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
 
-            <TextInput
-              style={styles.modalInput}
-              multiline
-              numberOfLines={4}
-              placeholder="What did you like or dislike?"
-              value={reviewComment}
-              onChangeText={setReviewComment}
-            />
-
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancel} onPress={() => setModalVisible(false)}>
-                <Text style={styles.modalCancelText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity 
-                style={[styles.modalSubmit, submitting && {opacity: 0.7}]} 
-                onPress={submitReview}
-                disabled={submitting}
-              >
-                {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.modalSubmitText}>Submit</Text>}
-              </TouchableOpacity>
+        {/* Deep Dive Sections */}
+        <View style={styles.deepDiveContainer}>
+          
+          {/* Material & Craft */}
+          <View style={styles.infoCard}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="color-palette-outline" size={20} color={colors['forest-green']} />
+              <Text style={styles.cardTitle}>Material & Craft</Text>
+            </View>
+            
+            <View style={styles.bulletItem}>
+              <Ionicons name="ellipse" size={6} color={colors.outline} style={styles.bulletIcon} />
+              <Text style={styles.bulletText}>Crafted from high-fire speckled stoneware clay, chosen for its durability and earthy texture.</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Ionicons name="ellipse" size={6} color={colors.outline} style={styles.bulletIcon} />
+              <Text style={styles.bulletText}>Fired at 1200°C to achieve full vitrification, ensuring the piece is water-tight and food safe.</Text>
+            </View>
+            <View style={styles.bulletItem}>
+              <Ionicons name="ellipse" size={6} color={colors.outline} style={styles.bulletIcon} />
+              <Text style={styles.bulletText}>Finished with an in-house formulated ash glaze that interacts uniquely with the kiln's atmosphere.</Text>
             </View>
           </View>
-        </View>
-      </Modal>
 
+          {/* Maker's Note */}
+          <View style={styles.infoCard}>
+            <View style={styles.cardHeader}>
+              <Ionicons name="brush-outline" size={20} color={colors['forest-green']} />
+              <Text style={styles.cardTitle}>Maker's Note</Text>
+            </View>
+            <View style={styles.quoteBlock}>
+              <Text style={styles.quoteText}>
+                "I wanted to create a form that feels grounding to hold. The slight asymmetry is intentional—a reminder of the human hands that shaped the clay on the wheel, standing in contrast to the perfect uniformity of mass production."
+              </Text>
+            </View>
+            <Text style={styles.quoteAuthor}>— Elena Ricci, Studio Arancia</Text>
+          </View>
+
+        </View>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -222,212 +180,201 @@ export default function ProductDetailScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  container: {
-    flex: 1,
-  },
-  center: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: colors['surface-linen'],
   },
   header: {
-    padding: 15,
-    backgroundColor: '#fff',
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  image: {
-    width: '100%',
-    height: 300,
-    backgroundColor: '#f6f6f6',
-  },
-  infoContainer: {
-    padding: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: spacing.marginMobile,
+    height: 64,
+    backgroundColor: 'rgba(252, 249, 248, 0.9)',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: 'rgba(193, 200, 195, 0.3)',
+    zIndex: 10,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: '500',
-    color: '#0f1111',
-    marginBottom: 8,
+  iconButton: {
+    padding: spacing.stackSm,
   },
-  ratingRow: {
+  headerTitle: {
+    ...typography.headlineLgMobile,
+    color: colors['forest-green'],
+    fontSize: 24, // Slightly smaller to fit with 2 right icons
+  },
+  headerRight: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  ratingCount: {
-    color: '#007185',
-    marginLeft: 5,
+  content: {
+    paddingBottom: spacing.sectionGap,
+  },
+  imageScrollContainer: {
+    width: width,
+    height: width * 1.25, // 4:5 aspect ratio
+    backgroundColor: colors['surface-variant'],
+  },
+  mainImage: {
+    width: width,
+    height: width * 1.25,
+    resizeMode: 'cover',
+  },
+  detailsContainer: {
+    paddingHorizontal: spacing.marginMobile,
+    paddingTop: spacing.stackLg,
+  },
+  productTitle: {
+    ...typography.displayLg,
+    fontSize: 32, // smaller for mobile detail
+    lineHeight: 36,
+    color: colors.charcoal,
+    marginBottom: spacing.stackSm,
+  },
+  artisanName: {
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
+    textDecorationLine: 'underline',
   },
   price: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#B12704',
-    marginBottom: 15,
+    ...typography.labelMd,
+    color: colors.charcoal,
+    fontSize: 18,
+    marginTop: spacing.stackSm,
+  },
+  badgesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.stackSm,
+    marginVertical: spacing.stackLg,
+  },
+  badge: {
+    backgroundColor: colors['surface-variant'],
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  badgeText: {
+    ...typography.labelSm,
+    color: colors.charcoal,
   },
   description: {
-    fontSize: 15,
-    lineHeight: 22,
-    color: '#333',
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
+    lineHeight: 24,
+    marginBottom: spacing.stackLg,
   },
-  reviewsSection: {
-    padding: 20,
+  actionsContainer: {
+    gap: spacing.stackMd,
+    marginBottom: spacing.stackLg,
   },
-  reviewHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 15,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0f1111',
-  },
-  writeReviewBtn: {
-    color: '#007185',
-    fontWeight: '600',
-  },
-  noReviews: {
-    color: '#555',
-    fontStyle: 'italic',
-  },
-  reviewCard: {
-    backgroundColor: '#f8f8f8',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 15,
-  },
-  reviewUserRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  reviewerName: {
-    fontWeight: 'bold',
-    marginLeft: 8,
-    color: '#0f1111',
-  },
-  verifiedBadge: {
-    marginLeft: 10,
-    color: '#c45500',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  reviewStars: {
-    flexDirection: 'row',
-    marginBottom: 8,
-  },
-  reviewComment: {
-    color: '#333',
-    lineHeight: 20,
-  },
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    flexDirection: 'row',
-    padding: 15,
-    paddingBottom: 25, // safe area padding
+  primaryButton: {
+    backgroundColor: colors['forest-green'],
+    paddingVertical: 16,
+    borderRadius: 4,
     alignItems: 'center',
   },
-  qtyContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#d5d9d9',
-    borderRadius: 8,
-    marginRight: 15,
-    backgroundColor: '#f0f2f2',
+  primaryButtonText: {
+    ...typography.labelMd,
+    color: colors['on-primary'],
   },
-  qtyBtn: {
-    padding: 10,
-  },
-  qtyText: {
-    paddingHorizontal: 15,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  addToCartBtn: {
-    flex: 1,
-    backgroundColor: '#FFD814',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  addToCartText: {
-    color: '#0f1111',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'flex-end',
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    padding: 25,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  modalSubtitle: {
-    color: '#555',
-    marginBottom: 20,
-  },
-  modalStars: {
+  secondaryButton: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 20,
-  },
-  modalInput: {
+    alignItems: 'center',
+    gap: 8,
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 15,
-    height: 100,
-    textAlignVertical: 'top',
-    marginBottom: 20,
+    borderColor: colors.outline,
+    paddingVertical: 16,
+    borderRadius: 4,
   },
-  modalActions: {
+  secondaryButtonText: {
+    ...typography.labelMd,
+    color: colors.charcoal,
+  },
+  shippingInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: spacing.stackLg,
+    borderTopWidth: 1,
+    borderTopColor: colors['surface-variant'],
+  },
+  shippingText: {
+    ...typography.labelSm,
+    color: colors['on-surface-variant'],
+  },
+  reviewsButton: {
+    marginTop: spacing.stackLg,
+    paddingTop: spacing.stackLg,
+    borderTopWidth: 1,
+    borderTopColor: colors['surface-variant'],
+  },
+  reviewsHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-  },
-  modalCancel: {
-    flex: 1,
-    padding: 15,
     alignItems: 'center',
+    marginBottom: 8,
   },
-  modalCancelText: {
-    color: '#007185',
-    fontWeight: 'bold',
+  reviewsButtonText: {
+    ...typography.headlineMd,
+    color: colors.charcoal,
   },
-  modalSubmit: {
-    flex: 1,
-    backgroundColor: '#FFD814',
-    padding: 15,
-    borderRadius: 8,
+  starsRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 4,
   },
-  modalSubmitText: {
-    color: '#0f1111',
-    fontWeight: 'bold',
-  }
+  ratingScore: {
+    ...typography.labelMd,
+    color: colors.charcoal,
+    marginLeft: 4,
+  },
+  deepDiveContainer: {
+    paddingHorizontal: spacing.marginMobile,
+    marginTop: spacing.sectionGap,
+    gap: spacing.stackLg,
+  },
+  infoCard: {
+    backgroundColor: colors['surface-container-low'],
+    padding: spacing.gutter,
+    borderRadius: 12,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: spacing.stackMd,
+  },
+  cardTitle: {
+    ...typography.headlineMd,
+    color: colors.charcoal,
+  },
+  bulletItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 8,
+    marginBottom: spacing.stackSm,
+  },
+  bulletIcon: {
+    marginTop: 8, // align with first line of text
+  },
+  bulletText: {
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
+    flex: 1,
+  },
+  quoteBlock: {
+    borderLeftWidth: 2,
+    borderLeftColor: 'rgba(22, 52, 40, 0.3)', // forest-green/30
+    paddingLeft: 16,
+    marginBottom: 8,
+  },
+  quoteText: {
+    ...typography.bodyLg,
+    color: colors['on-surface-variant'],
+    fontStyle: 'italic',
+  },
+  quoteAuthor: {
+    ...typography.labelMd,
+    color: colors.charcoal,
+  },
 });

@@ -1,10 +1,13 @@
+import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { useAuth } from '../services/AuthProvider';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';;
+import { useAuthStore } from '../store/useAuthStore';
 import { Ionicons } from '@expo/vector-icons';
+import { colors, typography, spacing } from '../theme/theme';
 
 export default function ProfileScreen({ navigation }) {
-  const { user, logout } = useAuth();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const handleLogout = async () => {
     try {
@@ -14,125 +17,179 @@ export default function ProfileScreen({ navigation }) {
     }
   };
 
-  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Guest User';
+  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Julian Thorne';
+  const role = user ? 'Member' : 'Master Ceramicist & Collector';
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Image 
-          source={{ uri: 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png' }} 
-          style={styles.avatar} 
-        />
-        <View style={styles.userInfo}>
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={colors['forest-green']} />
+        </TouchableOpacity>
+        <Text style={styles.brand}>Artisan Profile</Text>
+        <TouchableOpacity style={styles.iconButton}>
+          <Ionicons name="settings-outline" size={24} color={colors['forest-green']} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+        <View style={styles.profileHeader}>
+          <View style={styles.avatarContainer}>
+            <Image 
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSp22LO2WIyz_K097Vaz9ZUjT0HGApGIqC-E34VmusA8yWFqC8kyP3lz-bO1y0I0nZQwV-jDbZKVOE_22t-dl8OF8vzAb0jBdOweZ05R70f9q0K-3_B-SByawp5tsNGXbCtfiGLDxUi-MQk_-fIt2oTZgDwrwydtP85_TeTdkkFn2DjAjKQxinNLLMbMUZHUTnZZW5Bza9S3qkew5eq_eD9EcUuIlCwh3uJbY7A_Hl1fTy8wZxcTYbUA' }} 
+              style={styles.avatar} 
+            />
+          </View>
           <Text style={styles.name}>{fullName}</Text>
-          <Text style={styles.email}>{user?.email}</Text>
+          <Text style={styles.role}>{role}</Text>
         </View>
-      </View>
 
-      <View style={styles.menuContainer}>
-        <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Orders')}>
-          <View style={styles.menuItemLeft}>
-            <Ionicons name="cube-outline" size={24} color="#007185" />
-            <Text style={styles.menuText}>Your Orders</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#ccc" />
-        </TouchableOpacity>
-        
-        <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
-          <View style={styles.menuItemLeft}>
-            <Ionicons name="heart-outline" size={24} color="#007185" />
-            <Text style={styles.menuText}>Your Wishlist</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#ccc" />
-        </TouchableOpacity>
+        <View style={styles.menuContainer}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="person-outline" size={24} color={colors['clay-outline']} />
+              <Text style={styles.menuText}>Personal Info</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
-          <View style={styles.menuItemLeft}>
-            <Ionicons name="settings-outline" size={24} color="#007185" />
-            <Text style={styles.menuText}>Account Settings</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color="#ccc" />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Orders')}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="bag-outline" size={24} color={colors['clay-outline']} />
+              <Text style={styles.menuText}>My Orders</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
+          </TouchableOpacity>
 
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
+          <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="wallet-outline" size={24} color={colors['clay-outline']} />
+              <Text style={styles.menuText}>Digital Wallet</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="heart-outline" size={24} color={colors['clay-outline']} />
+              <Text style={styles.menuText}>Saved Collections</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity style={[styles.menuItem, { marginTop: spacing.stackMd }]} onPress={() => {}}>
+            <View style={styles.menuItemLeft}>
+              <Ionicons name="help-circle-outline" size={24} color={colors['clay-outline']} />
+              <Text style={styles.menuText}>Help Center</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
+          </TouchableOpacity>
+        </View>
+
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutText}>Sign Out</Text>
+        </TouchableOpacity>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: colors['surface-linen'],
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    paddingHorizontal: spacing.marginMobile,
+    height: 64,
+    backgroundColor: 'rgba(252, 249, 248, 0.8)',
+  },
+  brand: {
+    ...typography.headlineMd,
+    color: colors['forest-green'],
+    fontWeight: 'bold',
+  },
+  iconButton: {
+    padding: spacing.stackSm,
+  },
+  contentContainer: {
+    paddingHorizontal: spacing.marginMobile,
+    paddingBottom: spacing.sectionGap,
+    alignItems: 'center',
+  },
+  profileHeader: {
+    alignItems: 'center',
+    marginTop: spacing.stackLg,
+    marginBottom: spacing.sectionGap,
+  },
+  avatarContainer: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    overflow: 'hidden',
+    marginBottom: spacing.stackMd,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   avatar: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    marginRight: 16,
-  },
-  userInfo: {
-    flex: 1,
+    width: '100%',
+    height: '100%',
   },
   name: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0f1111',
+    ...typography.headlineLgMobile,
+    color: colors['forest-green'],
+    marginBottom: spacing.stackSm,
   },
-  email: {
-    fontSize: 14,
-    color: '#565959',
-    marginTop: 4,
+  role: {
+    ...typography.bodyLg,
+    color: colors['on-surface-variant'],
   },
   menuContainer: {
-    backgroundColor: '#fff',
-    marginTop: 20,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
+    width: '100%',
+    maxWidth: 600,
+    gap: spacing.base,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    backgroundColor: colors['surface-container-lowest'],
+    padding: spacing.stackMd,
+    borderRadius: 12,
+    shadowColor: colors['forest-green'],
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    elevation: 2,
+    marginBottom: spacing.stackSm,
   },
   menuItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: spacing.stackMd,
   },
   menuText: {
-    fontSize: 16,
-    color: '#0f1111',
-    marginLeft: 16,
+    ...typography.bodyMd,
+    color: colors.charcoal,
   },
   logoutButton: {
-    marginTop: 40,
-    marginHorizontal: 20,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#d5d9d9',
-    borderRadius: 8,
+    marginTop: spacing.stackLg,
     paddingVertical: 14,
+    paddingHorizontal: 32,
+    backgroundColor: colors['surface-container-lowest'],
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors['clay-outline'],
     alignItems: 'center',
   },
   logoutText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#0f1111',
+    ...typography.labelMd,
+    color: colors.charcoal,
   },
 });

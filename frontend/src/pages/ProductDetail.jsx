@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import api from '../services/api';
 import { useCart } from '../services/CartProvider';
 import { useAuth } from '../services/AuthProvider';
@@ -22,6 +22,7 @@ const ProductDetail = () => {
 
   useEffect(() => {
     fetchProductAndReviews();
+    window.scrollTo(0, 0);
   }, [id]);
 
   const fetchProductAndReviews = async () => {
@@ -105,280 +106,324 @@ const ProductDetail = () => {
   const renderStars = (rating) => {
     const fullStars = Math.floor(rating || 0);
     const emptyStars = 5 - fullStars;
-    return '★'.repeat(fullStars) + '☆'.repeat(emptyStars);
+    return (
+      <span className="flex text-terracotta">
+        {Array(fullStars).fill().map((_, i) => <span key={`f-${i}`} className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>star</span>)}
+        {Array(emptyStars).fill().map((_, i) => <span key={`e-${i}`} className="material-symbols-outlined">star</span>)}
+      </span>
+    );
   };
 
-  if (!product) return <div style={{padding: 20}}>Loading...</div>;
+  if (!product) return (
+    <div className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop text-center">
+      <div className="animate-pulse flex flex-col items-center">
+        <div className="w-16 h-16 border-4 border-forest-green border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 font-label-md text-label-md text-on-surface-variant">Loading piece...</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: 20 }}>
-      <div className="product-detail-container" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', gap: 30 }}>
-        {/* Left: Image */}
-        <div>
-          <img src={product.imageUrl || `https://picsum.photos/600/600?random=${product.id}`} alt={product.name} className="detail-image" style={{ width: '100%', borderRadius: 8 }} />
+    <main className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop">
+      {/* Main Product Section */}
+      <div className="grid grid-cols-12 gap-gutter">
+        {/* Product Images (Left) */}
+        <div className="col-span-12 md:col-span-7 flex flex-col gap-stack-md">
+          <div className="aspect-[4/5] bg-surface-container-highest overflow-hidden rounded-md">
+            <img 
+              src={product.imageUrl || `https://picsum.photos/800/1000?random=${product.id}`} 
+              alt={product.name}
+              className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" 
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-stack-md">
+            <div className="aspect-square bg-surface-container-highest overflow-hidden rounded-md">
+              <img 
+                src={`https://picsum.photos/400/400?random=${product.id + 1}`} 
+                alt="Detail 1"
+                className="w-full h-full object-cover" 
+              />
+            </div>
+            <div className="aspect-square bg-surface-container-highest overflow-hidden rounded-md">
+              <img 
+                src={`https://picsum.photos/400/400?random=${product.id + 2}`} 
+                alt="Detail 2"
+                className="w-full h-full object-cover" 
+              />
+            </div>
+          </div>
         </div>
+        
+        {/* Product Details (Right) */}
+        <div className="col-span-12 md:col-span-5 relative">
+          <div className="sticky top-[120px] flex flex-col gap-stack-lg pl-0 md:pl-8">
+            <div className="space-y-base">
+              <span className="font-label-md text-label-md text-terracotta uppercase tracking-[0.2em]">{product.category || 'Collection'}</span>
+              <h2 className="font-display-lg text-display-lg text-forest-green leading-none">{product.name}</h2>
+            </div>
+            <div className="font-headline-md text-headline-md text-on-surface">
+              ${product.price.toFixed(2)}
+            </div>
+            
+            <div className="flex items-center gap-2">
+              {renderStars(product.averageRating)}
+              <span className="font-label-md text-label-md text-on-surface-variant">({product.reviewCount || 0} reviews)</span>
+            </div>
 
-        {/* Center: Details */}
-        <div className="detail-info">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <h1 className="detail-title" style={{ fontSize: 28, marginBottom: 8, flex: 1 }}>{product.name}</h1>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button 
-                onClick={handleAddToWishlist}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B12704', fontSize: 24 }}
-                title="Add to Wishlist"
-              >
-                ❤️
-              </button>
-              <button 
-                onClick={handleAddToCompare}
-                style={{ fontSize: 14, padding: '4px 12px', borderRadius: 4, background: '#f0f2f2', border: '1px solid #d5d9d9', cursor: 'pointer', height: 'fit-content', alignSelf: 'center' }}
-              >
-                Compare
-              </button>
+            <div className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+              {product.description}
             </div>
-          </div>
-          <div style={{color:'#007185', marginBottom: 8}}>Visit the {product.sellerName || 'TrueHand'} Store</div>
-          
-          <div className="star-rating" style={{fontSize: 20, color: '#FFA41C'}}>
-            {renderStars(product.averageRating)} <span className="rating-count" style={{fontSize: 16, color: '#007185', marginLeft: 8}}>{product.reviewCount || 0} ratings</span>
-          </div>
-          
-          <hr style={{margin: '10px 0', border: 'none', borderTop: '1px solid #ddd'}} />
-          
-          <div className="price-display">
-            <span className="price-symbol" style={{fontSize: 14}}>₹</span>
-            <span className="price-whole" style={{fontSize: 28}}>{Math.floor(product.price)}</span>
-            <span className="price-fraction" style={{fontSize: 14}}>{(product.price % 1).toFixed(2).substring(2)}</span>
-          </div>
-          
-          <div style={{fontSize: 14, color: '#565959'}}>Inclusive of all taxes</div>
-          
-          <hr style={{margin: '14px 0', border: 'none', borderTop: '1px solid #ddd'}} />
-          
-          <h3 style={{fontSize: 16, marginBottom: 8}}>About this item</h3>
-          <ul style={{paddingLeft: 20, fontSize: 14, lineHeight: 1.6}}>
-            <li>{product.description}</li>
-            <li>Category: {product.category}</li>
-          </ul>
-        </div>
+            
+            <div className="flex flex-col gap-stack-sm pt-4">
+              <div className="flex items-center gap-4 mb-2">
+                 <label className="font-label-md text-label-md text-on-surface">Quantity:</label>
+                 <select 
+                   value={qty} 
+                   onChange={e => setQty(Number(e.target.value))} 
+                   className="border border-outline-variant rounded p-2 focus:ring-1 focus:ring-forest-green outline-none bg-transparent"
+                 >
+                   {[...Array(Math.min(10, product.stockQuantity || 1)).keys()].map(x => (
+                     <option key={x+1} value={x+1}>{x+1}</option>
+                   ))}
+                 </select>
+              </div>
 
-        {/* Right: Buy Box */}
-        <div>
-          <div className="detail-buybox" style={{ border: '1px solid #ddd', padding: 16, borderRadius: 8 }}>
-            <div className="price-display" style={{marginBottom: 14}}>
-              <span className="price-symbol" style={{fontSize: 14}}>₹</span>
-              <span className="price-whole" style={{fontSize: 24}}>{Math.floor(product.price)}</span>
-              <span className="price-fraction" style={{fontSize: 14}}>{(product.price % 1).toFixed(2).substring(2)}</span>
+              {product.stockQuantity > 0 ? (
+                <button 
+                  onClick={() => addToCart(product, qty)}
+                  className="w-full py-5 bg-forest-green text-white font-label-md text-label-md rounded-[4px] hover:bg-forest-green/90 transition-all active:scale-[0.98] uppercase tracking-wider"
+                >
+                  Add to Collection
+                </button>
+              ) : (
+                <button 
+                  disabled
+                  className="w-full py-5 bg-surface-variant text-outline font-label-md text-label-md rounded-[4px] cursor-not-allowed uppercase tracking-wider"
+                >
+                  Currently Unavailable
+                </button>
+              )}
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleAddToWishlist}
+                  className="flex-1 py-4 border border-charcoal/20 text-charcoal font-label-md text-label-md rounded-[4px] hover:bg-surface-container transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px]">favorite</span>
+                  Save
+                </button>
+                <button 
+                  onClick={handleAddToCompare}
+                  className="flex-1 py-4 border border-charcoal/20 text-charcoal font-label-md text-label-md rounded-[4px] hover:bg-surface-container transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-[18px]">compare_arrows</span>
+                  Compare
+                </button>
+              </div>
             </div>
-            
-            <div style={{fontSize: 14, marginBottom: 14}}>
-              <span style={{color:'#007185'}}>FREE delivery</span> <b>Tomorrow 8 AM - 12 PM</b>. Order within 10 hrs 30 mins.
-            </div>
-            
-            <div style={{display:'flex', alignItems:'center', gap:8, marginBottom: 14}}>
-              <span style={{fontSize:20}}>📍</span> <span style={{color:'#007185', fontSize:14}}>Deliver to India</span>
-            </div>
-            
-            {product.stockQuantity > 0 ? (
-              <div className="in-stock" style={{ color: '#007600', fontSize: 18, marginBottom: 10 }}>In stock</div>
-            ) : (
-              <div style={{color:'#B12704', fontSize:18, marginBottom:10}}>Currently unavailable.</div>
-            )}
-            
-            <div style={{marginBottom: 14}}>
-              <label style={{fontSize:13}}>Quantity: </label>
-              <select value={qty} onChange={e => setQty(Number(e.target.value))} style={{padding: '4px 8px', borderRadius: 8}}>
-                {[...Array(Math.min(10, product.stockQuantity || 1)).keys()].map(x => (
-                  <option key={x+1} value={x+1}>{x+1}</option>
-                ))}
-              </select>
-            </div>
-            
-            <button 
-              className="btn btn-primary w-full" 
-              style={{marginBottom: 10, borderRadius: 20, padding: '8px 0', width: '100%', background: '#FFD814', border: 'none', cursor: 'pointer'}}
-              onClick={() => addToCart(product, qty)}
-              disabled={product.stockQuantity === 0}
-            >
-              Add to Cart
-            </button>
-            
-            <button 
-              className="btn btn-secondary w-full" 
-              style={{marginBottom: 14, borderRadius: 20, padding: '8px 0', width: '100%', background: '#FFA41C', border: 'none', cursor: 'pointer'}}
-              onClick={() => { addToCart(product, qty); navigate('/checkout'); }}
-              disabled={product.stockQuantity === 0}
-            >
-              Buy Now
-            </button>
-            
-            <div style={{fontSize: 12, color: '#565959', display: 'grid', gridTemplateColumns: '80px 1fr', gap: 4}}>
-              <span>Ships from</span><span>TrueHand</span>
-              <span>Sold by</span><span style={{color:'#007185'}}>{product.sellerName || 'TrueHand'}</span>
+
+            <div className="border-t border-charcoal/5 pt-stack-lg space-y-stack-md mt-4">
+              <details className="group cursor-pointer">
+                <summary className="flex justify-between items-center list-none font-label-md text-label-md text-on-surface py-2">
+                  Dimensions & Details
+                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                </summary>
+                <div className="font-body-md text-body-md text-on-surface-variant pt-2 leading-relaxed pb-4">
+                  Sold by: {product.sellerName || 'TrueHand Collective'}<br/>
+                  Stock: {product.stockQuantity} remaining<br/>
+                  Authentic craftsmanship guaranteed.
+                </div>
+              </details>
+              <details className="group cursor-pointer border-t border-charcoal/5 pt-stack-sm">
+                <summary className="flex justify-between items-center list-none font-label-md text-label-md text-on-surface py-2">
+                  Shipping & Returns
+                  <span className="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+                </summary>
+                <div className="font-body-md text-body-md text-on-surface-variant pt-2 leading-relaxed pb-4">
+                  Each piece is meticulously packed in sustainable, plastic-free packaging. Ships within 3-5 business days. Returns accepted within 14 days of delivery.
+                </div>
+              </details>
             </div>
           </div>
         </div>
       </div>
 
-      <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
+      {/* Maker's Note */}
+      <section className="mt-section-gap bg-surface-container p-stack-lg md:p-24 flex flex-col items-center text-center rounded-lg">
+        <div className="max-w-2xl space-y-stack-md">
+          <span className="material-symbols-outlined text-4xl text-terracotta" style={{fontVariationSettings: "'FILL' 1"}}>format_quote</span>
+          <h3 className="font-headline-lg text-headline-lg text-forest-green italic">
+            "I believe objects carry the energy of their creation. This piece is meant to ground you—to make the act of holding it feel intentional and heavy with history."
+          </h3>
+          <div className="pt-8">
+            <div className="font-label-md text-label-md text-on-surface font-bold">{product.sellerName || 'TrueHand Artisan'}</div>
+            <div className="font-label-sm text-label-sm text-on-surface-variant uppercase">Master Craftsman</div>
+          </div>
+        </div>
+      </section>
 
-      {/* Smart Recommendations */}
+      {/* Complementary Pieces (Recommendations) */}
       {recommendations.length > 0 && (
-        <div style={{ marginBottom: 40 }}>
-          <h2 style={{ marginBottom: 20 }}>You Might Also Like</h2>
-          <div style={{ display: 'flex', gap: 20, overflowX: 'auto', paddingBottom: 10 }}>
-            {recommendations.map(rec => (
-              <div key={rec.id} style={{ minWidth: 200, border: '1px solid #ddd', borderRadius: 8, padding: 15, background: '#fff', cursor: 'pointer' }} onClick={() => navigate(`/product/${rec.id}`)}>
-                <img src={rec.imageUrl || `https://picsum.photos/200/200?random=${rec.id}`} alt={rec.name} style={{ width: '100%', height: 150, objectFit: 'contain', marginBottom: 10 }} />
-                <h4 style={{ margin: '0 0 5px 0', fontSize: 14, color: '#0f1111', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{rec.name}</h4>
-                <div style={{ color: '#B12704', fontSize: 18, fontWeight: 'bold' }}>₹{rec.price}</div>
-                <div style={{ color: '#FFA41C', fontSize: 12 }}>{renderStars(rec.averageRating)} ({rec.reviewCount})</div>
+        <section className="mt-section-gap">
+          <h3 className="font-headline-md text-headline-md text-forest-green mb-stack-lg">Complementary Pieces</h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+            {/* Bento Layout mapping (first takes 2 cols if > 3 items) */}
+            {recommendations.slice(0, 4).map((rec, idx) => (
+              <div key={rec.id} className={`${idx === 0 && recommendations.length >= 3 ? 'md:col-span-2' : ''} group cursor-pointer`} onClick={() => navigate(`/product/${rec.id}`)}>
+                <div className={`aspect-[${idx === 0 && recommendations.length >= 3 ? '16/10' : '1/1'}] bg-surface-container-highest overflow-hidden mb-4 rounded-md`}>
+                  <img src={rec.imageUrl || `https://picsum.photos/400/400?random=${rec.id}`} alt={rec.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                </div>
+                <div className="text-center">
+                  <h4 className="font-body-md text-body-md text-on-surface truncate">{rec.name}</h4>
+                  <div className="font-label-md text-label-md text-on-surface-variant">${rec.price.toFixed(2)}</div>
+                </div>
               </div>
             ))}
           </div>
-          <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
-        </div>
+        </section>
       )}
 
-      {/* Customer Questions & Answers */}
-      <div style={{ marginBottom: 40 }}>
-        <h2>Customer Questions & Answers</h2>
-        <form onSubmit={handleAskQuestion} style={{ display: 'flex', gap: 10, marginBottom: 20 }}>
-          <input 
-            value={newQuestion} 
-            onChange={e => setNewQuestion(e.target.value)} 
-            placeholder="Have a question? Ask here..." 
-            style={{ flex: 1, padding: 10, borderRadius: 4, border: '1px solid #ccc' }}
-          />
-          <button type="submit" style={{ padding: '10px 20px', borderRadius: 4, background: '#f0f2f2', border: '1px solid #d5d9d9', cursor: 'pointer' }}>Ask</button>
-        </form>
-
-        {questions.length === 0 ? (
-          <p style={{ color: '#565959' }}>No questions have been asked yet. Be the first!</p>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            {questions.map(q => (
-              <div key={q.id} style={{ padding: 15, border: '1px solid #eee', borderRadius: 8 }}>
-                <div style={{ display: 'flex', gap: 10 }}>
-                  <div style={{ fontWeight: 'bold' }}>Q:</div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 'bold', color: '#007185', marginBottom: 4 }}>{q.content}</div>
-                    <div style={{ fontSize: 12, color: '#565959' }}>Asked by {q.userName} on {new Date(q.createdAt).toLocaleDateString()}</div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
-                  <div style={{ fontWeight: 'bold' }}>A:</div>
-                  <div style={{ flex: 1 }}>
-                    {q.answer ? (
-                      <div>
-                        <div style={{ marginBottom: 4 }}>{q.answer}</div>
-                        <div style={{ fontSize: 12, color: '#565959' }}>Answered by {product.sellerName || 'Seller'}</div>
-                      </div>
-                    ) : (
-                      <div style={{ fontStyle: 'italic', color: '#565959' }}>Seller hasn't answered yet.</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <hr style={{margin: '40px 0', border: 'none', borderTop: '1px solid #ddd'}} />
-
-      {/* Customer Reviews Section */}
-      <div className="reviews-section" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 40 }}>
-        {/* Review Summary & Write Review */}
-        <div>
-          <h2>Customer Reviews</h2>
-          <div style={{ fontSize: 18, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: '#FFA41C', fontSize: 24 }}>{renderStars(product.averageRating)}</span> 
-            <span>{product.averageRating ? product.averageRating.toFixed(1) : '0'} out of 5</span>
-          </div>
-          <p style={{ color: '#565959', marginBottom: 24 }}>{product.reviewCount || 0} global ratings</p>
-          
-          <hr style={{margin: '20px 0', border: 'none', borderTop: '1px solid #ddd'}} />
-          
-          <h3>Review this product</h3>
-          <p style={{ fontSize: 14, color: '#565959', marginBottom: 16 }}>Share your thoughts with other customers</p>
-          
-          {user ? (
-            <form onSubmit={handleReviewSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Rating</label>
-                <select 
-                  value={reviewForm.rating} 
-                  onChange={e => setReviewForm({...reviewForm, rating: Number(e.target.value)})}
-                  style={{ padding: 8, borderRadius: 4, width: '100%' }}
-                >
-                  <option value={5}>5 - Excellent</option>
-                  <option value={4}>4 - Good</option>
-                  <option value={3}>3 - Average</option>
-                  <option value={2}>2 - Poor</option>
-                  <option value={1}>1 - Terrible</option>
-                </select>
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', marginBottom: 4 }}>Written Review (Optional)</label>
-                <textarea 
-                  rows={4} 
-                  value={reviewForm.comment}
-                  onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
-                  placeholder="What did you like or dislike?"
-                  style={{ width: '100%', padding: 8, borderRadius: 4, border: '1px solid #888' }}
-                />
-              </div>
-              {reviewError && <div style={{ color: '#B12704', fontSize: 14 }}>{reviewError}</div>}
-              <button 
-                type="submit" 
-                disabled={isSubmitting}
-                style={{ padding: '8px 16px', borderRadius: 8, background: '#fff', border: '1px solid #d5d9d9', cursor: 'pointer', fontWeight: 'bold', width: 'fit-content' }}
-              >
-                {isSubmitting ? 'Submitting...' : 'Write a customer review'}
-              </button>
-            </form>
-          ) : (
-            <button 
-              onClick={() => navigate('/login')}
-              style={{ padding: '8px 16px', borderRadius: 8, background: '#fff', border: '1px solid #d5d9d9', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-              Sign in to write a review
+      {/* Q&A Section */}
+      <section className="mt-section-gap">
+        <h3 className="font-headline-md text-headline-md text-forest-green mb-8">Community Questions</h3>
+        <div className="max-w-3xl">
+          <form onSubmit={handleAskQuestion} className="flex gap-4 mb-8">
+            <input 
+              type="text"
+              value={newQuestion} 
+              onChange={e => setNewQuestion(e.target.value)} 
+              placeholder="Ask a question about this piece..." 
+              className="flex-1 bg-surface border-b border-charcoal/20 py-2 focus:outline-none focus:border-terracotta font-body-md px-2"
+            />
+            <button type="submit" className="font-label-md text-label-md text-white bg-forest-green px-6 py-2 rounded-[4px] hover:bg-forest-green/90 transition-colors uppercase tracking-wider">
+              Ask
             </button>
-          )}
-        </div>
+          </form>
 
-        {/* Review List */}
-        <div>
-          <h3 style={{ marginBottom: 16 }}>Top reviews from India</h3>
-          {reviews.length === 0 ? (
-            <p style={{ color: '#565959' }}>No reviews yet. Be the first to review this product!</p>
+          {questions.length === 0 ? (
+            <p className="font-body-md text-body-md text-on-surface-variant italic">No questions have been asked yet. Be the first.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              {reviews.map(review => (
-                <div key={review.id} className="review-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: '50%', background: '#ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      👤
+            <div className="space-y-6">
+              {questions.map(q => (
+                <div key={q.id} className="p-6 border border-charcoal/10 rounded-lg bg-surface">
+                  <div className="flex gap-4 mb-4">
+                    <div className="font-headline-md text-terracotta leading-none mt-1">Q</div>
+                    <div>
+                      <div className="font-body-lg text-charcoal font-medium mb-1">{q.content}</div>
+                      <div className="font-label-sm text-outline uppercase tracking-wider">Asked by {q.userName} on {new Date(q.createdAt).toLocaleDateString()}</div>
                     </div>
-                    <span style={{ fontWeight: 'bold' }}>{review.userName}</span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                    <span style={{ color: '#FFA41C' }}>{renderStars(review.rating)}</span>
-                    <span style={{ fontWeight: 'bold', fontSize: 14, color: '#C45500' }}>Verified Purchase</span>
+                  <div className="flex gap-4">
+                    <div className="font-headline-md text-forest-green leading-none mt-1">A</div>
+                    <div>
+                      {q.answer ? (
+                        <>
+                          <div className="font-body-md text-on-surface mb-1">{q.answer}</div>
+                          <div className="font-label-sm text-outline uppercase tracking-wider">Answered by {product.sellerName || 'Artisan'}</div>
+                        </>
+                      ) : (
+                        <div className="font-body-md text-on-surface-variant italic">Awaiting response from artisan.</div>
+                      )}
+                    </div>
                   </div>
-                  <div style={{ fontSize: 13, color: '#565959', marginBottom: 8 }}>
-                    Reviewed on {new Date(review.createdAt).toLocaleDateString()}
-                  </div>
-                  <p style={{ lineHeight: 1.5, fontSize: 14 }}>{review.comment}</p>
                 </div>
               ))}
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </section>
+
+      {/* Reviews Section */}
+      <section className="mt-section-gap grid grid-cols-1 md:grid-cols-12 gap-gutter">
+        <div className="col-span-12 md:col-span-4">
+          <h3 className="font-headline-md text-headline-md text-forest-green mb-4">Reviews</h3>
+          <div className="flex items-center gap-2 mb-2">
+            {renderStars(product.averageRating)}
+            <span className="font-headline-md text-charcoal ml-2">{product.averageRating ? product.averageRating.toFixed(1) : '0'} / 5</span>
+          </div>
+          <p className="font-label-md text-label-md text-outline tracking-wider uppercase mb-8">Based on {product.reviewCount || 0} reviews</p>
+          
+          <div className="bg-surface-container-low p-6 rounded-lg">
+            <h4 className="font-label-md text-label-md text-charcoal mb-4 uppercase tracking-wider">Leave a Review</h4>
+            {user ? (
+              <form onSubmit={handleReviewSubmit} className="flex flex-col gap-4">
+                <div>
+                  <select 
+                    value={reviewForm.rating} 
+                    onChange={e => setReviewForm({...reviewForm, rating: Number(e.target.value)})}
+                    className="w-full bg-white border border-outline-variant rounded p-2 font-body-md focus:outline-none focus:border-forest-green"
+                  >
+                    <option value={5}>5 - Extraordinary Piece</option>
+                    <option value={4}>4 - Beautiful</option>
+                    <option value={3}>3 - Good Craftsmanship</option>
+                    <option value={2}>2 - Disappointing</option>
+                    <option value={1}>1 - Poor Quality</option>
+                  </select>
+                </div>
+                <div>
+                  <textarea 
+                    rows={4} 
+                    value={reviewForm.comment}
+                    onChange={e => setReviewForm({...reviewForm, comment: e.target.value})}
+                    placeholder="Share your thoughts on the craftsmanship..."
+                    className="w-full bg-white border border-outline-variant rounded p-3 font-body-md focus:outline-none focus:border-forest-green resize-none"
+                  />
+                </div>
+                {reviewError && <div className="text-error-red font-label-sm">{reviewError}</div>}
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full py-3 border border-forest-green text-forest-green font-label-md text-label-md rounded-[4px] hover:bg-forest-green hover:text-white transition-colors uppercase tracking-wider"
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+              </form>
+            ) : (
+              <button 
+                onClick={() => navigate('/login')}
+                className="w-full py-3 border border-charcoal/20 text-charcoal font-label-md text-label-md rounded-[4px] hover:bg-surface-container transition-colors uppercase tracking-wider"
+              >
+                Sign in to Review
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="col-span-12 md:col-span-8 md:pl-12">
+          <h3 className="font-headline-md text-headline-md text-charcoal mb-8">Collector Thoughts</h3>
+          {reviews.length === 0 ? (
+            <p className="font-body-md text-body-md text-on-surface-variant italic">No reviews yet. Be the first to share your thoughts.</p>
+          ) : (
+            <div className="space-y-8">
+              {reviews.map(review => (
+                <div key={review.id} className="border-b border-charcoal/10 pb-8 last:border-0">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-forest-green text-white flex items-center justify-center font-headline-md">
+                        {review.userName ? review.userName[0].toUpperCase() : 'C'}
+                      </div>
+                      <div>
+                        <div className="font-label-md text-label-md text-charcoal">{review.userName}</div>
+                        <div className="font-label-sm text-outline flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[14px] text-terracotta" style={{fontVariationSettings: "'FILL' 1"}}>verified</span> Verified Collector
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="mb-1">{renderStars(review.rating)}</div>
+                      <div className="font-label-sm text-outline uppercase tracking-wider">{new Date(review.createdAt).toLocaleDateString()}</div>
+                    </div>
+                  </div>
+                  <p className="font-body-lg text-on-surface-variant leading-relaxed mt-4">
+                    "{review.comment}"
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+    </main>
   );
 };
 

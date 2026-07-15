@@ -1,150 +1,164 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, TextInput, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import { useStripe } from '@stripe/stripe-react-native';
-import api from '../services/api';
-import { useCart } from '../services/CartProvider';
-import { useAuth } from '../services/AuthProvider';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';;
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { colors, typography, spacing } from '../theme/theme';
+import { useOrderStore } from '../store/useOrderStore';
 
 export default function CheckoutScreen() {
   const navigation = useNavigation();
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
-  const { cartItems, getTotal, clearCart } = useCart();
-  const { user } = useAuth();
+  const setCheckoutData = useOrderStore((state) => state.setCheckoutData);
+  const checkoutData = useOrderStore((state) => state.checkoutData);
+  
+  const [selectedAddress, setSelectedAddress] = useState(checkoutData.address?.id || 'home');
+  const [selectedShipping, setSelectedShipping] = useState(checkoutData.shipping || 'standard');
 
-  const [loading, setLoading] = useState(false);
-  const [address, setAddress] = useState(user?.address || '');
-
-  const fetchPaymentSheetParams = async () => {
-    const response = await api.post('/payment/create-intent', {
-      amount: getTotal(),
-      currency: 'inr'
+  const handleContinue = () => {
+    // Save to store
+    setCheckoutData({
+      address: { id: selectedAddress, street: selectedAddress === 'home' ? '123 Craft Lane' : '456 Maker Blvd' },
+      shipping: selectedShipping
     });
-    return response.data;
-  };
-
-  const openPaymentSheet = async () => {
-    if (!address) {
-      Alert.alert('Address Required', 'Please enter your delivery address.');
-      return;
-    }
-    if (cartItems.length === 0) {
-      Alert.alert('Empty Cart', 'Your cart is empty.');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // 1. Fetch Intent Client Secret from backend
-      const { clientSecret } = await fetchPaymentSheetParams();
-
-      // 2. Initialize the Payment Sheet
-      const { error: initError } = await initPaymentSheet({
-        merchantDisplayName: 'TrueHand',
-        paymentIntentClientSecret: clientSecret,
-        defaultBillingDetails: {
-          name: user ? `${user.firstName} ${user.lastName}` : 'Guest User',
-        },
-        returnURL: 'truehand://stripe-redirect', // Required for some local payment methods
-      });
-
-      if (initError) {
-        Alert.alert('Initialization Error', initError.message);
-        setLoading(false);
-        return;
-      }
-
-      // 3. Present the Payment Sheet
-      const { error: presentError } = await presentPaymentSheet();
-
-      if (presentError) {
-        // User cancelled or payment failed
-        if (presentError.code !== 'Canceled') {
-          Alert.alert('Payment Error', presentError.message);
-        }
-      } else {
-        // 4. Payment Succeeded, Create Order
-        const orderData = {
-          totalAmount: getTotal(),
-          deliveryAddress: address,
-          paymentStatus: 'PAID',
-          status: 'CONFIRMED'
-        };
-        const res = await api.post('/orders', orderData);
-        
-        clearCart();
-        Alert.alert('Success', 'Your order is confirmed!');
-        navigation.navigate('Tracking', { id: res.data.id });
-      }
-    } catch (err) {
-      console.error(err);
-      Alert.alert('Error', 'An error occurred during checkout.');
-    } finally {
-      setLoading(false);
-    }
+    navigation.navigate('PaymentMethodSelection');
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {/* Top AppBar */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={24} color="#0f1111" />
+        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
+          <Ionicons name="arrow-back" size={24} color={colors.charcoal} />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Checkout</Text>
+        <Text style={styles.headerTitle}>TrueHand</Text>
+        <View style={styles.iconButton} /> {/* Spacer */}
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>1. Delivery Address</Text>
-          <TextInput
-            style={styles.addressInput}
-            multiline
-            numberOfLines={3}
-            placeholder="Enter your full delivery address"
-            value={address}
-            onChangeText={setAddress}
-          />
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>2. Order Summary</Text>
-          {cartItems.map((item) => (
-            <View key={item.id} style={styles.summaryItem}>
-              <Text style={styles.summaryItemName} numberOfLines={1}>{item.name}</Text>
-              <Text style={styles.summaryItemPrice}>{item.quantity} x ${Number(item.price).toFixed(2)}</Text>
-            </View>
-          ))}
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Order Total:</Text>
-            <Text style={styles.totalValue}>${getTotal().toFixed(2)}</Text>
+        {/* Progress Indicator */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressStep}>
+            <Text style={[styles.progressText, styles.progressTextActive]}>Address</Text>
+            <View style={[styles.progressLine, styles.progressLineActive]} />
+          </View>
+          <View style={styles.progressConnector} />
+          <View style={styles.progressStep}>
+            <Text style={[styles.progressText, styles.progressTextInactive]}>Payment</Text>
+            <View style={[styles.progressLine, styles.progressLineInactive]} />
+          </View>
+          <View style={styles.progressConnector} />
+          <View style={styles.progressStep}>
+            <Text style={[styles.progressText, styles.progressTextInactive]}>Review</Text>
+            <View style={[styles.progressLine, styles.progressLineInactive]} />
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>3. Payment</Text>
-          <Text style={styles.paymentInfo}>
-            TrueHand uses Stripe for secure, encrypted payments. You can use any major credit card.
-          </Text>
+        <Text style={styles.pageTitle}>Shipping Details</Text>
+
+        <View style={styles.card}>
+          
+          {/* Select Address */}
+          <View style={styles.section}>
+            <View style={styles.sectionHeaderRow}>
+              <Text style={styles.sectionTitle}>Select Address</Text>
+              <TouchableOpacity>
+                <Text style={styles.addText}>Add New</Text>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.optionsList}>
+              {/* Address Option 1 */}
+              <TouchableOpacity 
+                style={[
+                  styles.optionCard, 
+                  selectedAddress === 'home' && styles.optionCardSelected
+                ]}
+                onPress={() => setSelectedAddress('home')}
+                activeOpacity={0.8}
+              >
+                <View style={styles.optionContent}>
+                  <Text style={styles.optionLabel}>Home</Text>
+                  <Text style={styles.optionName}>Jane Doe</Text>
+                  <Text style={styles.optionDesc}>123 Craft Lane, Studio 4{'\n'}Artisanville, NY 10012</Text>
+                </View>
+                {selectedAddress === 'home' && (
+                  <Ionicons name="checkmark-circle" size={24} color={colors['forest-green']} />
+                )}
+              </TouchableOpacity>
+
+              {/* Address Option 2 */}
+              <TouchableOpacity 
+                style={[
+                  styles.optionCard, 
+                  selectedAddress === 'work' && styles.optionCardSelected
+                ]}
+                onPress={() => setSelectedAddress('work')}
+                activeOpacity={0.8}
+              >
+                <View style={styles.optionContent}>
+                  <Text style={styles.optionLabel}>Studio</Text>
+                  <Text style={styles.optionName}>Jane Doe</Text>
+                  <Text style={styles.optionDesc}>456 Maker Blvd, Floor 2{'\n'}Creative City, CA 90210</Text>
+                </View>
+                {selectedAddress === 'work' && (
+                  <Ionicons name="checkmark-circle" size={24} color={colors['forest-green']} />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          {/* Shipping Method */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Delivery Speed</Text>
+            
+            <View style={styles.optionsList}>
+              <TouchableOpacity 
+                style={styles.shippingCard}
+                onPress={() => setSelectedShipping('standard')}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.radioCircle, selectedShipping === 'standard' && styles.radioCircleSelected]}>
+                  {selectedShipping === 'standard' && <View style={styles.radioInner} />}
+                </View>
+                <View style={styles.shippingDetails}>
+                  <Text style={styles.shippingTitle}>Standard Craft Shipping</Text>
+                  <Text style={styles.shippingDesc}>5-7 Business Days</Text>
+                </View>
+                <Text style={styles.shippingPrice}>Free</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.shippingCard}
+                onPress={() => setSelectedShipping('express')}
+                activeOpacity={0.8}
+              >
+                <View style={[styles.radioCircle, selectedShipping === 'express' && styles.radioCircleSelected]}>
+                  {selectedShipping === 'express' && <View style={styles.radioInner} />}
+                </View>
+                <View style={styles.shippingDetails}>
+                  <Text style={styles.shippingTitle}>Express Courier</Text>
+                  <Text style={styles.shippingDesc}>2-3 Business Days</Text>
+                </View>
+                <Text style={styles.shippingPrice}>$15.00</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.actionsRow}>
+            <TouchableOpacity 
+              style={styles.primaryButton}
+              onPress={handleContinue}
+            >
+              <Text style={styles.primaryButtonText}>Continue to Payment</Text>
+            </TouchableOpacity>
+          </View>
+
         </View>
 
       </ScrollView>
-
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.checkoutBtn, loading && styles.checkoutBtnDisabled]} 
-          onPress={openPaymentSheet}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#0f1111" />
-          ) : (
-            <Text style={styles.checkoutBtnText}>Pay Securely with Stripe</Text>
-          )}
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -152,107 +166,197 @@ export default function CheckoutScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#eaeded',
+    backgroundColor: colors['surface-linen'],
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 15,
-    backgroundColor: '#fff',
+    paddingHorizontal: spacing.marginMobile,
+    height: 64,
+    backgroundColor: colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: colors['surface-container-high'],
   },
-  backBtn: {
-    marginRight: 15,
+  iconButton: {
+    padding: spacing.stackSm,
+    width: 40,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#0f1111',
+    ...typography.headlineMd,
+    color: colors['forest-green'],
   },
   content: {
-    padding: 15,
+    paddingHorizontal: spacing.marginMobile,
+    paddingTop: spacing.stackLg,
+    paddingBottom: spacing.sectionGap,
   },
-  section: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderRadius: 8,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: '#ddd',
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0f1111',
-    marginBottom: 15,
-  },
-  addressInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    textAlignVertical: 'top',
-    height: 100,
-  },
-  summaryItem: {
+  progressContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 10,
+    alignItems: 'center',
+    marginBottom: spacing.stackLg,
+    paddingHorizontal: spacing.stackSm,
   },
-  summaryItemName: {
+  progressStep: {
     flex: 1,
-    fontSize: 15,
-    color: '#333',
-    marginRight: 10,
-  },
-  summaryItemPrice: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    color: '#0f1111',
-  },
-  totalRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 15,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#eee',
-  },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#0f1111',
-  },
-  totalValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#B12704',
-  },
-  paymentInfo: {
-    fontSize: 14,
-    color: '#555',
-    lineHeight: 20,
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: '#fff',
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-  },
-  checkoutBtn: {
-    backgroundColor: '#FFD814',
-    paddingVertical: 15,
-    borderRadius: 8,
     alignItems: 'center',
   },
-  checkoutBtnDisabled: {
-    opacity: 0.7,
+  progressText: {
+    ...typography.labelMd,
+    paddingBottom: 8,
   },
-  checkoutBtnText: {
-    color: '#0f1111',
-    fontWeight: 'bold',
-    fontSize: 18,
-  }
+  progressTextActive: {
+    color: colors.charcoal,
+  },
+  progressTextInactive: {
+    color: colors.outline,
+  },
+  progressLine: {
+    height: 2,
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+  },
+  progressLineActive: {
+    backgroundColor: colors.charcoal,
+  },
+  progressLineInactive: {
+    backgroundColor: 'transparent',
+  },
+  progressConnector: {
+    width: 32,
+    height: 1,
+    backgroundColor: colors['surface-container-high'],
+    marginBottom: -22, // adjust for alignment
+  },
+  pageTitle: {
+    ...typography.headlineLgMobile,
+    color: colors.charcoal,
+    textAlign: 'center',
+    marginBottom: spacing.stackLg,
+  },
+  card: {
+    backgroundColor: colors['surface-container-lowest'],
+    borderRadius: 8,
+    padding: spacing.marginMobile,
+    borderWidth: 1,
+    borderColor: colors['surface-container'],
+    shadowColor: colors.charcoal,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+  },
+  section: {
+    marginBottom: spacing.stackLg,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.stackMd,
+  },
+  sectionTitle: {
+    ...typography.bodyLg,
+    color: colors.charcoal,
+    marginBottom: 0,
+  },
+  addText: {
+    ...typography.labelSm,
+    color: colors['forest-green'],
+  },
+  optionsList: {
+    gap: spacing.stackMd,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors['surface-container-highest'],
+    borderRadius: 8,
+    backgroundColor: colors['surface-container-lowest'],
+  },
+  optionCardSelected: {
+    borderColor: colors.charcoal,
+    backgroundColor: colors.surface,
+  },
+  optionContent: {
+    flex: 1,
+  },
+  optionLabel: {
+    ...typography.labelMd,
+    color: colors.charcoal,
+    marginBottom: 4,
+  },
+  optionName: {
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
+  },
+  optionDesc: {
+    ...typography.bodyMd,
+    color: colors['on-surface-variant'],
+    marginTop: 4,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors['surface-container-high'],
+    marginBottom: spacing.stackLg,
+  },
+  shippingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderColor: colors['surface-container-highest'],
+    borderRadius: 8,
+  },
+  radioCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: colors.outline,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  radioCircleSelected: {
+    borderColor: colors['forest-green'],
+  },
+  radioInner: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors['forest-green'],
+  },
+  shippingDetails: {
+    flex: 1,
+  },
+  shippingTitle: {
+    ...typography.labelMd,
+    color: colors.charcoal,
+  },
+  shippingDesc: {
+    ...typography.bodyMd,
+    color: colors.outline,
+  },
+  shippingPrice: {
+    ...typography.labelMd,
+    color: colors.charcoal,
+  },
+  actionsRow: {
+    marginTop: spacing.stackMd,
+  },
+  primaryButton: {
+    backgroundColor: colors['forest-green'],
+    paddingVertical: 16,
+    borderRadius: 4,
+    alignItems: 'center',
+  },
+  primaryButtonText: {
+    ...typography.labelMd,
+    color: colors['on-primary'],
+  },
 });

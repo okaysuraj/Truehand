@@ -1,95 +1,99 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../services/AuthProvider';
-import './Navbar.css';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
-
-  const handleVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window)) {
-      alert('Voice search is not supported in your browser.');
-      return;
-    }
-    const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = 'en-US';
-    recognition.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      setSearchQuery(transcript);
-      navigate(`/products?search=${encodeURIComponent(transcript)}`);
-    };
-    recognition.start();
-  };
-
-  const handleImageSearch = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      alert('Image search endpoint placeholder. Searching visually similar products...');
-      navigate(`/products?search=visually-similar`);
+      setIsSearchOpen(false);
     }
   };
 
   return (
-    <nav className="navbar">
-      <div className="container navbar-container">
-        <Link to={isAuthenticated ? (user?.role === 'SELLER' ? '/seller/dashboard' : '/profile') : '/'} className="navbar-logo">
-          TrueHand
-        </Link>
-        <div className="nav-search" style={{ display: 'flex', flex: 1, margin: '0 20px', alignItems: 'center' }}>
-          <form onSubmit={handleSearch} style={{ display: 'flex', flex: 1, background: '#fff', borderRadius: 4, overflow: 'hidden', border: '1px solid #ccc' }}>
-            <input 
-              type="text" 
-              placeholder="Search products..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              style={{ flex: 1, padding: '8px 12px', border: 'none', outline: 'none' }}
-            />
-            <button type="button" onClick={handleVoiceSearch} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0 10px', fontSize: 18 }} title="Voice Search">🎤</button>
-            <label style={{ cursor: 'pointer', padding: '0 10px', display: 'flex', alignItems: 'center', fontSize: 18 }} title="Image Search">
-              📷
-              <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageSearch} />
-            </label>
-            <button type="submit" style={{ background: '#febd69', border: 'none', cursor: 'pointer', padding: '0 15px', fontWeight: 'bold' }}>🔍</button>
-          </form>
+    <header className="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md shadow-sm dark:shadow-none transition-all duration-300">
+      <nav className="flex justify-between items-center w-full px-margin-desktop py-stack-md max-w-container-max mx-auto h-20">
+        
+        {/* Brand Logo */}
+        <div className="flex-1">
+          <Link to="/" className="font-headline-lg text-headline-lg tracking-widest text-on-surface dark:text-inverse-on-surface uppercase hover:opacity-80 transition-opacity">
+            TrueHand
+          </Link>
         </div>
-        <div className="navbar-links">
-          <Link to="/products">Shop</Link>
-          <a href="#story">Our Story</a>
-          <a href="#sell">Sell</a>
-          {isAuthenticated && <Link to="/wishlist">Wishlist</Link>}
-          <Link to="/compare">Compare</Link>
-        </div>
-        <div className="navbar-actions">
-          {isAuthenticated ? (
-            <>
-              <Link to={user?.role === 'SELLER' ? '/seller/dashboard' : '/profile'} className="nav-btn nav-btn-outline">Dashboard</Link>
-              <button onClick={logout} className="nav-btn nav-btn-primary">Logout</button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="nav-btn nav-btn-outline">Sign In</Link>
-              <Link to="/register" className="nav-btn nav-btn-primary">Register</Link>
-            </>
+        
+        {/* Navigation Links */}
+        <ul className="hidden md:flex items-center gap-10">
+          <li>
+            <Link to="/products" className="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:text-forest-green transition-colors">Shop</Link>
+          </li>
+          <li>
+            <Link to="/products?category=Artisans" className="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:text-forest-green transition-colors">Artisans</Link>
+          </li>
+          <li>
+            <Link to="/products?category=Materials" className="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:text-forest-green transition-colors">Materials</Link>
+          </li>
+          {isAuthenticated && (
+            <li>
+              <Link to="/wishlist" className="font-label-md text-label-md text-on-surface-variant dark:text-on-tertiary-container hover:text-forest-green transition-colors">Wishlist</Link>
+            </li>
           )}
-          <button aria-label="Shopping Bag" className="icon-btn">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <path d="M16 10a4 4 0 0 1-8 0"></path>
-            </svg>
-          </button>
+        </ul>
+        
+        {/* Trailing Actions */}
+        <div className="flex-1 flex justify-end items-center gap-6 relative">
+          
+          {/* Search Toggle */}
+          {isSearchOpen ? (
+            <form onSubmit={handleSearch} className="absolute right-32 top-1/2 -translate-y-1/2 flex items-center bg-surface-container-low rounded-full px-4 py-1 border border-outline-variant animate-in fade-in slide-in-from-right-4">
+              <input 
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent border-none outline-none font-body-md text-on-surface w-40 placeholder:text-on-surface-variant/50"
+                autoFocus
+              />
+              <button type="submit" className="material-symbols-outlined text-on-surface-variant hover:text-forest-green">search</button>
+              <button type="button" onClick={() => setIsSearchOpen(false)} className="material-symbols-outlined text-on-surface-variant hover:text-error-red ml-2 text-[18px]">close</button>
+            </form>
+          ) : (
+            <button onClick={() => setIsSearchOpen(true)} className="material-symbols-outlined text-on-surface cursor-pointer transition-all duration-300 hover:text-forest-green hover:scale-110">search</button>
+          )}
+
+          {/* Cart */}
+          <Link to="/cart" className="material-symbols-outlined text-on-surface cursor-pointer transition-all duration-300 hover:text-forest-green hover:scale-110 relative group">
+            shopping_bag
+            <span className="absolute -top-1 -right-1 bg-forest-green text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">0</span>
+          </Link>
+
+          {/* Account */}
+          {isAuthenticated ? (
+            <div className="relative group">
+              <Link to={user?.role === 'SELLER' ? '/seller/dashboard' : '/profile'} className="material-symbols-outlined text-on-surface cursor-pointer transition-all duration-300 hover:text-forest-green hover:scale-110">
+                account_circle
+              </Link>
+              {/* Dropdown (Hover) */}
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant/30 shadow-lg rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex flex-col py-2">
+                <Link to={user?.role === 'SELLER' ? '/seller/dashboard' : '/profile'} className="px-4 py-2 font-label-md text-on-surface hover:bg-surface-container-low hover:text-forest-green">Dashboard</Link>
+                <Link to="/orders" className="px-4 py-2 font-label-md text-on-surface hover:bg-surface-container-low hover:text-forest-green">Orders</Link>
+                <button onClick={logout} className="px-4 py-2 font-label-md text-left text-error-red hover:bg-error-container/20">Logout</button>
+              </div>
+            </div>
+          ) : (
+            <Link to="/login" className="font-label-md text-label-md text-on-surface border border-outline-variant px-4 py-2 rounded-full hover:bg-surface-container hover:border-forest-green hover:text-forest-green transition-all">
+              Sign In
+            </Link>
+          )}
+
         </div>
-      </div>
-    </nav>
+      </nav>
+    </header>
   );
 };
 

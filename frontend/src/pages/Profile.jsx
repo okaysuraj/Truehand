@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../services/AuthProvider';
 import api from '../services/api';
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
   const { user } = useAuth();
@@ -45,147 +46,224 @@ const Profile = () => {
   if (!user) return null;
 
   return (
-    <div className="container" style={{padding: '20px 0'}}>
-      <h1 style={{fontSize: 28, fontWeight: 400, marginBottom: 20}}>Your Account</h1>
-
-      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20}}>
+    <main className="pt-32 pb-section-gap">
+      <div className="max-w-container-max mx-auto px-margin-desktop">
         
-        <div className="a-box">
-          <div className="a-box-inner" style={{display: 'flex', gap: 14}}>
-            <div style={{fontSize: 40}}>📦</div>
-            <div>
-              <h3 style={{fontSize: 18, marginBottom: 4, fontWeight: 400}}>Your Orders</h3>
-              <div style={{color: '#565959', fontSize: 14}}>Track, return, or buy things again</div>
+        {/* Profile Hero Section */}
+        <section className="flex flex-col items-center text-center mb-section-gap">
+          <div className="relative group mb-stack-lg">
+            <div className="w-40 h-40 rounded-full overflow-hidden border border-outline-variant/30 shadow-sm shadow-forest-green/5">
+              <img 
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
+                alt="Profile Avatar" 
+                src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.firstName} ${user.lastName}&backgroundColor=163428&textColor=ffffff`}
+              />
             </div>
           </div>
-        </div>
+          <h1 className="font-display-lg text-display-lg text-on-surface mb-stack-sm">{user.firstName} {user.lastName}</h1>
+          <p className="font-label-md text-label-md text-secondary uppercase tracking-[0.2em] mb-stack-md">Customer Account</p>
+          <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+            Welcome to your personal TrueHand concierge. Manage your profile, track your artisanal acquisitions, and organize your shipping details.
+          </p>
+        </section>
 
-        <div className="a-box">
-          <div className="a-box-inner" style={{display: 'flex', gap: 14}}>
-            <div style={{fontSize: 40}}>🔐</div>
+        {/* Dashboard Navigation Grid */}
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter mb-section-gap">
+          
+          {/* Personal Info */}
+          <div className="group bg-surface-container-lowest border border-outline-variant/20 p-stack-lg rounded-[4px] shadow-sm hover:shadow-md transition-all duration-500 flex flex-col justify-between h-64">
             <div>
-              <h3 style={{fontSize: 18, marginBottom: 4, fontWeight: 400}}>Login & security</h3>
-              <div style={{color: '#565959', fontSize: 14}}>Edit login, name, and mobile number</div>
+              <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-stack-lg group-hover:bg-primary-fixed transition-colors">
+                <span className="material-symbols-outlined text-forest-green">person_outline</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Personal Info</h3>
+              <div className="font-body-md text-on-surface-variant text-[14px]">
+                <p>Email: {user.email}</p>
+                <p>Role: {user.role}</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="a-box">
-          <div className="a-box-inner" style={{display: 'flex', gap: 14}}>
-            <div style={{fontSize: 40}}>prime</div>
+          {/* My Orders */}
+          <Link to="/orders" className="group bg-surface-container-lowest border border-outline-variant/20 p-stack-lg rounded-[4px] shadow-sm hover:shadow-md transition-all duration-500 flex flex-col justify-between h-64 cursor-pointer">
             <div>
-              <h3 style={{fontSize: 18, marginBottom: 4, fontWeight: 400}}>Prime</h3>
-              <div style={{color: '#565959', fontSize: 14}}>View benefits and payment settings</div>
+              <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-stack-lg group-hover:bg-primary-fixed transition-colors">
+                <span className="material-symbols-outlined text-forest-green">package_2</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">My Orders</h3>
+              <p className="font-body-md text-on-surface-variant">Track shipments, view detailed history, and manage your recent acquisitions.</p>
+            </div>
+            <div className="flex items-center gap-2 font-label-md text-forest-green">
+              View History <span className="material-symbols-outlined">arrow_forward</span>
+            </div>
+          </Link>
+
+          {/* Addresses */}
+          <div 
+            onClick={() => document.getElementById('addresses').scrollIntoView({ behavior: 'smooth' })}
+            className="group bg-surface-container-lowest border border-outline-variant/20 p-stack-lg rounded-[4px] shadow-sm hover:shadow-md transition-all duration-500 flex flex-col justify-between h-64 cursor-pointer"
+          >
+            <div>
+              <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-stack-lg group-hover:bg-primary-fixed transition-colors">
+                <span className="material-symbols-outlined text-forest-green">location_on</span>
+              </div>
+              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Your Addresses</h3>
+              <p className="font-body-md text-on-surface-variant">Manage shipping and billing addresses for faster checkout.</p>
+            </div>
+            <div className="flex items-center gap-2 font-label-md text-forest-green">
+              Manage Addresses <span className="material-symbols-outlined">arrow_forward</span>
             </div>
           </div>
-        </div>
 
-        <div className="a-box" onClick={() => {
-          document.getElementById('address-book-section').scrollIntoView({ behavior: 'smooth' });
-        }} style={{cursor: 'pointer'}}>
-          <div className="a-box-inner" style={{display: 'flex', gap: 14}}>
-            <div style={{fontSize: 40}}>📍</div>
-            <div>
-              <h3 style={{fontSize: 18, marginBottom: 4, fontWeight: 400}}>Your Addresses</h3>
-              <div style={{color: '#565959', fontSize: 14}}>Edit addresses for orders and gifts</div>
-            </div>
-          </div>
-        </div>
+        </section>
 
-      </div>
+        {/* Addresses Section */}
+        <section id="addresses" className="pt-stack-lg border-t border-outline-variant/20">
+          <div className="flex justify-between items-center mb-stack-lg">
+            <h2 className="font-display-lg text-display-lg text-on-surface text-[36px]">Your Addresses</h2>
+            <button 
+              onClick={() => setShowAddressForm(true)}
+              className="px-6 py-2 bg-forest-green text-white font-label-md rounded-sm hover:bg-forest-green/90 transition-colors flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined text-[20px]">add</span> Add Address
+            </button>
+          </div>
 
-      <h2 style={{fontSize: 24, fontWeight: 400, margin: '30px 0 20px 0'}}>Personal Information</h2>
-      <div className="a-box" style={{marginBottom: 30}}>
-        <div className="a-box-inner">
-          <div style={{display: 'grid', gridTemplateColumns: '200px 1fr', gap: 10, fontSize: 14, marginBottom: 10}}>
-            <div style={{fontWeight: 'bold'}}>Name:</div>
-            <div>{user.firstName} {user.lastName}</div>
-          </div>
-          <div style={{display: 'grid', gridTemplateColumns: '200px 1fr', gap: 10, fontSize: 14, marginBottom: 10}}>
-            <div style={{fontWeight: 'bold'}}>Email:</div>
-            <div>{user.email}</div>
-          </div>
-          <div style={{display: 'grid', gridTemplateColumns: '200px 1fr', gap: 10, fontSize: 14, marginBottom: 10}}>
-            <div style={{fontWeight: 'bold'}}>Account Type:</div>
-            <div>{user.role}</div>
-          </div>
-        </div>
-      </div>
-
-      <h2 id="address-book-section" style={{fontSize: 24, fontWeight: 400, margin: '30px 0 20px 0'}}>Your Addresses</h2>
-      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20}}>
-        <div className="a-box" style={{border: '1px dashed #ccc', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', height: '100%'}} onClick={() => setShowAddressForm(true)}>
-          <div className="a-box-inner" style={{textAlign: 'center', color: '#565959'}}>
-            <div style={{fontSize: 40}}>+</div>
-            <h3 style={{fontSize: 18, fontWeight: 400}}>Add Address</h3>
-          </div>
-        </div>
-        
-        {addresses.map(addr => (
-          <div key={addr.id} className="a-box" style={{position: 'relative'}}>
-            {addr.isDefault && (
-              <div style={{position: 'absolute', top: -10, left: 10, background: '#FFD814', padding: '2px 8px', fontSize: 12, borderRadius: 10, border: '1px solid #FCD200'}}>
-                Default
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
+            {addresses.map(addr => (
+              <div key={addr.id} className="relative bg-white border border-outline-variant/30 p-stack-lg rounded-sm shadow-sm flex flex-col justify-between">
+                {addr.isDefault && (
+                  <div className="absolute top-4 right-4 bg-primary-fixed text-on-primary-fixed text-[12px] px-2 py-1 rounded-full font-semibold uppercase tracking-widest">
+                    Default
+                  </div>
+                )}
+                <div>
+                  <h4 className="font-headline-md text-forest-green mb-4 pb-2 border-b border-outline-variant/20">{addr.label}</h4>
+                  <p className="font-body-md font-semibold text-on-surface">{user.firstName} {user.lastName}</p>
+                  <p className="font-body-md text-on-surface-variant mt-2">{addr.streetAddress}</p>
+                  <p className="font-body-md text-on-surface-variant">{addr.city}, {addr.state} {addr.postalCode}</p>
+                  <p className="font-body-md text-on-surface-variant">{addr.country}</p>
+                </div>
+                
+                <div className="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
+                  <button 
+                    onClick={() => handleDeleteAddress(addr.id)} 
+                    className="text-error-red hover:text-error-red/80 font-label-md transition-colors flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span> Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+            
+            {addresses.length === 0 && (
+              <div className="col-span-full text-center py-12 border-2 border-dashed border-outline-variant/50 rounded-sm">
+                <span className="material-symbols-outlined text-4xl text-outline-variant mb-4">location_off</span>
+                <p className="font-body-md text-on-surface-variant">You have no addresses saved yet.</p>
               </div>
             )}
-            <div className="a-box-inner">
-              <h4 style={{margin: '0 0 10px 0', borderBottom: '1px solid #eee', paddingBottom: 5}}>{addr.label}</h4>
-              <p style={{margin: '4px 0', fontSize: 14, fontWeight: 'bold'}}>{user.firstName} {user.lastName}</p>
-              <p style={{margin: '4px 0', fontSize: 14}}>{addr.streetAddress}</p>
-              <p style={{margin: '4px 0', fontSize: 14}}>{addr.city}, {addr.state} {addr.postalCode}</p>
-              <p style={{margin: '4px 0', fontSize: 14}}>{addr.country}</p>
+          </div>
+        </section>
+
+        {/* Address Form Modal */}
+        {showAddressForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <div className="bg-surface-linen w-full max-w-lg rounded-sm p-8 shadow-xl relative animate-in fade-in zoom-in-95">
+              <button 
+                onClick={() => setShowAddressForm(false)}
+                className="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
               
-              <div style={{marginTop: 15, paddingTop: 10, borderTop: '1px solid #eee'}}>
-                <button onClick={() => handleDeleteAddress(addr.id)} style={{background: 'none', border: 'none', color: '#007185', cursor: 'pointer', fontSize: 14, padding: 0}}>Remove</button>
-              </div>
+              <h2 className="font-display-lg text-forest-green text-[32px] mb-6">Add Address</h2>
+              
+              <form onSubmit={handleAddAddress} className="space-y-4">
+                <div>
+                  <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">Label (e.g. Home)</label>
+                  <input 
+                    required 
+                    value={addressForm.label} 
+                    onChange={e=>setAddressForm({...addressForm, label: e.target.value})} 
+                    className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
+                  />
+                </div>
+                
+                <div>
+                  <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">Street Address</label>
+                  <input 
+                    required 
+                    value={addressForm.streetAddress} 
+                    onChange={e=>setAddressForm({...addressForm, streetAddress: e.target.value})} 
+                    className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
+                  />
+                </div>
+                
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">City</label>
+                    <input 
+                      required 
+                      value={addressForm.city} 
+                      onChange={e=>setAddressForm({...addressForm, city: e.target.value})} 
+                      className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">State</label>
+                    <input 
+                      required 
+                      value={addressForm.state} 
+                      onChange={e=>setAddressForm({...addressForm, state: e.target.value})} 
+                      className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">ZIP / Postal Code</label>
+                  <input 
+                    required 
+                    value={addressForm.postalCode} 
+                    onChange={e=>setAddressForm({...addressForm, postalCode: e.target.value})} 
+                    className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
+                  />
+                </div>
+                
+                <div className="pt-2">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input 
+                      type="checkbox" 
+                      checked={addressForm.isDefault} 
+                      onChange={e=>setAddressForm({...addressForm, isDefault: e.target.checked})} 
+                      className="w-5 h-5 text-forest-green border-outline-variant/50 rounded-sm focus:ring-forest-green cursor-pointer"
+                    />
+                    <span className="font-label-md text-on-surface group-hover:text-forest-green transition-colors">Make this my default address</span>
+                  </label>
+                </div>
+                
+                <div className="flex gap-4 pt-4 mt-4 border-t border-outline-variant/20">
+                  <button 
+                    type="submit" 
+                    className="flex-1 bg-forest-green text-white font-label-md uppercase tracking-widest py-3 rounded-sm hover:bg-forest-green/90 transition-colors"
+                  >
+                    Save Address
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => setShowAddressForm(false)} 
+                    className="flex-1 border border-forest-green text-forest-green font-label-md uppercase tracking-widest py-3 rounded-sm hover:bg-forest-green/5 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
-        ))}
+        )}
+
       </div>
-
-      {showAddressForm && (
-        <div style={{position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000}}>
-          <div style={{background: '#fff', padding: 30, borderRadius: 8, width: 400, maxWidth: '90%'}}>
-            <h2 style={{marginTop: 0}}>Add a new address</h2>
-            <form onSubmit={handleAddAddress} style={{display: 'flex', flexDirection: 'column', gap: 15}}>
-              <div>
-                <label style={{display: 'block', fontWeight: 'bold', fontSize: 14, marginBottom: 5}}>Label (e.g. Home, Office)</label>
-                <input required value={addressForm.label} onChange={e=>setAddressForm({...addressForm, label: e.target.value})} style={{width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4}} />
-              </div>
-              <div>
-                <label style={{display: 'block', fontWeight: 'bold', fontSize: 14, marginBottom: 5}}>Street Address</label>
-                <input required value={addressForm.streetAddress} onChange={e=>setAddressForm({...addressForm, streetAddress: e.target.value})} style={{width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4}} />
-              </div>
-              <div style={{display: 'flex', gap: 10}}>
-                <div style={{flex: 1}}>
-                  <label style={{display: 'block', fontWeight: 'bold', fontSize: 14, marginBottom: 5}}>City</label>
-                  <input required value={addressForm.city} onChange={e=>setAddressForm({...addressForm, city: e.target.value})} style={{width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4}} />
-                </div>
-                <div style={{flex: 1}}>
-                  <label style={{display: 'block', fontWeight: 'bold', fontSize: 14, marginBottom: 5}}>State</label>
-                  <input required value={addressForm.state} onChange={e=>setAddressForm({...addressForm, state: e.target.value})} style={{width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4}} />
-                </div>
-              </div>
-              <div>
-                <label style={{display: 'block', fontWeight: 'bold', fontSize: 14, marginBottom: 5}}>ZIP Code</label>
-                <input required value={addressForm.postalCode} onChange={e=>setAddressForm({...addressForm, postalCode: e.target.value})} style={{width: '100%', padding: 8, border: '1px solid #ccc', borderRadius: 4}} />
-              </div>
-              <div>
-                <label style={{display: 'flex', alignItems: 'center', gap: 8, fontSize: 14}}>
-                  <input type="checkbox" checked={addressForm.isDefault} onChange={e=>setAddressForm({...addressForm, isDefault: e.target.checked})} />
-                  Make this my default address
-                </label>
-              </div>
-              <div style={{display: 'flex', gap: 10, marginTop: 10}}>
-                <button type="submit" style={{flex: 1, padding: 10, background: '#FFD814', border: '1px solid #FCD200', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold'}}>Add address</button>
-                <button type="button" onClick={() => setShowAddressForm(false)} style={{flex: 1, padding: 10, background: '#f0f2f2', border: '1px solid #d5d9d9', borderRadius: 8, cursor: 'pointer'}}>Cancel</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-    </div>
+    </main>
   );
 };
 
