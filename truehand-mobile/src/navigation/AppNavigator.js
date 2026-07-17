@@ -90,6 +90,34 @@ import AddNewAddressScreen from '../screens/AddNewAddressScreen';
 import AddressSelectionScreen from '../screens/AddressSelectionScreen';
 import BankAccountsScreen from '../screens/BankAccountsScreen';
 import WalletScreen from '../screens/WalletScreen';
+import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
+import ResetPasswordScreen from '../screens/ResetPasswordScreen';
+import SupportRequestDetailScreen from '../screens/SupportRequestDetailScreen';
+import SalesAnalyticsScreen from '../screens/SalesAnalyticsScreen';
+import TransactionHistoryScreen from '../screens/TransactionHistoryScreen';
+import PackagingQCScreen from '../screens/PackagingQCScreen';
+import ShippingLabelPreviewScreen from '../screens/ShippingLabelPreviewScreen';
+import RouteOptimizationScreen from '../screens/RouteOptimizationScreen';
+import TaxReportsScreen from '../screens/TaxReportsScreen';
+import AdminDashboardScreen from '../screens/AdminDashboardScreen';
+import AdminProductApprovalsScreen from '../screens/AdminProductApprovalsScreen';
+import AdminOrdersScreen from '../screens/AdminOrdersScreen';
+import AdminCustomersScreen from '../screens/AdminCustomersScreen';
+import AdminReturnRequestsScreen from '../screens/AdminReturnRequestsScreen';
+import AdminArtisanManagementScreen from '../screens/AdminArtisanManagementScreen';
+import AdminCategoryManagementScreen from '../screens/AdminCategoryManagementScreen';
+import AdminDeliveryAgentManagementScreen from '../screens/AdminDeliveryAgentManagementScreen';
+import AdminBannerManagementScreen from '../screens/AdminBannerManagementScreen';
+import AdminCommissionSettingsScreen from '../screens/AdminCommissionSettingsScreen';
+import AdminPayoutManagementScreen from '../screens/AdminPayoutManagementScreen';
+import AdminEmailCampaignsScreen from '../screens/AdminEmailCampaignsScreen';
+import AdminFraudDetectionScreen from '../screens/AdminFraudDetectionScreen';
+import AdminDisputeResolutionScreen from '../screens/AdminDisputeResolutionScreen';
+import AdminModerationScreen from '../screens/AdminModerationScreen';
+import AdminLiveFleetScreen from '../screens/AdminLiveFleetScreen';
+import AdminPlatformRevenueScreen from '../screens/AdminPlatformRevenueScreen';
+import AdminSuspiciousActivityScreen from '../screens/AdminSuspiciousActivityScreen';
+import AdminAnalyticsScreen from '../screens/AdminAnalyticsScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -134,7 +162,35 @@ const AuthStack = () => (
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
     <Stack.Screen name="DeliveryLogin" component={DeliveryLoginScreen} />
-  </Stack.Navigator>
+        <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ title: 'ForgotPassword' }} />
+      <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} options={{ title: 'ResetPassword' }} />
+      <Stack.Screen name="SupportRequestDetailScreen" component={SupportRequestDetailScreen} options={{ title: 'SupportRequestDetail' }} />
+      <Stack.Screen name="SalesAnalyticsScreen" component={SalesAnalyticsScreen} options={{ title: 'SalesAnalytics' }} />
+      <Stack.Screen name="TransactionHistoryScreen" component={TransactionHistoryScreen} options={{ title: 'TransactionHistory' }} />
+      <Stack.Screen name="PackagingQCScreen" component={PackagingQCScreen} options={{ title: 'PackagingQC' }} />
+      <Stack.Screen name="ShippingLabelPreviewScreen" component={ShippingLabelPreviewScreen} options={{ title: 'ShippingLabelPreview' }} />
+      <Stack.Screen name="RouteOptimizationScreen" component={RouteOptimizationScreen} options={{ title: 'RouteOptimization' }} />
+      <Stack.Screen name="TaxReportsScreen" component={TaxReportsScreen} options={{ title: 'TaxReports' }} />
+      <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} options={{ title: 'AdminDashboard' }} />
+      <Stack.Screen name="AdminProductApprovalsScreen" component={AdminProductApprovalsScreen} options={{ title: 'AdminProductApprovals' }} />
+      <Stack.Screen name="AdminOrdersScreen" component={AdminOrdersScreen} options={{ title: 'AdminOrders' }} />
+      <Stack.Screen name="AdminCustomersScreen" component={AdminCustomersScreen} options={{ title: 'AdminCustomers' }} />
+      <Stack.Screen name="AdminReturnRequestsScreen" component={AdminReturnRequestsScreen} options={{ title: 'AdminReturnRequests' }} />
+      <Stack.Screen name="AdminArtisanManagementScreen" component={AdminArtisanManagementScreen} options={{ title: 'AdminArtisanManagement' }} />
+      <Stack.Screen name="AdminCategoryManagementScreen" component={AdminCategoryManagementScreen} options={{ title: 'AdminCategoryManagement' }} />
+      <Stack.Screen name="AdminDeliveryAgentManagementScreen" component={AdminDeliveryAgentManagementScreen} options={{ title: 'AdminDeliveryAgentManagement' }} />
+      <Stack.Screen name="AdminBannerManagementScreen" component={AdminBannerManagementScreen} options={{ title: 'AdminBannerManagement' }} />
+      <Stack.Screen name="AdminCommissionSettingsScreen" component={AdminCommissionSettingsScreen} options={{ title: 'AdminCommissionSettings' }} />
+      <Stack.Screen name="AdminPayoutManagementScreen" component={AdminPayoutManagementScreen} options={{ title: 'AdminPayoutManagement' }} />
+      <Stack.Screen name="AdminEmailCampaignsScreen" component={AdminEmailCampaignsScreen} options={{ title: 'AdminEmailCampaigns' }} />
+      <Stack.Screen name="AdminFraudDetectionScreen" component={AdminFraudDetectionScreen} options={{ title: 'AdminFraudDetection' }} />
+      <Stack.Screen name="AdminDisputeResolutionScreen" component={AdminDisputeResolutionScreen} options={{ title: 'AdminDisputeResolution' }} />
+      <Stack.Screen name="AdminModerationScreen" component={AdminModerationScreen} options={{ title: 'AdminModeration' }} />
+      <Stack.Screen name="AdminLiveFleetScreen" component={AdminLiveFleetScreen} options={{ title: 'AdminLiveFleet' }} />
+      <Stack.Screen name="AdminPlatformRevenueScreen" component={AdminPlatformRevenueScreen} options={{ title: 'AdminPlatformRevenue' }} />
+      <Stack.Screen name="AdminSuspiciousActivityScreen" component={AdminSuspiciousActivityScreen} options={{ title: 'AdminSuspiciousActivity' }} />
+      <Stack.Screen name="AdminAnalyticsScreen" component={AdminAnalyticsScreen} options={{ title: 'AdminAnalytics' }} />
+    </Stack.Navigator>
 );
 
 const AppNavigator = () => {
@@ -220,7 +276,35 @@ const AppNavigator = () => {
           <Stack.Screen name="InventoryManagement" component={InventoryManagementScreen} />
           <Stack.Screen name="AddEditProduct" component={AddEditProductScreen} />
           <Stack.Screen name="OrderFulfillment" component={OrderFulfillmentScreen} />
-        </Stack.Navigator>
+              <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ title: 'ForgotPassword' }} />
+      <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} options={{ title: 'ResetPassword' }} />
+      <Stack.Screen name="SupportRequestDetailScreen" component={SupportRequestDetailScreen} options={{ title: 'SupportRequestDetail' }} />
+      <Stack.Screen name="SalesAnalyticsScreen" component={SalesAnalyticsScreen} options={{ title: 'SalesAnalytics' }} />
+      <Stack.Screen name="TransactionHistoryScreen" component={TransactionHistoryScreen} options={{ title: 'TransactionHistory' }} />
+      <Stack.Screen name="PackagingQCScreen" component={PackagingQCScreen} options={{ title: 'PackagingQC' }} />
+      <Stack.Screen name="ShippingLabelPreviewScreen" component={ShippingLabelPreviewScreen} options={{ title: 'ShippingLabelPreview' }} />
+      <Stack.Screen name="RouteOptimizationScreen" component={RouteOptimizationScreen} options={{ title: 'RouteOptimization' }} />
+      <Stack.Screen name="TaxReportsScreen" component={TaxReportsScreen} options={{ title: 'TaxReports' }} />
+      <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} options={{ title: 'AdminDashboard' }} />
+      <Stack.Screen name="AdminProductApprovalsScreen" component={AdminProductApprovalsScreen} options={{ title: 'AdminProductApprovals' }} />
+      <Stack.Screen name="AdminOrdersScreen" component={AdminOrdersScreen} options={{ title: 'AdminOrders' }} />
+      <Stack.Screen name="AdminCustomersScreen" component={AdminCustomersScreen} options={{ title: 'AdminCustomers' }} />
+      <Stack.Screen name="AdminReturnRequestsScreen" component={AdminReturnRequestsScreen} options={{ title: 'AdminReturnRequests' }} />
+      <Stack.Screen name="AdminArtisanManagementScreen" component={AdminArtisanManagementScreen} options={{ title: 'AdminArtisanManagement' }} />
+      <Stack.Screen name="AdminCategoryManagementScreen" component={AdminCategoryManagementScreen} options={{ title: 'AdminCategoryManagement' }} />
+      <Stack.Screen name="AdminDeliveryAgentManagementScreen" component={AdminDeliveryAgentManagementScreen} options={{ title: 'AdminDeliveryAgentManagement' }} />
+      <Stack.Screen name="AdminBannerManagementScreen" component={AdminBannerManagementScreen} options={{ title: 'AdminBannerManagement' }} />
+      <Stack.Screen name="AdminCommissionSettingsScreen" component={AdminCommissionSettingsScreen} options={{ title: 'AdminCommissionSettings' }} />
+      <Stack.Screen name="AdminPayoutManagementScreen" component={AdminPayoutManagementScreen} options={{ title: 'AdminPayoutManagement' }} />
+      <Stack.Screen name="AdminEmailCampaignsScreen" component={AdminEmailCampaignsScreen} options={{ title: 'AdminEmailCampaigns' }} />
+      <Stack.Screen name="AdminFraudDetectionScreen" component={AdminFraudDetectionScreen} options={{ title: 'AdminFraudDetection' }} />
+      <Stack.Screen name="AdminDisputeResolutionScreen" component={AdminDisputeResolutionScreen} options={{ title: 'AdminDisputeResolution' }} />
+      <Stack.Screen name="AdminModerationScreen" component={AdminModerationScreen} options={{ title: 'AdminModeration' }} />
+      <Stack.Screen name="AdminLiveFleetScreen" component={AdminLiveFleetScreen} options={{ title: 'AdminLiveFleet' }} />
+      <Stack.Screen name="AdminPlatformRevenueScreen" component={AdminPlatformRevenueScreen} options={{ title: 'AdminPlatformRevenue' }} />
+      <Stack.Screen name="AdminSuspiciousActivityScreen" component={AdminSuspiciousActivityScreen} options={{ title: 'AdminSuspiciousActivity' }} />
+      <Stack.Screen name="AdminAnalyticsScreen" component={AdminAnalyticsScreen} options={{ title: 'AdminAnalytics' }} />
+    </Stack.Navigator>
       ) : (
         <AuthStack />
       )}

@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
@@ -38,6 +39,8 @@ export default function FlashSaleScreen() {
         };
       });
     }, 1000);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
     return () => clearInterval(timer);
   }, []);

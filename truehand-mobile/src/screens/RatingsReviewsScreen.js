@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';;
@@ -39,6 +40,8 @@ const renderStars = (rating) => {
       stars.push(<Ionicons key={i} name="star-outline" size={18} color={colors.terracotta} />);
     }
   }
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
   return <View style={{ flexDirection: 'row', gap: 2 }}>{stars}</View>;
 };
 

@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,6 +57,8 @@ export default function MaintenanceModeScreen() {
       ])
     ).start();
   }, [floatAnim, pulseAnim]);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

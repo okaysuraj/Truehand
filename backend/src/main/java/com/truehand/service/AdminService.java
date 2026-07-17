@@ -57,4 +57,8 @@ public class AdminService {
         metrics.put("pendingDelivery", getPendingDeliveryPartners().size());
         return metrics;
     }
+
+    public List<com.truehand.model.User> getAllUsers() {
+        return userRepository.findAll();
+    }
 }

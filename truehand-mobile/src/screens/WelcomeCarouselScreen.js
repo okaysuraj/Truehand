@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, Dimensions, TouchableOpacity, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -42,6 +43,8 @@ export default function WelcomeCarouselScreen() {
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const renderItem = ({ item }) => {
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
     return (
       <View style={styles.slideContainer}>
         <View style={styles.imageContainer}>

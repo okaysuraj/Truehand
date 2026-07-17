@@ -1,9 +1,22 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../services/api';
 
 const LandingPage = () => {
+  const [newArrivals, setNewArrivals] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Fetch products
+    api.get('/products?size=4&sort=createdAt,desc')
+      .then(res => {
+        setNewArrivals(res.data.content || []);
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching new arrivals', err);
+        setLoading(false);
+      });
     const observerOptions = {
       threshold: 0.1
     };
@@ -57,57 +70,27 @@ const LandingPage = () => {
           <Link to="/products" className="font-label-md text-label-md text-on-surface border-b border-on-surface pb-1 hover:opacity-70 transition-opacity">Shop All</Link>
         </div>
         <div className="flex gap-gutter overflow-x-auto pb-stack-lg" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-          {/* Product Card 1 */}
-          <Link to="/product/1" className="min-w-[320px] group cursor-pointer block">
-            <div className="aspect-[4/5] overflow-hidden bg-surface-container mb-stack-md relative">
-              <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/5 transition-colors duration-500 z-10 pointer-events-none"></div>
-              <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Hand-Woven Charcoal Linen" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDWF_vhLuInaKzneFXh8pm1zMsYg-BK73AOX_3WqgFVQeHFtPw2ExoIIe9au52-QXH-m8t97VV0Dqdgl8NCZ7x4JgfQPm6WL06yeY2YXNnRx25yo1J5FyluBYPmBfvp2NHEIjt34ysnKKXv0mxj6Ube9FafCCxgtCc-eg6K_J0gFvBEZgZs3VFvH5hqb3Tk5Re3JtvR0FekqV4b5Kn6dWGjKFvZXffj1BYjcpy9TZ231ADdnBQmlT0Kdg" />
-              <button className="absolute top-4 right-4 material-symbols-outlined text-on-surface opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">favorite</button>
+          {loading ? (
+            <div className="w-full flex justify-center py-10">
+              <span className="material-symbols-outlined animate-spin text-forest-green text-3xl">progress_activity</span>
             </div>
-            <div className="text-center">
-              <h3 className="font-body-md text-body-md text-on-surface mb-1">Hand-Woven Charcoal Linen</h3>
-              <p className="font-label-md text-label-md text-on-surface-variant">$185.00</p>
-            </div>
-          </Link>
-
-          {/* Product Card 2 */}
-          <Link to="/product/2" className="min-w-[320px] group cursor-pointer block">
-            <div className="aspect-[4/5] overflow-hidden bg-surface-container mb-stack-md relative">
-              <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/5 transition-colors duration-500 z-10 pointer-events-none"></div>
-              <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Smoke Tinted Glassware Set" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDl32JIaQbyVRfKquoWr73CBK1P7KEV3FclqyVydZOXMW9b83FV7EglQeDBblwAxNrdVTtU1zGODJuR-ITbtOV_kxNg5U3lQaJmwi5nM8nG6WAqB_yN3luvUoNa9kUE0XRNoJ59nFaXxzPZ7-Z49tZfwG8M91aHCkskouHxtDctoQFL4_2KLhHEITPcaXWh8U-WiowONVUJU3DFhT8ULsza8-8imKcb6BuhOqPokG7v5laz--K2E3KwRQ" />
-              <button className="absolute top-4 right-4 material-symbols-outlined text-on-surface opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">favorite</button>
-            </div>
-            <div className="text-center">
-              <h3 className="font-body-md text-body-md text-on-surface mb-1">Smoke Tinted Glassware Set</h3>
-              <p className="font-label-md text-label-md text-on-surface-variant">$120.00</p>
-            </div>
-          </Link>
-
-          {/* Product Card 3 */}
-          <Link to="/product/3" className="min-w-[320px] group cursor-pointer block">
-            <div className="aspect-[4/5] overflow-hidden bg-surface-container mb-stack-md relative">
-              <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/5 transition-colors duration-500 z-10 pointer-events-none"></div>
-              <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Raw Sandstone Sculpture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtExz30CUj3OhHY1qRJT7iqKjlA9owNKpJOiK-Au2lQn8jlbdXjp4f5lwhvkZeb_mCCQctKKkZr1IPtZDaDUihMrsKNYMsfLU8F__veHjFnFgtDRBictWZ9qj5CfmWIxkNLS6GgK8zTh6nkzPm9OgAPoZR60g1mQL0cjNzVNiDiZPg0z10EuS4LYLBkbqQeSDGjeljCWLmsXoBa9EKITfu4BAvzuBCkDPuIpUw_jBKTHQazw_GkZwZKw" />
-              <button className="absolute top-4 right-4 material-symbols-outlined text-on-surface opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">favorite</button>
-            </div>
-            <div className="text-center">
-              <h3 className="font-body-md text-body-md text-on-surface mb-1">Raw Sandstone Sculpture</h3>
-              <p className="font-label-md text-label-md text-on-surface-variant">$450.00</p>
-            </div>
-          </Link>
-
-          {/* Product Card 4 */}
-          <Link to="/product/4" className="min-w-[320px] group cursor-pointer block">
-            <div className="aspect-[4/5] overflow-hidden bg-surface-container mb-stack-md relative">
-              <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/5 transition-colors duration-500 z-10 pointer-events-none"></div>
-              <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="Carved Walnut Nesting Set" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAihgFBpVMJrO3PO3Nkh0kMNQ_O3fG1p1x6mmmQjhpuxwDJtojvNkz0hHHUz-Dh0FHrXCTr4JxY3U7XlM97FLLPZ0a19omKGqfFJg0aGD2DNr1yFoLUxyimit52f4VN6cjsv3z0fKvXLvOc_Kjwm_aautVn6LWP1mFnNTlcFyjHCdSlA8vGC9eQMvut6TxHemacNecCLXNaL26n7wGEcz8cER6qPbmVU-JcxAzHzYX7lsksV-PGoXoJMA" />
-              <button className="absolute top-4 right-4 material-symbols-outlined text-on-surface opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">favorite</button>
-            </div>
-            <div className="text-center">
-              <h3 className="font-body-md text-body-md text-on-surface mb-1">Carved Walnut Nesting Set</h3>
-              <p className="font-label-md text-label-md text-on-surface-variant">$240.00</p>
-            </div>
-          </Link>
+          ) : newArrivals.length > 0 ? (
+            newArrivals.map(product => (
+              <Link key={product.id} to={`/product/${product.id}`} className="min-w-[320px] group cursor-pointer block shrink-0">
+                <div className="aspect-[4/5] overflow-hidden bg-surface-container mb-stack-md relative">
+                  <div className="absolute inset-0 bg-charcoal/0 group-hover:bg-charcoal/5 transition-colors duration-500 z-10 pointer-events-none"></div>
+                  <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={product.name} src={product.imageUrl} />
+                  <button className="absolute top-4 right-4 material-symbols-outlined text-on-surface opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">favorite</button>
+                </div>
+                <div className="text-center">
+                  <h3 className="font-body-md text-body-md text-on-surface mb-1">{product.name}</h3>
+                  <p className="font-label-md text-label-md text-on-surface-variant">${product.price.toFixed(2)}</p>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <p className="text-on-surface-variant font-body-md">No new arrivals found.</p>
+          )}
         </div>
       </section>
 

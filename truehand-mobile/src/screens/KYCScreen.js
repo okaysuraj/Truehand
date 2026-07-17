@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
@@ -16,6 +17,8 @@ export default function KYCScreen() {
     }
     Alert.alert('Success', 'Vehicle details saved temporarily (not wired to backend yet).');
   };
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

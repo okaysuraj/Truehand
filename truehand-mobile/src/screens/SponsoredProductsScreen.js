@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Switch } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -52,6 +53,8 @@ export default function SponsoredProductsScreen() {
       return p;
     }));
   };
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

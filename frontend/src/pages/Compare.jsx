@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -16,6 +17,8 @@ const Compare = () => {
   };
 
   if (compareItems.length === 0) {
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
     return (
       <main className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop min-h-screen flex flex-col items-center justify-center text-center">
         <span className="material-symbols-outlined text-6xl text-outline-variant mb-stack-md">compare_arrows</span>

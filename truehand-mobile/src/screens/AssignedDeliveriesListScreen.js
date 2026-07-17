@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';;
@@ -11,6 +12,8 @@ export default function AssignedDeliveriesListScreen() {
   const deliveries = useDeliveryStore(state => state.deliveries);
   const startDelivery = useDeliveryStore(state => state.startDelivery);
   const setActiveDelivery = useDeliveryStore(state => state.setActiveDelivery);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

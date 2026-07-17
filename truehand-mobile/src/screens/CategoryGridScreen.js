@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList, Dimensions } from 'react-native';;
@@ -43,6 +44,8 @@ export default function CategoryGridScreen() {
   const navigation = useNavigation();
 
   const renderCategoryItem = ({ item }) => {
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
     return (
       <TouchableOpacity 
         style={[styles.cardContainer, item.offset && styles.cardOffset]}

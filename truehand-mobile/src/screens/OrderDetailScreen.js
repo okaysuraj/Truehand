@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';;
@@ -15,6 +16,8 @@ export default function OrderDetailScreen() {
   const order = orders.find(o => o.id === orderId) || null;
 
   if (!order) {
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
     return (
       <SafeAreaView style={styles.safeArea}>
         <Text style={{ textAlign: 'center', marginTop: 20 }}>Order not found.</Text>

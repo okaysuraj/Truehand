@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput } from 'react-native';;
@@ -27,6 +28,8 @@ export default function AddEditProductScreen() {
       console.error(e);
     }
   };
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

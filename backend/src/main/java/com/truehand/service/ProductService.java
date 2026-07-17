@@ -77,7 +77,8 @@ public class ProductService {
 
     public Page<ProductDTO> getAllProducts(Pageable pageable) {
         return productRepository.findByIsAvailableTrue(pageable)
-                .map(this::mapToDTO);
+                .map(this::mapToDTO)
+                .map(dto -> dto); // Only APPROVED products have isAvailable=true via updateProductStatus
     }
 
     public List<ProductDTO> getTrendingProducts() {
@@ -139,6 +140,25 @@ public class ProductService {
         productRepository.deleteById(id);
     }
 
+    public List<ProductDTO> getPendingProducts() {
+        return productRepository.findAll().stream()
+                .filter(p -> "PENDING".equalsIgnoreCase(p.getApprovalStatus()))
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public ProductDTO updateProductStatus(Integer id, String status) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setApprovalStatus(status);
+        if ("REJECTED".equalsIgnoreCase(status)) {
+            product.setIsAvailable(false);
+        } else if ("APPROVED".equalsIgnoreCase(status)) {
+            product.setIsAvailable(true);
+        }
+        return mapToDTO(productRepository.save(product));
+    }
+
     public List<ProductDTO> getRecommendations(Integer productId) {
         Product currentProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -169,7 +189,8 @@ public class ProductService {
                 .price(product.getPrice())
                 .stockQuantity(product.getStockQuantity())
                 .imageUrl(product.getImageUrl())
-                .isAvailable(product.getIsAvailable());
+                .isAvailable(product.getIsAvailable())
+                .status(product.getApprovalStatus());
 
         if (product.getSeller() != null) {
             builder.sellerId(product.getSeller().getId());

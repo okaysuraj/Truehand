@@ -1,5 +1,6 @@
+import api from '../services/api';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -29,6 +30,8 @@ export default function SignUpScreen() {
       Alert.alert('Registration Failed', err.message || 'Could not create account.');
     }
   };
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -40,6 +43,7 @@ export default function SignUpScreen() {
           
           <View style={styles.container}>
             <View style={styles.header}>
+              <Image source={require('../../assets/logo.png')} style={{ width: 150, height: 40, marginBottom: spacing.stackSm }} resizeMode="contain" />
               <Text style={styles.title}>Create Your Account</Text>
               <Text style={styles.subtitle}>
                 Join the TrueHand collective and explore authentic craftsmanship.

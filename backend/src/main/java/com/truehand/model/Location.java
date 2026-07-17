@@ -32,5 +32,6 @@ public class Location {
     @Column(columnDefinition = "DECIMAL(10, 2)")
     private BigDecimal accuracy;
 
+    @Builder.Default
     private LocalDateTime timestamp = LocalDateTime.now();
 }

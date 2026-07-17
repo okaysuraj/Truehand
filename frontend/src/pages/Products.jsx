@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import api from '../services/api';
-import { useCart } from '../services/CartProvider';
-import { useAuth } from '../services/AuthProvider';
+import { useCart } from '../context/CartProvider';
+import { useAuth } from '../context/AuthProvider';
 
 const Products = () => {
   const [products, setProducts] = useState([]);

@@ -1,10 +1,13 @@
+import api from '../services/api';
 import React from 'react';
-import { useCart } from '../services/CartProvider';
+import { useCart } from '../context/CartProvider';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Cart = () => {
   const { cartItems, updateQuantity, removeFromCart, getTotal } = useCart();
   const navigate = useNavigate();
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <main className="flex-grow pt-32 pb-section-gap px-margin-desktop max-w-container-max mx-auto w-full">

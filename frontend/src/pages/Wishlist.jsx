@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
-import { useAuth } from '../services/AuthProvider';
+import { useAuth } from '../context/AuthProvider';
 import { Link, useNavigate } from 'react-router-dom';
 
 const Wishlist = () => {

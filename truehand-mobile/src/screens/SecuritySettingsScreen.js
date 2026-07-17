@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Switch, KeyboardAvoidingView, Platform } from 'react-native';;
@@ -8,6 +9,8 @@ import { colors, typography, spacing } from '../theme/theme';
 export default function SecuritySettingsScreen() {
   const navigation = useNavigation();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

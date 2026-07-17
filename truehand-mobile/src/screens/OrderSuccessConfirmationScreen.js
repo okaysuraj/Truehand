@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';;
@@ -46,6 +47,8 @@ export default function OrderSuccessConfirmationScreen() {
     };
     animateRings();
   }, [ring1Scale, ring1Opacity, ring2Scale, ring2Opacity]);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useCart } from '../services/CartProvider';
-import { useAuth } from '../services/AuthProvider';
+import { useCart } from '../context/CartProvider';
+import { useAuth } from '../context/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';

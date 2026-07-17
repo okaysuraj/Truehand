@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';;
@@ -19,6 +20,8 @@ export default function ProfileScreen({ navigation }) {
 
   const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Julian Thorne';
   const role = user ? 'Member' : 'Master Ceramicist & Collector';
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

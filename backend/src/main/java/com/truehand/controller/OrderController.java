@@ -13,9 +13,8 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
     private final OrderService orderService;
 
-    @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderDTO dto) {
-        Integer userId = 1; // Get from JWT token in production
+    @PostMapping("/user/{userId}")
+    public ResponseEntity<OrderDTO> createOrder(@PathVariable Integer userId, @RequestBody OrderDTO dto) {
         return ResponseEntity.ok(orderService.createOrder(userId, dto));
     }
 
@@ -24,10 +23,14 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrder(id));
     }
 
-    @GetMapping
-    public ResponseEntity<?> getUserOrders() {
-        Integer userId = 1; // Get from JWT token in production
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getUserOrders(@PathVariable Integer userId) {
         return ResponseEntity.ok(orderService.getUserOrders(userId));
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<?> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @PostMapping("/{id}/cancel")

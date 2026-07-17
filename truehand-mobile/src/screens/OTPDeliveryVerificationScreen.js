@@ -1,248 +1,153 @@
-import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';;
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { colors, typography, spacing } from '../theme/theme';
+import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import api from '../services/api';
 
-export default function OTPDeliveryVerificationScreen() {
-  const navigation = useNavigation();
-  const [code, setCode] = useState('');
+const OTPDeliveryVerificationScreen = ({ navigation }) => {
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleKeyPress = (val) => {
-    if (code.length < 4) {
-      setCode(prev => prev + val);
+  const verifyOTP = async () => {
+    if (otp.length !== 6) {
+      Alert.alert('Invalid', 'Please enter a 6-digit OTP.');
+      return;
     }
-  };
 
-  const handleBackspace = () => {
-    if (code.length > 0) {
-      setCode(prev => prev.slice(0, -1));
+    setLoading(true);
+    try {
+      const res = await api.post('/delivery/verify-otp', { otp });
+      if (res.data.success) {
+        Alert.alert('Success', 'Delivery confirmed!', [
+          { text: 'OK', onPress: () => navigation.navigate('DeliveryMap') }
+        ]);
+      }
+    } catch (err) {
+      Alert.alert('Error', err.response?.data || 'Failed to verify OTP');
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleVerify = () => {
-    if (code.length === 4) {
-      navigation.navigate('DeliverySuccess');
-    }
-  };
-
-  // Render 4 boxes
-  const renderBoxes = () => {
-    const boxes = [];
-    for (let i = 0; i < 4; i++) {
-      boxes.push(
-        <View key={i} style={[styles.codeBox, code.length === i && styles.codeBoxActive]}>
-          <Text style={styles.codeText}>{code[i] || ''}</Text>
-        </View>
-      );
-    }
-    return boxes;
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors['forest-green']} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.iconContainer}>
+          <Text style={styles.iconText}>🛡️</Text>
+        </View>
+        <Text style={styles.title}>Verify Delivery</Text>
+        <Text style={styles.subtitle}>Enter the 6-digit code provided by the customer to mark this order as delivered.</Text>
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.otpInput}
+            placeholder="0 0 0 0 0 0"
+            value={otp}
+            onChangeText={setOtp}
+            keyboardType="number-pad"
+            maxLength={6}
+            textAlign="center"
+          />
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.button, (loading || otp.length < 6) && styles.buttonDisabled]} 
+          onPress={verifyOTP}
+          disabled={loading || otp.length < 6}
+        >
+          {loading ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text style={styles.buttonText}>Confirm Delivery</Text>
+          )}
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Delivery Route</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="headset-outline" size={24} color={colors['forest-green']} />
+        
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.backBtnText}>Cancel</Text>
         </TouchableOpacity>
       </View>
-
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.card}>
-          <Ionicons name="lock-closed-outline" size={48} color={colors['forest-green']} style={styles.lockIcon} />
-          <Text style={styles.title}>Secure Handover</Text>
-          <Text style={styles.subtitle}>
-            Please enter the 4-digit verification code provided by the customer to complete this premium delivery.
-          </Text>
-
-          <View style={styles.codeContainer}>
-            {renderBoxes()}
-          </View>
-
-          <TouchableOpacity style={styles.resendBtn}>
-            <Ionicons name="refresh-outline" size={16} color={colors.terracotta} />
-            <Text style={styles.resendText}>Resend Code</Text>
-          </TouchableOpacity>
-
-          {/* Custom Keypad */}
-          <View style={styles.keypad}>
-            {['1','2','3','4','5','6','7','8','9'].map(num => (
-              <TouchableOpacity key={num} style={styles.keyBtn} onPress={() => handleKeyPress(num)}>
-                <Text style={styles.keyText}>{num}</Text>
-              </TouchableOpacity>
-            ))}
-            <View style={styles.keyBtn} />
-            <TouchableOpacity style={styles.keyBtn} onPress={() => handleKeyPress('0')}>
-              <Text style={styles.keyText}>0</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.keyBtn} onPress={handleBackspace}>
-              <Ionicons name="backspace-outline" size={24} color={colors.charcoal} />
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity 
-            style={[styles.primaryButton, code.length < 4 && styles.primaryButtonDisabled]} 
-            onPress={handleVerify}
-            disabled={code.length < 4}
-          >
-            <Ionicons name="checkmark-done" size={20} color={colors['on-primary']} />
-            <Text style={styles.primaryButtonText}>Verify & Handover</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.goBack()}>
-            <Text style={styles.secondaryButtonText}>Cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  safeArea: {
+  container: {
     flex: 1,
-    backgroundColor: colors['surface-linen'],
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.marginMobile,
-    height: 64,
-  },
-  iconButton: {
-    padding: spacing.stackSm,
-    marginLeft: -8,
-    marginRight: -8,
-  },
-  headerTitle: {
-    ...typography.headlineMd,
-    color: colors['forest-green'],
+    backgroundColor: '#FBFDF9',
   },
   content: {
-    flexGrow: 1,
-    padding: spacing.marginMobile,
+    flex: 1,
+    padding: 24,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  card: {
-    width: '100%',
-    maxWidth: 400,
-    backgroundColor: colors['surface-container-lowest'],
-    borderRadius: 12,
-    padding: spacing.stackLg,
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#E8F5E9',
+    justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: colors['forest-green'],
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: colors['surface-variant'],
+    marginBottom: 24,
   },
-  lockIcon: {
-    marginBottom: spacing.stackMd,
-    fontWeight: '300',
+  iconText: {
+    fontSize: 40,
   },
   title: {
-    ...typography.headlineLgMobile,
-    color: colors.charcoal,
-    marginBottom: spacing.stackSm,
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1A1C19',
+    marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
-    ...typography.bodyMd,
-    color: colors['on-surface-variant'],
+    fontSize: 16,
+    color: '#424940',
+    marginBottom: 32,
     textAlign: 'center',
-    marginBottom: spacing.stackLg,
-    maxWidth: 280,
+    paddingHorizontal: 20,
   },
-  codeContainer: {
-    flexDirection: 'row',
-    gap: 16,
-    marginBottom: spacing.stackLg,
+  inputContainer: {
+    width: '100%',
+    marginBottom: 32,
   },
-  codeBox: {
-    width: 60,
-    height: 72,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors['clay-outline'],
-    borderRadius: 8,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  codeBoxActive: {
-    borderColor: colors['forest-green'],
+  otpInput: {
     borderWidth: 2,
-  },
-  codeText: {
-    ...typography.displayLg,
-    color: colors.charcoal,
-  },
-  resendBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: spacing.stackLg,
-  },
-  resendText: {
-    ...typography.labelMd,
-    color: colors.terracotta,
-  },
-  keypad: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    width: 280,
-    marginBottom: spacing.stackLg,
-  },
-  keyBtn: {
-    width: '33%',
-    height: 64,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  keyText: {
-    ...typography.headlineMd,
-    color: colors.charcoal,
-  },
-  primaryButton: {
-    w_idth: '100%',
-    width: '100%',
-    backgroundColor: colors['forest-green'],
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
+    borderColor: '#2E6C36',
+    borderRadius: 12,
     paddingVertical: 16,
-    borderRadius: 4,
+    fontSize: 32,
+    fontWeight: 'bold',
+    color: '#1A1C19',
+    backgroundColor: '#FFFFFF',
+    letterSpacing: 12,
   },
-  primaryButtonDisabled: {
-    opacity: 0.5,
-  },
-  primaryButtonText: {
-    ...typography.labelMd,
-    color: colors['on-primary'],
-  },
-  secondaryButton: {
+  button: {
     width: '100%',
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors['clay-outline'],
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: '#2E6C36',
     paddingVertical: 16,
-    borderRadius: 4,
-    marginTop: spacing.stackSm,
+    borderRadius: 8,
+    alignItems: 'center',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  secondaryButtonText: {
-    ...typography.labelMd,
-    color: colors.charcoal,
+  buttonDisabled: {
+    opacity: 0.6,
   },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  backBtn: {
+    marginTop: 20,
+  },
+  backBtnText: {
+    color: '#424940',
+    fontSize: 16,
+    fontWeight: '600',
+  }
 });
+
+export default OTPDeliveryVerificationScreen;

@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions, TouchableOpacity, FlatList } from 'react-native';;
@@ -41,6 +42,8 @@ export default function WelcomeScreen() {
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const renderItem = ({ item }) => {
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
     return (
       <View style={styles.slide}>
         <View style={styles.imageContainer}>
@@ -58,7 +61,7 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.brandTitle}>TrueHand</Text>
+        <Image source={require('../../assets/logo.png')} style={{ height: 40, width: 150 }} resizeMode="contain" />
       </View>
       
       <View style={styles.carouselContainer}>

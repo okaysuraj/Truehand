@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -41,6 +42,8 @@ const FAQ_DATA = [
 const CATEGORIES = ['All Questions', 'Orders & Shipping', 'Artisans & Materials', 'Returns'];
 
 const AccordionItem = ({ item, isOpen, toggleOpen }) => {
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
   return (
     <View style={styles.accordionContainer}>
       <TouchableOpacity 

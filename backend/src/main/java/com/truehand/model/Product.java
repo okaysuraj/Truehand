@@ -36,23 +36,32 @@ public class Product {
     @Column(columnDefinition = "INT DEFAULT 0")
     private Integer stockQuantity;
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT TRUE")
     private Boolean isAvailable;
+
+    @Column(columnDefinition = "VARCHAR(255) DEFAULT 'APPROVED'")
+    @Builder.Default
+    private String approvalStatus = "APPROVED";
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id")
     private User seller;
 
     @Column(updatable = false)
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+    @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @Column(columnDefinition = "DOUBLE PRECISION DEFAULT 0.0")
+    @Builder.Default
     private Double averageRating = 0.0;
 
     @Column(columnDefinition = "INT DEFAULT 0")
+    @Builder.Default
     private Integer reviewCount = 0;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)

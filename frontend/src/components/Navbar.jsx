@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../services/AuthProvider';
+import { useAuth } from '../context/AuthProvider';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -22,8 +22,8 @@ const Navbar = () => {
         
         {/* Brand Logo */}
         <div className="flex-1">
-          <Link to="/" className="font-headline-lg text-headline-lg tracking-widest text-on-surface dark:text-inverse-on-surface uppercase hover:opacity-80 transition-opacity">
-            TrueHand
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img src="/images/logo.svg" alt="TrueHand Logo" className="h-8" />
           </Link>
         </div>
         

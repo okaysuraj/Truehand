@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';;
@@ -16,6 +17,8 @@ const LANGUAGES = [
 export default function LanguageSettingsScreen() {
   const navigation = useNavigation();
   const [selectedLanguage, setSelectedLanguage] = useState('en');
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, Image, ScrollView } from 'react-native';;
@@ -74,6 +75,8 @@ export default function OrdersScreen({ navigation }) {
 
     const statusStyle = getStatusStyles(item.status);
     const displayStatus = getDisplayStatus(item.status);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
     return (
       <TouchableOpacity 

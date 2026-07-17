@@ -1,5 +1,6 @@
+import api from '../services/api';
 import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, Animated, ImageBackground, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { colors, typography } from '../theme/theme';
 import { useAuthStore } from '../store/useAuthStore';
@@ -40,6 +41,8 @@ export default function SplashScreen() {
         }
       }
     }, 4000);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
     return () => clearTimeout(timer);
   }, [fadeAnim, bgFadeAnim, isAuthenticated, loading, navigation]);
@@ -55,7 +58,7 @@ export default function SplashScreen() {
       </Animated.View>
       
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        <Text style={styles.brandTitle}>TrueHand</Text>
+        <Image source={require('../../assets/logo.png')} style={{ width: 250, height: 80 }} resizeMode="contain" />
       </Animated.View>
     </View>
   );

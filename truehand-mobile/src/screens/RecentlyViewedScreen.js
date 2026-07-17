@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
@@ -37,6 +38,8 @@ export default function RecentlyViewedScreen() {
   const renderProduct = ({ item, index }) => {
     // Make every 3rd item span wider or taller to simulate bento layout
     const isLarge = index === 2;
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
     return (
       <TouchableOpacity 

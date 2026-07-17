@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';;
@@ -51,6 +52,8 @@ export default function VoiceSearchScreen() {
     createRipple(scale1, opacity1, 0);
     createRipple(scale2, opacity2, 1000);
   }, [scale1, opacity1, scale2, opacity2]);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

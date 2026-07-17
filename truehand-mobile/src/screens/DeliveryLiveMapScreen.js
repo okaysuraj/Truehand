@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';;
@@ -9,6 +10,8 @@ import { useDeliveryStore } from '../store/useDeliveryStore';
 export default function DeliveryLiveMapScreen() {
   const navigation = useNavigation();
   const activeDelivery = useDeliveryStore(state => state.activeDelivery);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <View style={styles.container}>

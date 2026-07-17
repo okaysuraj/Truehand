@@ -10,12 +10,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+import com.truehand.service.ProductService;
+
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000")
 public class AdminController {
     private final AdminService adminService;
+    private final ProductService productService;
 
     @GetMapping("/kyc/seller/pending")
     public ResponseEntity<List<SellerProfile>> getPendingSellers() {
@@ -40,5 +43,20 @@ public class AdminController {
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics() {
         return ResponseEntity.ok(adminService.getMetrics());
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<List<com.truehand.model.User>> getAllUsers() {
+        return ResponseEntity.ok(adminService.getAllUsers());
+    }
+
+    @GetMapping("/products/pending")
+    public ResponseEntity<List<com.truehand.dto.ProductDTO>> getPendingProducts() {
+        return ResponseEntity.ok(productService.getPendingProducts());
+    }
+
+    @PutMapping("/products/{id}/approve")
+    public ResponseEntity<com.truehand.dto.ProductDTO> approveProduct(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        return ResponseEntity.ok(productService.updateProductStatus(id, body.get("status")));
     }
 }

@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +27,8 @@ export default function HomeFeedScreen() {
     { id: 'c3', name: 'Glass', image: 'https://via.placeholder.com/300x400', isLarge: false },
     { id: 'c4', name: 'Ceramics', image: 'https://via.placeholder.com/600x400', isLarge: true },
   ];
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

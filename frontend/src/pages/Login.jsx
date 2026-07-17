@@ -1,5 +1,6 @@
+import api from '../services/api';
 import React, { useState } from 'react';
-import { useAuth } from '../services/AuthProvider';
+import { useAuth } from '../context/AuthProvider';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Login = () => {
@@ -23,6 +24,8 @@ const Login = () => {
     }
     setLoading(false);
   };
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <main className="min-h-screen flex items-center justify-center pt-20 px-margin-mobile">

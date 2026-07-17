@@ -34,5 +34,6 @@ public class OrderItem {
     private BigDecimal priceAtPurchase;
 
     @Column(updatable = false)
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }

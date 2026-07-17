@@ -36,6 +36,7 @@ public class Review {
     private String comment;
 
     @Column(updatable = false)
+    @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @PrePersist

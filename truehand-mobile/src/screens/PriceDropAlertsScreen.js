@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
@@ -37,6 +38,8 @@ export default function PriceDropAlertsScreen() {
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDScOpoEQxPygePWkbJgZhZYnCU5RIPNiVYHWmc-3yamW_WyNqK5ESfX_pswLnGjV5Di6ZQcKw6EOiABcuBVewBrZaUHSDqT195cf02-CHP77VYnsn6HwcjYCgKL3e87ViF9ZlpQha7ScZ9XYKlTNOA5BIy_NdRqtss60oReeNvGu1OMuOVN6eXY-NkpsEZNzZvHNNSsyCe-4nLYGx3Uo1PS0751PVnS2LPW-rMtxtE4oZnJmnYxBdgsw'
     }
   ];
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

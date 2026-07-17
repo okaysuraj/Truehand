@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthProvider';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [filter, setFilter] = useState('all'); // all, active, completed
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!user) return;
       try {
-        const res = await api.get('/orders');
+        const res = await api.get(`/orders/user/${user.id}`);
         setOrders(res.data || []);
       } catch (err) {
         console.error(err);
       }
     };
     fetchOrders();
-  }, []);
+  }, [user]);
 
   const filteredOrders = orders.filter(o => {
     if (filter === 'active') return o.status !== 'DELIVERED' && o.status !== 'CANCELLED';

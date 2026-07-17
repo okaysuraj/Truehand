@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -26,6 +27,8 @@ const Skeleton = ({ width, height, style, delay = 0 }) => {
       ])
     ).start();
   }, [opacity, delay]);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <Animated.View 

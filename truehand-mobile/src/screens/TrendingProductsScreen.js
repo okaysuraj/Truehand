@@ -1,3 +1,4 @@
+import api from '../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
@@ -29,6 +30,8 @@ export default function TrendingProductsScreen() {
   const renderProduct = ({ item, index }) => {
     // To simulate masonry, we can alternate aspect ratios
     const isTall = index % 3 === 0;
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
     return (
       <TouchableOpacity 

@@ -1,6 +1,7 @@
+import api from '../services/api';
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { useAuth } from '../services/AuthProvider';
+import { useAuth } from '../context/AuthProvider';
 
 const VerifyEmail = () => {
   const [searchParams] = useSearchParams();
@@ -22,6 +23,8 @@ const VerifyEmail = () => {
         setError(err?.response?.data || 'Unable to verify email.');
       });
   }, [searchParams, verifyEmail]);
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <main className="flex-grow flex items-center justify-center pt-24 px-margin-mobile md:px-margin-desktop min-h-screen relative bg-surface-linen text-on-surface">

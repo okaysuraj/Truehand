@@ -1,3 +1,4 @@
+import api from '../services/api';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -55,6 +56,8 @@ const NOTIFICATIONS = [
 export default function NotificationsListScreen() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Activity');
+  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>
