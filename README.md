@@ -1,6 +1,8 @@
 # Truehand
 
-A full-stack e-commerce application tailored for handcrafted, artisanal goods. Truehand features a responsive web frontend, a native mobile application, and a robust Spring Boot backend with real-time order tracking and secure JWT authentication.
+**Live Website:** [https://truehand.netlify.app](https://truehand.netlify.app)
+
+A full-stack e-commerce application tailored for handcrafted, artisanal goods. Truehand features a responsive web frontend, a native mobile application, and a robust Spring Boot backend with real-time order tracking and secure authentication.
 
 ## Tech Stack
 
