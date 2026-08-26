@@ -14,7 +14,6 @@ export default function LoginScreen() {
   const login = useAuthStore((state) => state.login);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (
@@ -30,7 +29,7 @@ export default function LoginScreen() {
         >
           <View style={styles.card}>
             <View style={styles.header}>
-              <Image source={require('../../assets/logo.png')} style={{ width: 150, height: 40, marginBottom: spacing.stackSm }} resizeMode="contain" />
+              <Image source={require('../../../assets/logo.png')} style={{ width: 150, height: 40, marginBottom: spacing.stackSm }} resizeMode="contain" />
               <Text style={styles.title}>Welcome Back</Text>
               <Text style={styles.subtitle}>Sign in to continue exploring curated craftsmanship.</Text>
             </View>

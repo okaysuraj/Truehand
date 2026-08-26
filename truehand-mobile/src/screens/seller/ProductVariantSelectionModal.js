@@ -27,7 +27,6 @@ export default function ProductVariantSelectionModal() {
     // Navigate back with selected options
     navigation.goBack();
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

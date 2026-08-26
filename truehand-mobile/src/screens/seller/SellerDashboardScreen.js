@@ -23,7 +23,6 @@ export default function SellerDashboardScreen() {
   }, [fetchStats, fetchOrders]);
 
   const recentOrders = orders.slice(0, 3);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

@@ -35,7 +35,6 @@ export default function SearchInputScreen() {
     setSearchQuery(query);
     navigation.navigate('SearchResults', { query });
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

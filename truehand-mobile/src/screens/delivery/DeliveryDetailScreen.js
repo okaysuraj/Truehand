@@ -10,7 +10,6 @@ import { useDeliveryStore } from '../../store/useDeliveryStore';
 export default function DeliveryDetailScreen() {
   const navigation = useNavigation();
   const activeDelivery = useDeliveryStore(state => state.activeDelivery);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

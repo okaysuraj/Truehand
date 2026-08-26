@@ -46,7 +46,6 @@ export default function SaveForLaterScreen() {
   const clearAll = () => {
     setSavedItems([]);
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

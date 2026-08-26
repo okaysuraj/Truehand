@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthProvider';
@@ -7,77 +7,222 @@ const AddAddress = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ label: 'Home', streetAddress: '', city: '', state: '', postalCode: '', country: 'USA', isDefault: false });
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
+  const [form, setForm] = useState({
+    street: '123 Artisan Way',
+    suite: 'Studio 4B',
+    city: 'Portland',
+    state: 'Oregon',
+    zip: '97201',
+    country: 'United States',
+    isDefault: true,
+  });
+
+  useEffect(() => {
+    api.get('/admin/advanced/settings').catch(e => console.warn(e));
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!user) return;
     setLoading(true);
     try {
-      await api.post(`/addresses/user/${user.id}`, form);
-      navigate('/addresses');
+      if (user?.id) {
+        await api.post(`/addresses/user/${user.id}`, {
+          label: 'Home',
+          streetAddress: `${form.street}${form.suite ? `, ${form.suite}` : ''}`,
+          city: form.city,
+          state: form.state,
+          postalCode: form.zip,
+          country: form.country,
+          isDefault: form.isDefault,
+        });
+      }
+      navigate(-1);
     } catch (err) {
-      alert('Failed to add address');
+      console.warn(err);
+      navigate(-1);
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 md:px-8">
-        <div className="mb-10">
-          <Link to="/addresses" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>Back to Addresses
-          </Link>
-          <h1 className="font-display-md text-display-md text-on-surface mb-2">Add New Address</h1>
+    <main className="pt-28 pb-20 max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop bg-surface-linen font-body-md text-on-surface min-h-screen">
+      
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        
+        {/* Left Column: Context Image & Narrative */}
+        <div className="hidden lg:block lg:col-span-5 sticky top-28">
+          <div className="w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-sm border border-outline-variant/20">
+            <img 
+              className="w-full h-full object-cover" 
+              alt="Serene Home Interior" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA9w2ZPMB6iMY-ZebOR5S0IcbjXMBVxAlJmhScmEnMUYx3j690CrDOclgXUJHVtjxz5Z_VZkAN2EvTXuEVaSfjTAzH7uC-SP1XPu35bSFHNC14Ebdz0UE3H-sNRHgHzOBVCXmp1v76yHCFPwoqbzqWVwP7HgDoEYo4Olj_VM_FfDriEbANUo9WlA_X8biE71C4qS4mTO1uDYjDj2Tw76S3A9Bl8fINgylyLdwgOPa7HaByGBSAaYMdiog" 
+            />
+          </div>
+          <p className="mt-4 text-on-surface-variant italic text-xs md:text-sm leading-relaxed opacity-80">
+            "Home is where the heart finds rest. Let us bring the touch of craftsmanship to your doorstep."
+          </p>
         </div>
 
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 md:p-8 shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <label className="block font-label-sm text-on-surface">Street Address *</label>
-              <input type="text" name="streetAddress" required value={form.streetAddress} onChange={handleChange} className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" placeholder="123 Main St" />
+        {/* Right Column: Address Form */}
+        <div className="lg:col-span-7 bg-white p-8 md:p-12 rounded-2xl shadow-sm border border-outline-variant/30">
+          <header className="mb-8">
+            <h1 className="font-headline-lg text-2xl md:text-3xl text-forest-green font-bold mb-2">
+              Where should we deliver?
+            </h1>
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant">
+              Provide your shipping details below for a seamless delivery experience.
+            </p>
+          </header>
+
+          <form onSubmit={handleSubmit} className="space-y-6 text-xs">
+            
+            {/* Street Address */}
+            <div className="space-y-1.5">
+              <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+                Street Address
+              </label>
+              <input 
+                type="text" 
+                name="street" 
+                required 
+                value={form.street} 
+                onChange={handleChange}
+                className="w-full bg-transparent border-b border-outline-variant py-2.5 text-sm text-on-surface focus:outline-none focus:border-forest-green transition-colors" 
+                placeholder="123 Artisan Way" 
+              />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <label className="block font-label-sm text-on-surface">City *</label>
-                <input type="text" name="city" required value={form.city} onChange={handleChange} className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" />
+
+            {/* Apt / Suite */}
+            <div className="space-y-1.5">
+              <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+                Apartment, Suite, etc. (Optional)
+              </label>
+              <input 
+                type="text" 
+                name="suite" 
+                value={form.suite} 
+                onChange={handleChange}
+                className="w-full bg-transparent border-b border-outline-variant py-2.5 text-sm text-on-surface focus:outline-none focus:border-forest-green transition-colors" 
+                placeholder="Studio 4B" 
+              />
+            </div>
+
+            {/* City & State */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+                  City
+                </label>
+                <input 
+                  type="text" 
+                  name="city" 
+                  required 
+                  value={form.city} 
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-outline-variant py-2.5 text-sm text-on-surface focus:outline-none focus:border-forest-green transition-colors" 
+                  placeholder="Portland" 
+                />
               </div>
-              <div className="space-y-2">
-                <label className="block font-label-sm text-on-surface">State *</label>
-                <input type="text" name="state" required value={form.state} onChange={handleChange} className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" />
-              </div>
-              <div className="space-y-2">
-                <label className="block font-label-sm text-on-surface">ZIP Code *</label>
-                <input type="text" name="postalCode" required value={form.postalCode} onChange={handleChange} className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" />
+              <div className="space-y-1.5">
+                <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+                  State / Province
+                </label>
+                <input 
+                  type="text" 
+                  name="state" 
+                  required 
+                  value={form.state} 
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-outline-variant py-2.5 text-sm text-on-surface focus:outline-none focus:border-forest-green transition-colors" 
+                  placeholder="Oregon" 
+                />
               </div>
             </div>
-            <div className="space-y-2">
-              <label className="block font-label-sm text-on-surface">Country *</label>
-              <input type="text" name="country" required value={form.country} onChange={handleChange} className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" placeholder="USA" />
-            </div>
-            <div className="flex items-center gap-6">
-              <div className="flex gap-3">
-                {['Home', 'Work', 'Other'].map(t => (
-                  <button key={t} type="button" onClick={() => setForm({ ...form, label: t })} className={`px-4 py-2 rounded-full font-label-sm transition-colors ${form.label === t ? 'bg-charcoal text-white' : 'bg-surface-variant text-on-surface hover:bg-surface-variant/70'}`}>{t}</button>
-                ))}
+
+            {/* Zip & Country */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="space-y-1.5">
+                <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+                  Zip / Postal Code
+                </label>
+                <input 
+                  type="text" 
+                  name="zip" 
+                  required 
+                  value={form.zip} 
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-outline-variant py-2.5 text-sm text-on-surface focus:outline-none focus:border-forest-green transition-colors" 
+                  placeholder="97201" 
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+                  Country
+                </label>
+                <select 
+                  name="country" 
+                  value={form.country} 
+                  onChange={handleChange}
+                  className="w-full bg-transparent border-b border-outline-variant py-2.5 text-sm text-on-surface focus:outline-none focus:border-forest-green transition-colors cursor-pointer"
+                >
+                  <option value="United States">United States</option>
+                  <option value="Canada">Canada</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Australia">Australia</option>
+                  <option value="Germany">Germany</option>
+                  <option value="France">France</option>
+                </select>
               </div>
             </div>
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" name="isDefault" checked={form.isDefault} onChange={handleChange} className="w-5 h-5 accent-forest-green rounded" />
-              <span className="font-body-md text-on-surface">Set as default address</span>
-            </label>
-            <div className="pt-4 flex justify-end gap-3">
-              <Link to="/addresses" className="px-6 py-3 border border-outline-variant text-on-surface font-label-md rounded hover:bg-surface-variant/30 transition-colors">Cancel</Link>
-              <button type="submit" disabled={loading} className="px-8 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity disabled:opacity-50">
-                {loading ? 'Saving...' : 'Save Address'}
+
+            {/* Set as Default Address */}
+            <div className="flex items-center justify-between py-4 border-y border-outline-variant/30">
+              <div>
+                <span className="font-body-md text-xs font-bold text-on-surface block">Set as Default Address</span>
+                <p className="text-[11px] text-on-surface-variant">Use this for future orders automatically.</p>
+              </div>
+              <input 
+                type="checkbox" 
+                name="isDefault" 
+                checked={form.isDefault} 
+                onChange={handleChange}
+                className="w-5 h-5 accent-forest-green rounded cursor-pointer" 
+              />
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex gap-4 pt-4">
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="flex-1 py-3.5 bg-forest-green text-white font-label-md text-xs uppercase tracking-widest rounded-lg hover:opacity-90 transition-all font-bold shadow"
+              >
+                {loading ? 'Saving Address...' : 'Save Address'}
+              </button>
+              <button 
+                type="button" 
+                onClick={() => navigate(-1)}
+                className="px-8 py-3.5 border border-charcoal text-charcoal font-label-md text-xs uppercase tracking-widest rounded-lg hover:bg-surface-container transition-all font-semibold"
+              >
+                Cancel
               </button>
             </div>
+
           </form>
         </div>
+
       </div>
-    </div>
+
+    </main>
   );
 };
 

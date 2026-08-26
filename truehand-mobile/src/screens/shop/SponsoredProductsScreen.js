@@ -53,7 +53,6 @@ export default function SponsoredProductsScreen() {
       return p;
     }));
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

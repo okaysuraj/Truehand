@@ -14,3 +14,7 @@ Thumbs.db
 # Env
 .env
 .env.local
+
+build/
+dist/
+target/

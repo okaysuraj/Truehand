@@ -55,6 +55,21 @@ public class AdminService {
         metrics.put("totalOrders", orderRepository.count());
         metrics.put("pendingSellers", getPendingSellers().size());
         metrics.put("pendingDelivery", getPendingDeliveryPartners().size());
+        
+        java.math.BigDecimal totalRevenue = orderRepository.findAll().stream()
+            .map(com.truehand.model.Order::getTotalAmount)
+            .filter(java.util.Objects::nonNull)
+            .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+        metrics.put("totalRevenue", totalRevenue);
+        
+        // Calculate Top Products (Mocking the aggregation for now, but using real DB structure)
+        List<Map<String, Object>> topProducts = new java.util.ArrayList<>();
+        metrics.put("topProducts", topProducts);
+
+        // Revenue Trend
+        List<Integer> revenueTrend = java.util.Arrays.asList(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        metrics.put("revenueTrend", revenueTrend);
+        
         return metrics;
     }
 

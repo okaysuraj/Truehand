@@ -59,4 +59,21 @@ public class AdminController {
     public ResponseEntity<com.truehand.dto.ProductDTO> approveProduct(@PathVariable Integer id, @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(productService.updateProductStatus(id, body.get("status")));
     }
+
+    @GetMapping("/payouts")
+    public ResponseEntity<List<com.truehand.model.PayoutRequest>> getAllPayouts(
+            @org.springframework.beans.factory.annotation.Autowired com.truehand.repository.PayoutRequestRepository payoutRepo) {
+        return ResponseEntity.ok(payoutRepo.findAll());
+    }
+
+    @PutMapping("/payouts/{id}/{action}")
+    public ResponseEntity<?> updatePayoutStatus(
+            @PathVariable Integer id, 
+            @PathVariable String action,
+            @org.springframework.beans.factory.annotation.Autowired com.truehand.repository.PayoutRequestRepository payoutRepo) {
+        
+        com.truehand.model.PayoutRequest payout = payoutRepo.findById(id).orElseThrow();
+        payout.setStatus(action.equalsIgnoreCase("approve") ? "APPROVED" : "REJECTED");
+        return ResponseEntity.ok(payoutRepo.save(payout));
+    }
 }

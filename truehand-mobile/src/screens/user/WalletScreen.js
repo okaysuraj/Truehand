@@ -43,7 +43,6 @@ export default function WalletScreen() {
       icon: 'bag-handle'
     }
   ];
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

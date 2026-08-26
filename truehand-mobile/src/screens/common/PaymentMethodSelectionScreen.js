@@ -29,7 +29,6 @@ export default function PaymentMethodSelectionScreen() {
     });
     navigation.navigate('OrderSummary');
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

@@ -14,13 +14,12 @@ export default function ProfileScreen({ navigation }) {
     try {
       await logout();
     } catch (err) {
-      console.log('Error logging out', err);
+      // Ignore logout error
     }
   };
 
   const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Julian Thorne';
   const role = user ? 'Member' : 'Master Ceramicist & Collector';
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

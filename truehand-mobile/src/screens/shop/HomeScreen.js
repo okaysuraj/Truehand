@@ -19,7 +19,6 @@ export default function HomeScreen() {
   React.useEffect(() => {
     fetchTrendingProducts();
   }, [fetchTrendingProducts]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

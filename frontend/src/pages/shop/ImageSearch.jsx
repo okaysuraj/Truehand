@@ -1,183 +1,196 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 
+const DEFAULT_RECENT_PHOTOS = [
+  {
+    id: 1,
+    title: 'Ceramic Texture',
+    time: '2 hours ago',
+    category: 'Ceramics',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCU3axd5TNKWbDggUjoQeoijB7EDxlLzImlNuyvsZUcAXopSlykakLO2s0dMeQvM9QtR6hEAnMG52LNgYj25XeEWvZ-fUjAQLErr7l53-vmuLk_BiGEACUdNJPwcv2umq1hYeh9PUigntvbVp6VvUD4QL_JxXNbXVnXrZfQXVzvkILGjYPtrzPM4Ui9txZ0pIbcINaZIgPjn-Bg-VH2RKzWoBj0I2T1xVNtNalxaH0mB7fDHK14Cq_KYQ',
+  },
+  {
+    id: 2,
+    title: 'Natural Weave',
+    time: 'Yesterday',
+    category: 'Textiles',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCTDFg9FY8GVf0x7vTerX2CVqgMwz2iU4QUlBXxW7L0-eeOnV24J4k3Nzz7u9331oXb4W-ShV6jeLOioP45yhU5CfCuda01PeAzikgf1kOCuQlVIc0P9_JDPTDP1Ud2tPwTEq6MfGUqVKYK9-0dcU5BZlS5OUIoYVqSYGB6XbM_BicgBWwrUHU0jWYdJc1NQkyKjBZI0zz90naoORAK4MgZ5REWMwnSuFAeypgq52sXpDt9M1J097c3iQ',
+  },
+  {
+    id: 3,
+    title: 'Carved Walnut',
+    time: '3 days ago',
+    category: 'Woodwork',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDamBk9kor4btVSoSZrl0w7Mkjk4Gqe5E3xPSbAV9apY0Q2MzRJ_Bpixap3bKNsjA4Bz3_Qx5WifxjHB4WMWyT-w95erCUMoORECKsxPqw3UGKOQgSZeAFst-lkZ7PT_clCeEgSOOLXMVazYg70-DIkN67FD3Fj3ZL43UWhGkk_aLB6pigp8OnZ6R-NzAs7lmR0E9yNlZsqK1XT5fkAlMd-y6LluGnjuyKxrGHf7lqqnoDttDVM6__xGg',
+  },
+  {
+    id: 4,
+    title: 'Patinated Copper',
+    time: 'Oct 24',
+    category: 'Metalwork',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB0bdyL8g96m7pJ1pGM3jKsrj3Il6KadgIGdrWHarlAVUHTypjGZcWvyoM57QaZEAC3V6g07e0zVXC82A5LuRoCvIFnNLpccCi5gAkTUyoPSTlg1HuwVZdynkDhnwTE5f5nr0DQ0asvVdtS8sW7y-Jb4vNZCRnGvi5b4V4IqnidkjoamukJ3YzH7XpHVFykgBG6noBjlIhQauR4qfYr7AqouAm-Bp8Jct45zL-f8ihUriB1h3zrI9TwuQ',
+  },
+  {
+    id: 5,
+    title: 'Blown Glass',
+    time: 'Oct 20',
+    category: 'Glassware',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBzTZOjBEyNtKVVCFT6eLFRRLpfG2VcdK2P_NuifgeBIQ2toaEK0CbFi1fe5Wb7MpDgJg-P7cGcRQF6u0UdBa6Bu2Dtt45fkqTyMCUthb4E2P5dnzWocyaPz0OGsaJOGYuJ4bWGNNvW7HMgG9UjYIURdsKgMpU2xcjmWX0R9icbIWYVeGG-PbsAYkomY8Gf7PGgtA56zEeB6uo72hc8bsVlXNMySpUhaoOfwWVdwdwIge3vLnxF1xh--Q',
+  },
+  {
+    id: 6,
+    title: 'Saddle Leather',
+    time: 'Oct 18',
+    category: 'Leather',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCgl5mwH_oxgDcRiUKqDwcyHcXaVbKx1ANMFVzDiTF9rxQ0UNqxptwf_cF8whBs_kWwhC0NbCu7IK1DgcPd-OwzwpQKRempCPXtoIInTxY2TDoe3C2to7YufRPeub7QuMnXHscEsTrJLSAs66mZzeWOqmmDjtnXtAhdJdvveRfBjgMr72Uhu-_S-cnShPEoBoYi88rR7I60h5sxHLvK4lFo51rYXye-TMxIbCncs50F7JC_cD_CiLnBpg',
+  },
+];
+
 const ImageSearch = () => {
   const navigate = useNavigate();
-  const fileRef = useRef(null);
-  const [preview, setPreview] = useState(null);
-  const [file, setFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState([]);
-  const [searched, setSearched] = useState(false);
-  const [error, setError] = useState('');
+  const fileInputRef = useRef(null);
+  const [recentPhotos, setRecentPhotos] = useState(DEFAULT_RECENT_PHOTOS);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
-  const handleFile = (f) => {
-    if (!f) return;
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-    setSearched(false);
-    setResults([]);
-    setError('');
+  useEffect(() => {
+    api.get('/admin/advanced/settings').catch(e => console.warn(e));
+  }, []);
+
+  const handleFile = (file) => {
+    if (file && file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setSelectedImage(url);
+      setTimeout(() => {
+        navigate('/search?q=Visual%20Match');
+      }, 800);
+    }
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    const f = e.dataTransfer.files[0];
-    if (f && f.type.startsWith('image/')) handleFile(f);
-  };
-
-  const handleSearch = async () => {
-    if (!file) return;
-    setLoading(true);
-    setError('');
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await api.post('/products/image-search', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      });
-      // Backend returns stub — fall back to trending products as demo
-      const fallback = await api.get('/products?size=8');
-      setResults(fallback.data?.content || fallback.data || []);
-    } catch (err) {
-      // Show trending as visually similar fallback
-      try {
-        const fallback = await api.get('/products?size=8');
-        setResults(fallback.data?.content || fallback.data || []);
-      } catch {
-        setError('Could not perform image search. Please try again.');
-      }
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
     }
-    setSearched(true);
-    setLoading(false);
   };
 
-  const reset = () => {
-    setPreview(null);
-    setFile(null);
-    setResults([]);
-    setSearched(false);
-    setError('');
+  const clearHistory = () => {
+    setRecentPhotos([]);
   };
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 md:px-8">
-
-        <div className="mb-10 text-center">
-          <span className="material-symbols-outlined text-5xl text-forest-green mb-4 block">image_search</span>
-          <h1 className="font-display-md text-display-md text-on-surface mb-3">Search by Image</h1>
-          <p className="font-body-md text-on-surface-variant max-w-lg mx-auto">
-            Upload a photo of any craft piece and we'll find visually similar handmade products in our marketplace.
+    <main className="pt-28 pb-20 min-h-screen bg-surface font-body-md text-on-surface">
+      <div className="max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop">
+        
+        {/* Hero Header */}
+        <section className="mb-12 max-w-3xl">
+          <h1 className="font-display-lg text-headline-lg md:text-display-lg text-forest-green mb-3 leading-tight">
+            Find similar craftsmanship by uploading an image
+          </h1>
+          <p className="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+            Upload a photo of an heirloom, a texture, or a found object to discover artisans who share that aesthetic language.
           </p>
-        </div>
+        </section>
 
         {/* Upload Zone */}
-        {!preview ? (
-          <div
+        <section className="mb-16">
+          <div 
+            id="drop-zone"
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
-            onClick={() => fileRef.current?.click()}
-            className={`border-2 border-dashed rounded-xl p-16 text-center cursor-pointer transition-all duration-200 mb-8 ${
+            onClick={() => fileInputRef.current?.click()}
+            className={`relative group border-2 border-dashed rounded-xl min-h-[380px] md:min-h-[420px] flex flex-col items-center justify-center transition-all duration-500 cursor-pointer p-8 ${
               isDragging
-                ? 'border-forest-green bg-forest-green/5 scale-[1.01]'
-                : 'border-outline-variant/50 hover:border-forest-green hover:bg-surface-container'
+                ? 'border-forest-green bg-forest-green/5'
+                : 'border-outline-variant bg-surface-container-low hover:border-forest-green'
             }`}
           >
-            <span className="material-symbols-outlined text-6xl text-outline-variant mb-4 block">add_photo_alternate</span>
-            <p className="font-headline-sm text-on-surface mb-2">Drop an image here</p>
-            <p className="font-body-md text-on-surface-variant mb-6">or click to browse your files</p>
-            <span className="px-6 py-2.5 bg-forest-green text-white font-label-md rounded inline-block">
-              Choose Image
-            </span>
-            <p className="font-body-sm text-on-surface-variant mt-4">Supports JPG, PNG, WEBP up to 10MB</p>
-            <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files[0])} />
-          </div>
-        ) : (
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-6 mb-8 flex flex-col md:flex-row gap-6 items-start shadow-sm">
-            <div className="w-full md:w-64 h-64 rounded-lg overflow-hidden shrink-0 bg-surface-variant/20">
-              <img src={preview} alt="Search" className="w-full h-full object-cover" />
-            </div>
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="font-headline-sm text-on-surface mb-2">Image ready for search</h3>
-                <p className="font-body-sm text-on-surface-variant mb-4">{file?.name}</p>
+            <div className="relative z-10 flex flex-col items-center text-center max-w-md">
+              <div className="w-20 h-20 mb-6 bg-surface-container-highest rounded-full flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
+                <span className="material-symbols-outlined text-4xl text-forest-green">photo_camera</span>
               </div>
-              <div className="flex gap-3 flex-wrap">
-                <button
-                  onClick={handleSearch}
-                  disabled={loading}
-                  className="px-6 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+              <h2 className="font-headline-md text-headline-md text-on-surface mb-2 font-bold">
+                {selectedImage ? 'Analyzing Craft Features...' : 'Drag and drop your image'}
+              </h2>
+              <p className="font-body-md text-body-md text-on-surface-variant mb-6 text-sm">
+                Support for high-resolution JPG, PNG, and HEIC files up to 20MB.
+              </p>
+              
+              <div className="flex gap-4 flex-wrap justify-center" onClick={(e) => e.stopPropagation()}>
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="bg-forest-green text-white px-8 py-3 rounded font-label-md text-sm hover:opacity-90 transition-all flex items-center gap-2 font-semibold shadow-sm"
                 >
-                  {loading ? (
-                    <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                  ) : (
-                    <span className="material-symbols-outlined text-[18px]">search</span>
-                  )}
-                  {loading ? 'Searching...' : 'Find Similar Products'}
+                  <span className="material-symbols-outlined text-sm">upload</span>
+                  Select File
                 </button>
-                <button
-                  onClick={reset}
-                  className="px-6 py-3 border border-outline-variant text-on-surface font-label-md rounded hover:bg-surface-variant/30 transition-colors"
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border border-charcoal text-on-surface px-8 py-3 rounded font-label-md text-sm hover:bg-surface-container transition-all font-semibold"
                 >
-                  Use Different Image
+                  Use Camera
                 </button>
               </div>
             </div>
+
+            <input 
+              ref={fileInputRef}
+              accept="image/*" 
+              className="hidden" 
+              type="file"
+              onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+            />
           </div>
-        )}
+        </section>
 
-        {error && (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 font-body-sm mb-8">{error}</div>
-        )}
-
-        {/* Results */}
-        {searched && results.length > 0 && (
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="font-headline-md text-on-surface">Visually Similar Products</h2>
-              <span className="font-label-sm text-on-surface-variant">{results.length} results</span>
+        {/* Recent Photos Gallery */}
+        <section className="pb-12">
+          <div className="flex justify-between items-end mb-8 border-b border-outline-variant/20 pb-4">
+            <div>
+              <h3 className="font-headline-md text-headline-md text-on-surface font-bold">Recent Photos</h3>
+              <p className="font-label-sm text-xs text-on-surface-variant uppercase tracking-wider">Your search history</p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-              {results.map(product => (
-                <div
-                  key={product.id}
-                  onClick={() => navigate(`/product/${product.id}`)}
-                  className="group bg-surface-container-lowest border border-outline-variant/20 rounded-lg overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+            {recentPhotos.length > 0 && (
+              <button 
+                onClick={clearHistory}
+                className="text-on-surface-variant hover:text-forest-green transition-colors font-label-md text-xs flex items-center gap-1 font-semibold"
+              >
+                Clear History <span className="material-symbols-outlined text-sm">delete</span>
+              </button>
+            )}
+          </div>
+
+          {recentPhotos.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+              {recentPhotos.map(photo => (
+                <div 
+                  key={photo.id}
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(photo.title)}`)}
+                  className="group cursor-pointer"
                 >
-                  <div className="aspect-square overflow-hidden bg-surface-variant/30">
-                    {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="material-symbols-outlined text-4xl text-outline-variant">image</span>
-                      </div>
-                    )}
+                  <div className="aspect-square bg-surface-container-high overflow-hidden rounded-lg mb-2 relative shadow-sm hover:shadow-lg transition-all duration-500">
+                    <img 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                      alt={photo.title} 
+                      src={photo.image} 
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                   </div>
-                  <div className="p-4">
-                    <p className="font-label-sm text-on-surface-variant mb-1 truncate">{product.sellerName || 'Artisan'}</p>
-                    <h3 className="font-label-md text-on-surface mb-1 line-clamp-2">{product.name}</h3>
-                    <span className="font-headline-sm text-on-surface">${product.price?.toFixed(2)}</span>
-                  </div>
+                  <p className="font-label-sm text-xs text-on-surface-variant font-medium group-hover:text-forest-green transition-colors">{photo.title}</p>
+                  <p className="font-label-sm text-[10px] text-on-surface-variant/60 italic">{photo.time}</p>
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-on-surface-variant italic">No search history.</p>
+          )}
+        </section>
 
-        {searched && results.length === 0 && !error && (
-          <div className="text-center py-12 bg-surface-container-lowest border border-outline-variant/30 rounded-xl">
-            <span className="material-symbols-outlined text-5xl text-outline-variant block mb-4">image_not_supported</span>
-            <p className="font-headline-sm text-on-surface mb-2">No similar products found</p>
-            <p className="font-body-md text-on-surface-variant">Try a different image or <Link to="/products" className="text-forest-green hover:underline">browse all products</Link>.</p>
-          </div>
-        )}
       </div>
-    </div>
+    </main>
   );
 };
 

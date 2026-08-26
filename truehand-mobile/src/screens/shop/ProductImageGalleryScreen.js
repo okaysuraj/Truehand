@@ -27,7 +27,6 @@ export default function ProductImageGalleryScreen() {
   };
 
   const currentImage = images[currentIndex] || images[0];
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

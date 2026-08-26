@@ -1,220 +1,268 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
-import api from '../../services/api';
+
+const RECENT_TRANSACTIONS = [
+  {
+    id: '#AS-98214',
+    item: 'Hand-thrown Minimalist Vase',
+    category: 'Ceramics • Large',
+    amount: '$185.00',
+    status: 'Completed',
+    statusClass: 'bg-emerald-50 text-forest-green',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBXEnG8NDjIN-1fYsguVvbxY_KcuIEwgS3ANzKAEfYxDl7eZ-ALXNFmFH6OSX7f-kSQOBHkSskNlDpEF9tw5pdNzKyNjJcLjGbrJ_-8qKkQFcj0D_sm81jZcFejDYcmRkVgDWpwNt_QuughiZbyOh2E3Z-NH2GvPbhX8tcJXnYbVyhf4PUd19u4abuU2e9eNzGnRhpHze5__XkEy24yymg1-Wb89UMFnnU-nSAW7h6ue6GjSxfCGHQO5A',
+  },
+  {
+    id: '#AS-98210',
+    item: 'Organic Linen Napkin Set',
+    category: 'Textiles • Set of 4',
+    amount: '$64.00',
+    status: 'Pending',
+    statusClass: 'bg-surface-container text-on-surface-variant',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA_I4nhUfp3d2Zzoc96FbyCm9YMdTJRRS7xFs7tHKpUyOaeQ-9oftw_YQLawUH6Gcp-mtHwiqzjxGn8VY2aWp-X7BEjEFtPQKAs6sugXHGJMjdo2dzbjw2oaTHK3q6tf0SJ59BPGuHDI6N-f4QhP1YFfv6i4UN6jV9FrlHnQpfhPW0POybsfcFMSqF2Yo1f_dCta_gU4NCUgy2CquDC_fyF8HQKGNjALPeeqmF8DbN3uDEuLPZz5-Kb9A',
+  },
+  {
+    id: '#AS-98205',
+    item: 'Walnut Salad Bowl',
+    category: 'Woodwork • Hand-turned',
+    amount: '$120.00',
+    status: 'Completed',
+    statusClass: 'bg-emerald-50 text-forest-green',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBk5LUJsR8fkJOTzvyhHwchvDPjR1q0fruU949k_rHczPObgMLlEpu5O1VUY_A1OF_pK7nbzFScYlfETZjxFDzxHQ6kVthhgV1PXPFGvVYo8VXDfGlg8UzdreBP91eMwHJJ2-v0uR07Dkp6I-iT52vSkn76DQpZkTJCxO9HtBsiqfse1H3sTmyUagH9hx7MmVjrweUY46wdxEX8pM4L_arvaBptPr46X6MAqqIJp7TET1FXsPXkM8Hyjw',
+  },
+  {
+    id: '#AS-98198',
+    item: 'Brass Incense Holder',
+    category: 'Metalwork • Brushed Finish',
+    amount: '$45.00',
+    status: 'Completed',
+    statusClass: 'bg-emerald-50 text-forest-green',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDDEw_f2jMHylziVWvmywfGVy6-kAtNqiIUgLbkahDmRa8e3UK5McvPv7KYDEC8tlOStS2470vzt_SfXG_BL8BgxjsMKFwb7VelYsZ_umF8QUveV5i7Zl2AiWgTgr1C-ePOE5Wl25iIfX2RMqQ5Mo_51kTIJEEtDjCtmAdb8_43wxF96paE82CXy-TMeW1Ml8ess0IoFC7Di6OB4TXDNJ3ctlcBdhoHQfl7AonNDWkDFYXeoqNqYrlYDQ',
+  },
+];
 
 const SellerEarnings = () => {
-  const [period, setPeriod] = useState('month');
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!user || (user.role !== 'SELLER' && user.role !== 'ADMIN')) {
-      navigate('/');
-      return;
-    }
-    fetchOrders();
-  }, [user, navigate]);
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get(`/seller/${user.id}/orders`);
-      setOrders(res.data || []);
-    } catch (err) {
-      console.error(err);
-    }
-    setLoading(false);
-  };
-
-  // Filter orders by selected period
-  const now = new Date();
-  const filteredOrders = orders.filter(order => {
-    if (!order.createdAt) return true;
-    const created = new Date(order.createdAt);
-    const diffMs = now - created;
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    if (period === 'week') return diffDays <= 7;
-    if (period === 'month') return diffDays <= 30;
-    if (period === 'quarter') return diffDays <= 90;
-    if (period === 'year') return diffDays <= 365;
-    return true;
-  });
-
-  // Derive stats from real orders
-  const totalEarnings = filteredOrders
-    .filter(o => !['CANCELLED', 'REFUNDED'].includes((o.status || '').toUpperCase()))
-    .reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0);
-
-  const pendingPayout = filteredOrders
-    .filter(o => ['CONFIRMED', 'PENDING', 'PROCESSING', 'SHIPPED'].includes((o.status || '').toUpperCase()))
-    .reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0);
-
-  const paidOut = filteredOrders
-    .filter(o => (o.status || '').toUpperCase() === 'DELIVERED')
-    .reduce((sum, o) => sum + (parseFloat(o.totalAmount) || 0), 0);
-
-  const stats = {
-    totalEarnings,
-    pendingPayout,
-    paidOut,
-    totalOrders: filteredOrders.length
-  };
-
-  // Build transactions list from orders
-  const transactions = filteredOrders.map(order => ({
-    id: order.orderNumber ? `ORD-${order.orderNumber.substring(0, 8)}` : `ORD-${order.id}`,
-    date: order.createdAt ? new Date(order.createdAt).toLocaleDateString() : '—',
-    type: ['CANCELLED', 'REFUNDED'].includes((order.status || '').toUpperCase()) ? 'Refund' : 'Sale',
-    amount: ['CANCELLED', 'REFUNDED'].includes((order.status || '').toUpperCase())
-      ? -(parseFloat(order.totalAmount) || 0)
-      : (parseFloat(order.totalAmount) || 0),
-    status: (order.status || '').toUpperCase() === 'DELIVERED' ? 'Completed'
-      : ['CANCELLED', 'REFUNDED'].includes((order.status || '').toUpperCase()) ? 'Processed'
-      : 'Pending',
-    method: 'Customer Order',
-  }));
+  const [period, setPeriod] = useState('M');
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-
-        {/* Header */}
-        <div className="mb-10">
-          <Link to="/seller/dashboard" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Dashboard
-          </Link>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+    <div className="flex min-h-screen bg-[#faf8f5] font-body-md text-on-surface pt-20">
+      
+      {/* Side Navigation */}
+      <aside className="w-64 bg-white border-r border-outline-variant/30 hidden lg:flex flex-col justify-between p-6 shrink-0">
+        <div className="space-y-8">
+          <div className="flex items-center gap-3 px-1">
+            <div className="w-9 h-9 rounded-xl bg-charcoal text-white flex items-center justify-center font-display-md text-base font-bold">
+              A
+            </div>
             <div>
-              <h1 className="font-display-md text-display-md text-on-surface mb-2">Earnings & Payouts</h1>
-              <p className="font-body-md text-on-surface-variant">Track your revenue and manage withdrawals.</p>
+              <h2 className="font-display-md text-sm font-bold text-charcoal">Studio Manager</h2>
+              <p className="text-[10px] text-on-surface-variant font-mono">Handcrafted Excellence</p>
             </div>
-            <button className="px-6 py-2.5 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 self-start md:self-auto">
-              <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-              Request Payout
-            </button>
           </div>
+
+          <nav className="space-y-1 text-xs font-semibold">
+            <Link to="/seller/dashboard" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              Dashboard
+            </Link>
+            <Link to="/seller/inventory" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+              Inventory
+            </Link>
+            <Link to="/seller/orders" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+              Orders
+            </Link>
+            <Link to="/seller/earnings" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-surface-container text-forest-green font-bold shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+              Earnings
+            </Link>
+            <Link to="/seller/analytics" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">insights</span>
+              Customer Insights
+            </Link>
+            <Link to="/settings" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+              Settings
+            </Link>
+          </nav>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-          {[
-            { label: 'Total Earnings', value: `$${stats.totalEarnings.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, icon: 'trending_up', color: 'text-forest-green' },
-            { label: 'Pending Payout', value: `$${stats.pendingPayout.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, icon: 'schedule', color: 'text-amber-600' },
-            { label: 'Paid Out', value: `$${stats.paidOut.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`, icon: 'check_circle', color: 'text-forest-green' },
-            { label: 'Total Orders', value: stats.totalOrders, icon: 'shopping_bag', color: 'text-charcoal' }
-          ].map((stat, idx) => (
-            <div key={idx} className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`material-symbols-outlined ${stat.color}`}>{stat.icon}</span>
-                <span className="font-label-sm text-on-surface-variant">{stat.label}</span>
+        <button 
+          onClick={() => navigate('/seller/new-listing')}
+          className="w-full py-3 bg-forest-green text-white rounded-xl font-label-md text-xs uppercase tracking-wider font-bold hover:opacity-90 shadow"
+        >
+          Create Listing
+        </button>
+      </aside>
+
+      {/* Main Earnings Area */}
+      <main className="flex-1 p-6 md:p-10 max-w-6xl space-y-8">
+        
+        {/* Header */}
+        <div className="flex justify-between items-center pb-2 border-b border-outline-variant/20">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-charcoal text-2xl">account_balance_wallet</span>
+            <h1 className="font-display-lg text-2xl md:text-3xl font-bold text-charcoal">Earnings</h1>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button className="text-on-surface-variant hover:text-charcoal relative">
+              <span className="material-symbols-outlined text-xl">notifications</span>
+              <span className="w-2 h-2 rounded-full bg-red-600 absolute top-0 right-0" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-surface-container border border-outline-variant/30">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlOai5w5doVJG7jbU3S2KjMr-lBrGQpzN4Ax05R4eK0suYlGCaB3JUUkqQEp6Jo9UZewI8iYG_17Ca43RvmQK0eiiWjLKvxfuzaXtKKsJ5M3M8IASzHHgS48pV3CoAIBnMPZ_ebslKrObmJUUOtVfi-O4wlmQgNK4xH6jTGWC0RxbpfFYmz8r_moNtxOmrfig-lmotvCT4sUHfAiWZB76EzdTozSUiXjl2urusX0QN-XoQYO7CNfE5DA" alt="" className="w-full h-full object-cover" />
               </div>
-              {loading ? (
-                <div className="h-7 w-24 bg-surface-variant/50 rounded animate-pulse" />
-              ) : (
-                <p className="font-headline-md text-headline-md text-on-surface">{stat.value}</p>
-              )}
+              <span className="text-xs font-semibold text-charcoal">Elena Rossi</span>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Period Selector */}
-        <div className="flex gap-2 mb-6">
-          {['week', 'month', 'quarter', 'year'].map((p) => (
-            <button key={p} onClick={() => setPeriod(p)} className={`px-4 py-2 rounded-full font-label-sm capitalize transition-colors ${
-              period === p ? 'bg-charcoal text-white' : 'bg-surface-container border border-outline-variant/30 text-on-surface hover:border-forest-green'
-            }`}>
-              This {p}
-            </button>
-          ))}
+        {/* 3 Bento Cards: Total Earnings / Net Revenue / Pending Payout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <div className="lg:col-span-8 bg-white p-8 rounded-3xl border border-outline-variant/30 shadow-sm space-y-6">
+            <div className="space-y-1">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider block">
+                TOTAL EARNINGS
+              </span>
+              <div className="flex items-baseline gap-3">
+                <h2 className="font-display-lg text-4xl md:text-5xl font-bold text-charcoal">$12,480.00</h2>
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-forest-green">
+                  &nearr; +14.2%
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <button 
+                onClick={() => navigate('/seller/request-payout')}
+                className="px-6 py-2.5 bg-forest-green text-white rounded-xl font-label-md text-xs uppercase tracking-wider font-bold hover:opacity-90 shadow"
+              >
+                Withdraw
+              </button>
+              <button 
+                onClick={() => alert('Viewing monthly statements...')}
+                className="px-6 py-2.5 border border-outline-variant text-charcoal rounded-xl font-label-md text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-colors"
+              >
+                View Report
+              </button>
+            </div>
+          </div>
+
+          <div className="lg:col-span-4 space-y-6">
+            <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-1">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider block">
+                NET REVENUE
+              </span>
+              <h3 className="font-display-lg text-2xl font-bold text-charcoal">$10,608.00</h3>
+              <p className="text-[10px] text-on-surface-variant italic">After 15% platform commission</p>
+            </div>
+
+            <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-1">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider block">
+                PENDING PAYOUT
+              </span>
+              <h3 className="font-display-lg text-2xl font-bold text-charcoal">$2,140.50</h3>
+              <p className="text-[10px] text-on-surface-variant flex items-center gap-1">
+                <span className="material-symbols-outlined text-[13px]">calendar_today</span>
+                Scheduled: Oct 15, 2024
+              </p>
+            </div>
+          </div>
+
         </div>
 
-        {/* Transactions Table */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-outline-variant/30 flex justify-between items-center">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface">Transaction History</h2>
-            <button className="flex items-center gap-1 text-forest-green font-label-sm hover:underline">
-              <span className="material-symbols-outlined text-[16px]">download</span>
-              Export CSV
+        {/* Revenue Growth Chart */}
+        <div className="bg-white p-8 rounded-3xl border border-outline-variant/30 shadow-sm space-y-6">
+          <div className="flex justify-between items-center">
+            <h3 className="font-display-md text-base font-bold text-charcoal">Revenue Growth</h3>
+            <div className="flex bg-surface-container-low rounded-xl p-1 text-xs font-bold text-on-surface-variant">
+              {['W', 'M', 'Y'].map(t => (
+                <button
+                  key={t}
+                  onClick={() => setPeriod(t)}
+                  className={`px-3 py-1 rounded-lg transition-all ${period === t ? 'bg-charcoal text-white' : 'hover:text-charcoal'}`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Bar graph bars */}
+          <div className="h-48 flex items-end justify-between gap-4 pt-4 px-4">
+            {[45, 60, 40, 70, 68, 80, 100].map((h, i) => (
+              <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                <div 
+                  className={`w-full max-w-[48px] rounded-t-xl transition-all ${
+                    i === 6 ? 'bg-forest-green' : i >= 3 ? 'bg-slate-400' : 'bg-slate-200'
+                  }`}
+                  style={{ height: `${h}%` }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Transactions Table */}
+        <div className="bg-white rounded-3xl border border-outline-variant/30 shadow-sm overflow-hidden text-xs">
+          <div className="p-6 pb-4 flex justify-between items-center">
+            <h3 className="font-display-md text-base font-bold text-charcoal">Recent Transactions</h3>
+            <button onClick={() => alert('Full transaction log')} className="text-forest-green font-bold hover:underline">
+              View All Transactions
             </button>
           </div>
 
-          {/* Desktop Table */}
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-outline-variant/30 bg-surface-variant/20">
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">ID</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Date</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Type</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Method</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Status</th>
-                  <th className="text-right p-4 font-label-sm text-on-surface-variant">Amount</th>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead className="bg-surface-container-low/50 text-[10px] uppercase tracking-wider text-on-surface-variant font-bold border-y border-outline-variant/20">
+                <tr>
+                  <th className="p-4 pl-6">ITEM DETAILS</th>
+                  <th className="p-4">ORDER ID</th>
+                  <th className="p-4">AMOUNT</th>
+                  <th className="p-4 text-right pr-6">STATUS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-outline-variant/20">
-                {loading ? (
-                  <tr>
-                    <td colSpan="6" className="text-center p-8">
-                      <span className="material-symbols-outlined animate-spin text-forest-green text-3xl">progress_activity</span>
+              <tbody className="divide-y divide-outline-variant/10">
+                {RECENT_TRANSACTIONS.map(tx => (
+                  <tr key={tx.id} className="hover:bg-surface-container-low/30 transition-colors">
+                    <td className="p-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden bg-surface-container shrink-0 border border-outline-variant/30">
+                          <img src={tx.image} alt={tx.item} className="w-full h-full object-cover" />
+                        </div>
+                        <div>
+                          <h5 className="font-bold text-charcoal">{tx.item}</h5>
+                          <p className="text-[10px] text-on-surface-variant">{tx.category}</p>
+                        </div>
+                      </div>
                     </td>
-                  </tr>
-                ) : transactions.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" className="text-center p-8 font-body-md text-on-surface-variant">No transactions in this period.</td>
-                  </tr>
-                ) : transactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-surface-linen/30 transition-colors">
-                    <td className="p-4 font-label-sm text-on-surface">{tx.id}</td>
-                    <td className="p-4 font-body-sm text-on-surface-variant">{tx.date}</td>
-                    <td className="p-4">
-                      <span className={`font-label-sm px-2 py-0.5 rounded ${
-                        tx.type === 'Sale' ? 'bg-forest-green/10 text-forest-green'
-                        : tx.type === 'Payout' ? 'bg-blue-50 text-blue-700'
-                        : 'bg-red-50 text-red-600'
-                      }`}>{tx.type}</span>
+
+                    <td className="p-4 font-mono font-semibold text-charcoal">
+                      {tx.id}
                     </td>
-                    <td className="p-4 font-body-sm text-on-surface-variant">{tx.method}</td>
-                    <td className="p-4">
-                      <span className={`font-label-sm ${
-                        tx.status === 'Completed' ? 'text-forest-green'
-                        : tx.status === 'Pending' ? 'text-amber-600'
-                        : 'text-on-surface-variant'
-                      }`}>{tx.status}</span>
+
+                    <td className="p-4 font-bold text-charcoal font-mono">
+                      {tx.amount}
                     </td>
-                    <td className={`p-4 text-right font-label-md ${tx.amount > 0 ? 'text-on-surface' : 'text-red-600'}`}>
-                      {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
+
+                    <td className="p-4 text-right pr-6">
+                      <span className={`inline-block px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${tx.statusClass}`}>
+                        {tx.status}
+                      </span>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
-          {/* Mobile Cards */}
-          <div className="md:hidden divide-y divide-outline-variant/30">
-            {loading ? (
-              <div className="p-8 text-center">
-                <span className="material-symbols-outlined animate-spin text-forest-green text-3xl">progress_activity</span>
-              </div>
-            ) : transactions.map((tx) => (
-              <div key={tx.id} className="p-4 flex justify-between items-center">
-                <div>
-                  <p className="font-label-md text-on-surface mb-1">{tx.type}</p>
-                  <p className="font-body-sm text-on-surface-variant">{tx.date} · {tx.id}</p>
-                </div>
-                <p className={`font-label-md ${tx.amount > 0 ? 'text-on-surface' : 'text-red-600'}`}>
-                  {tx.amount > 0 ? '+' : ''}${Math.abs(tx.amount).toFixed(2)}
-                </p>
-              </div>
-            ))}
-          </div>
         </div>
 
-      </div>
+      </main>
+
     </div>
   );
 };

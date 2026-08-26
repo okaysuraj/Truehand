@@ -42,7 +42,6 @@ export default function MySupportRequestsScreen() {
         return { bg: colors['surface-variant'], text: colors['on-surface-variant'] };
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

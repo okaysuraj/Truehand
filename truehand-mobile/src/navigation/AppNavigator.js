@@ -93,6 +93,8 @@ import WalletScreen from '../screens/user/WalletScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import ResetPasswordScreen from '../screens/auth/ResetPasswordScreen';
 import SupportRequestDetailScreen from '../screens/user/SupportRequestDetailScreen';
+import HelpCenterScreen from '../screens/user/HelpCenterScreen';
+import MySupportRequestsScreen from '../screens/user/MySupportRequestsScreen';
 import SalesAnalyticsScreen from '../screens/common/SalesAnalyticsScreen';
 import TransactionHistoryScreen from '../screens/common/TransactionHistoryScreen';
 import PackagingQCScreen from '../screens/common/PackagingQCScreen';
@@ -162,35 +164,9 @@ const AuthStack = () => (
     <Stack.Screen name="Register" component={RegisterScreen} />
     <Stack.Screen name="OTPVerification" component={OTPVerificationScreen} />
     <Stack.Screen name="DeliveryLogin" component={DeliveryLoginScreen} />
-        <Stack.Screen name="ForgotPasswordScreen" component={ForgotPasswordScreen} options={{ title: 'ForgotPassword' }} />
-      <Stack.Screen name="ResetPasswordScreen" component={ResetPasswordScreen} options={{ title: 'ResetPassword' }} />
-      <Stack.Screen name="SupportRequestDetailScreen" component={SupportRequestDetailScreen} options={{ title: 'SupportRequestDetail' }} />
-      <Stack.Screen name="SalesAnalyticsScreen" component={SalesAnalyticsScreen} options={{ title: 'SalesAnalytics' }} />
-      <Stack.Screen name="TransactionHistoryScreen" component={TransactionHistoryScreen} options={{ title: 'TransactionHistory' }} />
-      <Stack.Screen name="PackagingQCScreen" component={PackagingQCScreen} options={{ title: 'PackagingQC' }} />
-      <Stack.Screen name="ShippingLabelPreviewScreen" component={ShippingLabelPreviewScreen} options={{ title: 'ShippingLabelPreview' }} />
-      <Stack.Screen name="RouteOptimizationScreen" component={RouteOptimizationScreen} options={{ title: 'RouteOptimization' }} />
-      <Stack.Screen name="TaxReportsScreen" component={TaxReportsScreen} options={{ title: 'TaxReports' }} />
-      <Stack.Screen name="AdminDashboardScreen" component={AdminDashboardScreen} options={{ title: 'AdminDashboard' }} />
-      <Stack.Screen name="AdminProductApprovalsScreen" component={AdminProductApprovalsScreen} options={{ title: 'AdminProductApprovals' }} />
-      <Stack.Screen name="AdminOrdersScreen" component={AdminOrdersScreen} options={{ title: 'AdminOrders' }} />
-      <Stack.Screen name="AdminCustomersScreen" component={AdminCustomersScreen} options={{ title: 'AdminCustomers' }} />
-      <Stack.Screen name="AdminReturnRequestsScreen" component={AdminReturnRequestsScreen} options={{ title: 'AdminReturnRequests' }} />
-      <Stack.Screen name="AdminArtisanManagementScreen" component={AdminArtisanManagementScreen} options={{ title: 'AdminArtisanManagement' }} />
-      <Stack.Screen name="AdminCategoryManagementScreen" component={AdminCategoryManagementScreen} options={{ title: 'AdminCategoryManagement' }} />
-      <Stack.Screen name="AdminDeliveryAgentManagementScreen" component={AdminDeliveryAgentManagementScreen} options={{ title: 'AdminDeliveryAgentManagement' }} />
-      <Stack.Screen name="AdminBannerManagementScreen" component={AdminBannerManagementScreen} options={{ title: 'AdminBannerManagement' }} />
-      <Stack.Screen name="AdminCommissionSettingsScreen" component={AdminCommissionSettingsScreen} options={{ title: 'AdminCommissionSettings' }} />
-      <Stack.Screen name="AdminPayoutManagementScreen" component={AdminPayoutManagementScreen} options={{ title: 'AdminPayoutManagement' }} />
-      <Stack.Screen name="AdminEmailCampaignsScreen" component={AdminEmailCampaignsScreen} options={{ title: 'AdminEmailCampaigns' }} />
-      <Stack.Screen name="AdminFraudDetectionScreen" component={AdminFraudDetectionScreen} options={{ title: 'AdminFraudDetection' }} />
-      <Stack.Screen name="AdminDisputeResolutionScreen" component={AdminDisputeResolutionScreen} options={{ title: 'AdminDisputeResolution' }} />
-      <Stack.Screen name="AdminModerationScreen" component={AdminModerationScreen} options={{ title: 'AdminModeration' }} />
-      <Stack.Screen name="AdminLiveFleetScreen" component={AdminLiveFleetScreen} options={{ title: 'AdminLiveFleet' }} />
-      <Stack.Screen name="AdminPlatformRevenueScreen" component={AdminPlatformRevenueScreen} options={{ title: 'AdminPlatformRevenue' }} />
-      <Stack.Screen name="AdminSuspiciousActivityScreen" component={AdminSuspiciousActivityScreen} options={{ title: 'AdminSuspiciousActivity' }} />
-      <Stack.Screen name="AdminAnalyticsScreen" component={AdminAnalyticsScreen} options={{ title: 'AdminAnalytics' }} />
-    </Stack.Navigator>
+    <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
+  </Stack.Navigator>
 );
 
 const AppNavigator = () => {
@@ -260,6 +236,8 @@ const AppNavigator = () => {
           <Stack.Screen name="ReportIssue" component={ReportIssueScreen} />
           <Stack.Screen name="BackInStockAlerts" component={BackInStockAlertsScreen} />
           <Stack.Screen name="PriceDropAlerts" component={PriceDropAlertsScreen} />
+          <Stack.Screen name="HelpCenterScreen" component={HelpCenterScreen} />
+          <Stack.Screen name="MySupportRequestsScreen" component={MySupportRequestsScreen} />
 
           {/* Delivery Agent Flow */}
           <Stack.Screen name="DeliveryHome" component={DeliveryHomeScreen} />

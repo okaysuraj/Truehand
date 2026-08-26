@@ -1,268 +1,203 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthProvider';
 import api from '../../services/api';
-import { Link } from 'react-router-dom';
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [addresses, setAddresses] = useState([]);
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [addressForm, setAddressForm] = useState({ label: '', streetAddress: '', city: '', state: '', postalCode: '', country: 'India', isDefault: false });
 
   useEffect(() => {
-    if (user) fetchAddresses();
+    if (user?.id) {
+      api.get(`/addresses/user/${user.id}`)
+        .then(res => setAddresses(res.data || []))
+        .catch(e => console.warn(e));
+    }
   }, [user]);
 
-  const fetchAddresses = async () => {
-    try {
-      const res = await api.get(`/addresses/user/${user.id}`);
-      setAddresses(res.data);
-    } catch (e) {
-      console.error('Failed to fetch addresses', e);
-    }
-  };
-
-  const handleAddAddress = async (e) => {
-    e.preventDefault();
-    try {
-      await api.post(`/addresses/user/${user.id}`, addressForm);
-      setShowAddressForm(false);
-      setAddressForm({ label: '', streetAddress: '', city: '', state: '', postalCode: '', country: 'India', isDefault: false });
-      fetchAddresses();
-    } catch (e) {
-      alert('Failed to add address');
-    }
-  };
-
-  const handleDeleteAddress = async (id) => {
-    try {
-      await api.delete(`/addresses/${id}/user/${user.id}`);
-      fetchAddresses();
-    } catch (e) {
-      alert('Failed to delete address');
-    }
-  };
-
-  if (!user) return null;
+  const userName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Julian Vanhoutte' : 'Julian Vanhoutte';
 
   return (
-    <main className="pt-32 pb-section-gap">
-      <div className="max-w-container-max mx-auto px-margin-desktop">
-        
-        {/* Profile Hero Section */}
-        <section className="flex flex-col items-center text-center mb-section-gap">
-          <div className="relative group mb-stack-lg">
-            <div className="w-40 h-40 rounded-full overflow-hidden border border-outline-variant/30 shadow-sm shadow-forest-green/5">
-              <img 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
-                alt="Profile Avatar" 
-                src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.firstName} ${user.lastName}&backgroundColor=163428&textColor=ffffff`}
-              />
-            </div>
+    <main className="pt-28 pb-20 max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop bg-surface-linen font-body-md text-on-surface min-h-screen">
+      
+      {/* Profile Hero Section */}
+      <section className="flex flex-col items-center text-center mb-16 max-w-2xl mx-auto">
+        <div className="relative mb-6">
+          <div className="w-32 h-32 md:w-36 md:h-36 rounded-2xl overflow-hidden shadow-sm border border-outline-variant/30">
+            <img 
+              className="w-full h-full object-cover" 
+              alt={userName} 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU3O6ywVK7jEMLvKVA2kxssgwGL1XlWsOAd84tu2XqZg4CgzMYwltj5tWAQ2Ql8IT5-5vy-eHa4sLDQptw0SRhg91q6t80nQZblBDtMIfRgO6xDTt-aalUaPfafhqNy6M2zGihlYjIFhars6KFVaVaaXuwbb1XPoHyo2Tean4Jy8_9ET7nngtylq-67tC3Lz5ezyZgAqsdw6ASwH_K2vf_bCNtZUQmDTguRdIoB-r5OyDzVc98AqtFxQ" 
+            />
           </div>
-          <h1 className="font-display-lg text-display-lg text-on-surface mb-stack-sm">{user.firstName} {user.lastName}</h1>
-          <p className="font-label-md text-label-md text-secondary uppercase tracking-[0.2em] mb-stack-md">Customer Account</p>
-          <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
-            Welcome to your personal TrueHand concierge. Manage your profile, track your artisanal acquisitions, and organize your shipping details.
-          </p>
-        </section>
-
-        {/* Dashboard Navigation Grid */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter mb-section-gap">
-          
-          {/* Personal Info */}
-          <div className="group bg-surface-container-lowest border border-outline-variant/20 p-stack-lg rounded-[4px] shadow-sm hover:shadow-md transition-all duration-500 flex flex-col justify-between h-64">
-            <div>
-              <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-stack-lg group-hover:bg-primary-fixed transition-colors">
-                <span className="material-symbols-outlined text-forest-green">person_outline</span>
-              </div>
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Personal Info</h3>
-              <div className="font-body-md text-on-surface-variant text-[14px]">
-                <p>Email: {user.email}</p>
-                <p>Role: {user.role}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* My Orders */}
-          <Link to="/orders" className="group bg-surface-container-lowest border border-outline-variant/20 p-stack-lg rounded-[4px] shadow-sm hover:shadow-md transition-all duration-500 flex flex-col justify-between h-64 cursor-pointer">
-            <div>
-              <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-stack-lg group-hover:bg-primary-fixed transition-colors">
-                <span className="material-symbols-outlined text-forest-green">package_2</span>
-              </div>
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">My Orders</h3>
-              <p className="font-body-md text-on-surface-variant">Track shipments, view detailed history, and manage your recent acquisitions.</p>
-            </div>
-            <div className="flex items-center gap-2 font-label-md text-forest-green">
-              View History <span className="material-symbols-outlined">arrow_forward</span>
-            </div>
-          </Link>
-
-          {/* Addresses */}
-          <div 
-            onClick={() => document.getElementById('addresses').scrollIntoView({ behavior: 'smooth' })}
-            className="group bg-surface-container-lowest border border-outline-variant/20 p-stack-lg rounded-[4px] shadow-sm hover:shadow-md transition-all duration-500 flex flex-col justify-between h-64 cursor-pointer"
+          <Link 
+            to="/edit-profile" 
+            className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-white shadow-md border border-outline-variant/40 flex items-center justify-center text-charcoal hover:bg-surface-container transition-colors"
           >
-            <div>
-              <div className="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center mb-stack-lg group-hover:bg-primary-fixed transition-colors">
-                <span className="material-symbols-outlined text-forest-green">location_on</span>
-              </div>
-              <h3 className="font-headline-md text-headline-md text-on-surface mb-2">Your Addresses</h3>
-              <p className="font-body-md text-on-surface-variant">Manage shipping and billing addresses for faster checkout.</p>
+            <span className="material-symbols-outlined text-[16px]">edit</span>
+          </Link>
+        </div>
+
+        <h1 className="font-display-lg text-3xl md:text-5xl text-charcoal font-bold mb-1">
+          {userName}
+        </h1>
+        <span className="font-label-sm text-xs uppercase tracking-widest text-terracotta font-bold mb-4">
+          Master Ceramist &amp; Sculptor
+        </span>
+
+        <p className="font-body-md text-xs md:text-sm text-on-surface-variant leading-relaxed mb-6">
+          Dedicated to the philosophy of 'Wabi-Sabi', I create hand-thrown ceramic pieces that celebrate imperfection and the raw beauty of natural materials. My work is a dialogue between ancient techniques and contemporary minimalist forms, designed for the quiet moments of daily life.
+        </p>
+
+        <div className="flex gap-4">
+          <Link 
+            to="/edit-profile" 
+            className="px-6 py-2.5 bg-forest-green text-white font-label-md text-xs uppercase tracking-wider rounded-lg hover:opacity-90 transition-all font-semibold shadow"
+          >
+            Edit Bio
+          </Link>
+          <Link 
+            to="/artisan-profile-1" 
+            className="px-6 py-2.5 border border-charcoal text-charcoal font-label-md text-xs uppercase tracking-wider rounded-lg hover:bg-surface-container transition-all font-semibold"
+          >
+            View Public Gallery
+          </Link>
+        </div>
+      </section>
+
+      {/* 6 Bento Action Cards Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-16">
+        
+        {/* 1. Personal Info */}
+        <Link 
+          to="/edit-profile" 
+          className="bg-white p-8 rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-forest-green mb-4 group-hover:bg-forest-green group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">person</span>
             </div>
-            <div className="flex items-center gap-2 font-label-md text-forest-green">
-              Manage Addresses <span className="material-symbols-outlined">arrow_forward</span>
+            <h3 className="font-headline-md text-base text-charcoal font-bold mb-1">Personal Info</h3>
+            <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+              Update your identity, contact details, and secure your artisan credentials.
+            </p>
+          </div>
+          <span className="font-label-md text-xs font-bold text-forest-green mt-6 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            Manage Account &rarr;
+          </span>
+        </Link>
+
+        {/* 2. My Orders */}
+        <Link 
+          to="/orders" 
+          className="bg-white p-8 rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-forest-green mb-4 group-hover:bg-forest-green group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">package_2</span>
             </div>
+            <h3 className="font-headline-md text-base text-charcoal font-bold mb-1">My Orders</h3>
+            <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+              Track shipments, view detailed history, and manage your recent acquisitions.
+            </p>
           </div>
+          <span className="font-label-md text-xs font-bold text-forest-green mt-6 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            View History &rarr;
+          </span>
+        </Link>
 
-        </section>
-
-        {/* Addresses Section */}
-        <section id="addresses" className="pt-stack-lg border-t border-outline-variant/20">
-          <div className="flex justify-between items-center mb-stack-lg">
-            <h2 className="font-display-lg text-display-lg text-on-surface text-[36px]">Your Addresses</h2>
-            <button 
-              onClick={() => setShowAddressForm(true)}
-              className="px-6 py-2 bg-forest-green text-white font-label-md rounded-sm hover:bg-forest-green/90 transition-colors flex items-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[20px]">add</span> Add Address
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-gutter">
-            {addresses.map(addr => (
-              <div key={addr.id} className="relative bg-white border border-outline-variant/30 p-stack-lg rounded-sm shadow-sm flex flex-col justify-between">
-                {addr.isDefault && (
-                  <div className="absolute top-4 right-4 bg-primary-fixed text-on-primary-fixed text-[12px] px-2 py-1 rounded-full font-semibold uppercase tracking-widest">
-                    Default
-                  </div>
-                )}
-                <div>
-                  <h4 className="font-headline-md text-forest-green mb-4 pb-2 border-b border-outline-variant/20">{addr.label}</h4>
-                  <p className="font-body-md font-semibold text-on-surface">{user.firstName} {user.lastName}</p>
-                  <p className="font-body-md text-on-surface-variant mt-2">{addr.streetAddress}</p>
-                  <p className="font-body-md text-on-surface-variant">{addr.city}, {addr.state} {addr.postalCode}</p>
-                  <p className="font-body-md text-on-surface-variant">{addr.country}</p>
-                </div>
-                
-                <div className="mt-6 pt-4 border-t border-outline-variant/20 flex justify-end">
-                  <button 
-                    onClick={() => handleDeleteAddress(addr.id)} 
-                    className="text-error-red hover:text-error-red/80 font-label-md transition-colors flex items-center gap-1"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">delete</span> Remove
-                  </button>
-                </div>
-              </div>
-            ))}
-            
-            {addresses.length === 0 && (
-              <div className="col-span-full text-center py-12 border-2 border-dashed border-outline-variant/50 rounded-sm">
-                <span className="material-symbols-outlined text-4xl text-outline-variant mb-4">location_off</span>
-                <p className="font-body-md text-on-surface-variant">You have no addresses saved yet.</p>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Address Form Modal */}
-        {showAddressForm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-            <div className="bg-surface-linen w-full max-w-lg rounded-sm p-8 shadow-xl relative animate-in fade-in zoom-in-95">
-              <button 
-                onClick={() => setShowAddressForm(false)}
-                className="absolute top-4 right-4 text-on-surface-variant hover:text-on-surface"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-              
-              <h2 className="font-display-lg text-forest-green text-[32px] mb-6">Add Address</h2>
-              
-              <form onSubmit={handleAddAddress} className="space-y-4">
-                <div>
-                  <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">Label (e.g. Home)</label>
-                  <input 
-                    required 
-                    value={addressForm.label} 
-                    onChange={e=>setAddressForm({...addressForm, label: e.target.value})} 
-                    className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
-                  />
-                </div>
-                
-                <div>
-                  <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">Street Address</label>
-                  <input 
-                    required 
-                    value={addressForm.streetAddress} 
-                    onChange={e=>setAddressForm({...addressForm, streetAddress: e.target.value})} 
-                    className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
-                  />
-                </div>
-                
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">City</label>
-                    <input 
-                      required 
-                      value={addressForm.city} 
-                      onChange={e=>setAddressForm({...addressForm, city: e.target.value})} 
-                      className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">State</label>
-                    <input 
-                      required 
-                      value={addressForm.state} 
-                      onChange={e=>setAddressForm({...addressForm, state: e.target.value})} 
-                      className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block font-label-md text-on-surface mb-1 uppercase tracking-widest">ZIP / Postal Code</label>
-                  <input 
-                    required 
-                    value={addressForm.postalCode} 
-                    onChange={e=>setAddressForm({...addressForm, postalCode: e.target.value})} 
-                    className="w-full bg-white border border-outline-variant/50 rounded-sm px-4 py-2 font-body-md focus:outline-none focus:border-forest-green" 
-                  />
-                </div>
-                
-                <div className="pt-2">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
-                      checked={addressForm.isDefault} 
-                      onChange={e=>setAddressForm({...addressForm, isDefault: e.target.checked})} 
-                      className="w-5 h-5 text-forest-green border-outline-variant/50 rounded-sm focus:ring-forest-green cursor-pointer"
-                    />
-                    <span className="font-label-md text-on-surface group-hover:text-forest-green transition-colors">Make this my default address</span>
-                  </label>
-                </div>
-                
-                <div className="flex gap-4 pt-4 mt-4 border-t border-outline-variant/20">
-                  <button 
-                    type="submit" 
-                    className="flex-1 bg-forest-green text-white font-label-md uppercase tracking-widest py-3 rounded-sm hover:bg-forest-green/90 transition-colors"
-                  >
-                    Save Address
-                  </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setShowAddressForm(false)} 
-                    className="flex-1 border border-forest-green text-forest-green font-label-md uppercase tracking-widest py-3 rounded-sm hover:bg-forest-green/5 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
+        {/* 3. Wallet */}
+        <Link 
+          to="/digital-wallet" 
+          className="bg-white p-8 rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-forest-green mb-4 group-hover:bg-forest-green group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">account_balance_wallet</span>
             </div>
+            <h3 className="font-headline-md text-base text-charcoal font-bold mb-1">Wallet</h3>
+            <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+              Manage payout methods, view balance, and download financial statements.
+            </p>
           </div>
-        )}
+          <span className="font-label-md text-xs font-bold text-forest-green mt-6 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            View Balance &rarr;
+          </span>
+        </Link>
+
+        {/* 4. Saved Collections */}
+        <Link 
+          to="/wishlist" 
+          className="bg-white p-8 rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-forest-green mb-4 group-hover:bg-forest-green group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">favorite</span>
+            </div>
+            <h3 className="font-headline-md text-base text-charcoal font-bold mb-1">Saved Collections</h3>
+            <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+              Curated inspirations and items you've bookmarked for future craft sessions.
+            </p>
+          </div>
+          <span className="font-label-md text-xs font-bold text-forest-green mt-6 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            Explore Saves &rarr;
+          </span>
+        </Link>
+
+        {/* 5. Handprint Score (Dark Forest Green Bento) */}
+        <div className="bg-[#163428] text-white p-8 rounded-2xl shadow-md flex flex-col justify-between group">
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-emerald-300 mb-4">
+              <span className="material-symbols-outlined text-xl">eco</span>
+            </div>
+            <h3 className="font-headline-md text-base font-bold text-white mb-1">Handprint Score</h3>
+            <p className="font-body-md text-xs text-white/80 leading-relaxed">
+              Your craftsmanship has saved 42kg of carbon through ethical material sourcing.
+            </p>
+          </div>
+          <Link 
+            to="/authenticity" 
+            className="font-label-md text-xs font-bold text-emerald-300 mt-6 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform"
+          >
+            Sustainability Metrics &rarr;
+          </Link>
+        </div>
+
+        {/* 6. Help Center */}
+        <Link 
+          to="/help" 
+          className="bg-white p-8 rounded-2xl border border-outline-variant/30 shadow-sm hover:shadow-md transition-all group flex flex-col justify-between"
+        >
+          <div>
+            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-forest-green mb-4 group-hover:bg-forest-green group-hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-xl">headset_mic</span>
+            </div>
+            <h3 className="font-headline-md text-base text-charcoal font-bold mb-1">Help Center</h3>
+            <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+              Need assistance? Access our guides or start a conversation with our concierge.
+            </p>
+          </div>
+          <span className="font-label-md text-xs font-bold text-forest-green mt-6 inline-flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+            Get Support &rarr;
+          </span>
+        </Link>
 
       </div>
+
+      {/* Logout & Quick Actions */}
+      <div className="text-center pt-8 border-t border-outline-variant/20 max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <Link to="/manage-addresses" className="text-xs text-on-surface-variant hover:text-forest-green font-semibold">
+          Manage Delivery Addresses ({addresses.length})
+        </Link>
+        <button 
+          onClick={logout}
+          className="px-6 py-2.5 border border-outline-variant text-on-surface-variant hover:text-red-700 rounded-lg text-xs font-semibold uppercase tracking-wider hover:bg-red-50 transition-colors"
+        >
+          Sign Out of Account
+        </button>
+      </div>
+
     </main>
   );
 };

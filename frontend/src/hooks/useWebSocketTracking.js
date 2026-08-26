@@ -32,7 +32,6 @@ export const useWebSocketTracking = (orderId) => {
 
       ws.onopen = () => {
         setConnectionStatus('connected');
-        console.log('WebSocket connected');
         
         // Subscribe to order tracking
         const subscribeMsg = {
@@ -70,7 +69,6 @@ export const useWebSocketTracking = (orderId) => {
 
       ws.onclose = () => {
         setConnectionStatus('disconnected');
-        console.log('WebSocket disconnected');
       };
 
       return () => {

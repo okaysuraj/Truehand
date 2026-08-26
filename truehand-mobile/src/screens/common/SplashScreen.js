@@ -41,7 +41,6 @@ export default function SplashScreen() {
         }
       }
     }, 4000);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
     return () => clearTimeout(timer);
@@ -58,7 +57,7 @@ export default function SplashScreen() {
       </Animated.View>
       
       <Animated.View style={[styles.content, { opacity: fadeAnim }]}>
-        <Image source={require('../../assets/logo.png')} style={{ width: 250, height: 80 }} resizeMode="contain" />
+        <Image source={require('../../../assets/logo.png')} style={{ width: 250, height: 80 }} resizeMode="contain" />
       </Animated.View>
     </View>
   );

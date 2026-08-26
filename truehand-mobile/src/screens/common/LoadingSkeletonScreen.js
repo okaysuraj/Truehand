@@ -27,7 +27,6 @@ const Skeleton = ({ width, height, style, delay = 0 }) => {
       ])
     ).start();
   }, [opacity, delay]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

@@ -33,10 +33,8 @@ export default function OTPVerificationScreen() {
     Keyboard.dismiss();
     const code = otp.join('');
     // Mock verification
-    console.log('Verifying code:', code);
     navigation.navigate('Login');
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

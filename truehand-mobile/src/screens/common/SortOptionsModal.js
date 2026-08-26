@@ -27,7 +27,6 @@ export default function SortOptionsModal() {
 
   const renderItem = ({ item }) => {
     const isSelected = selected === item.id;
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
     return (
       <TouchableOpacity 

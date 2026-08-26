@@ -12,7 +12,6 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState('julian.thorne@example.com');
   const [phone, setPhone] = useState('+1 (555) 123-4567');
   const [bio, setBio] = useState('Master Ceramicist and dedicated collector of brutalist tableware. Member since 2021.');
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

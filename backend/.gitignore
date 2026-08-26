@@ -26,3 +26,7 @@ buildNumber.properties
 # Environments
 .env
 *.env
+
+build/
+dist/
+target/

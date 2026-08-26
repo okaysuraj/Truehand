@@ -12,7 +12,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
@@ -85,6 +88,13 @@ public class ProductService {
         // Fetch top 10 products sorted by price desc or random as trending stub
         org.springframework.data.domain.Pageable topTen = org.springframework.data.domain.PageRequest.of(0, 10, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "stockQuantity"));
         return productRepository.findAll(topTen).getContent()
+                .stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    public List<ProductDTO> getFlashSaleProducts() {
+        // Fetch 5 products with lowest price to simulate flash sale items
+        org.springframework.data.domain.Pageable topFive = org.springframework.data.domain.PageRequest.of(0, 5, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.ASC, "price"));
+        return productRepository.findAll(topFive).getContent()
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
     }
 

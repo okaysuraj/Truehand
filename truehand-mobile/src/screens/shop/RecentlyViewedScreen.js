@@ -18,8 +18,8 @@ export default function RecentlyViewedScreen() {
 
   const fetchHistory = async () => {
     try {
-      const res = await productService.getAllProducts();
-      setProducts(res.slice(0, 6)); // Mocking recent history
+      const res = await productService.getRecentlyViewed(1); // hardcoded user ID 1 for now
+      setProducts(res || []);
     } catch (err) {
       console.error('Failed to fetch recently viewed', err);
     } finally {
@@ -38,7 +38,6 @@ export default function RecentlyViewedScreen() {
   const renderProduct = ({ item, index }) => {
     // Make every 3rd item span wider or taller to simulate bento layout
     const isLarge = index === 2;
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
     return (

@@ -29,7 +29,6 @@ const QAS = [
 
 export default function ProductQAScreen() {
   const navigation = useNavigation();
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

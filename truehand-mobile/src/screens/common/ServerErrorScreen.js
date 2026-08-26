@@ -28,7 +28,6 @@ export default function ServerErrorScreen() {
       ])
     ).start();
   }, [pulseAnim]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

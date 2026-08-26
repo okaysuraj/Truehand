@@ -33,6 +33,12 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getDeliveriesByPartner(deliveryBoyId));
     }
 
+    @GetMapping("/partner/{deliveryBoyId}/payouts")
+    public ResponseEntity<List<Map<String, Object>>> getPartnerPayouts(@PathVariable Integer deliveryBoyId) {
+        // Return empty array for now since Payout entity doesn't exist. This replaces mock data.
+        return ResponseEntity.ok(new java.util.ArrayList<>());
+    }
+
     @PostMapping("/{orderId}/start")
     public ResponseEntity<?> startDelivery(@PathVariable Integer orderId) {
         deliveryService.startDelivery(orderId);

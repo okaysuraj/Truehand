@@ -39,7 +39,6 @@ export default function FlashSaleScreen() {
         };
       });
     }, 1000);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
     return () => clearInterval(timer);
@@ -47,9 +46,8 @@ export default function FlashSaleScreen() {
 
   const fetchFlashSaleProducts = async () => {
     try {
-      // Mock fetch
-      const res = await productService.getAllProducts();
-      setProducts(res.slice(2, 5)); // Just take a few
+      const res = await productService.getFlashSaleProducts();
+      setProducts(res);
     } catch (err) {
       console.error('Failed to fetch flash sale products', err);
     } finally {

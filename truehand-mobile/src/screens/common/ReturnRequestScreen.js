@@ -31,7 +31,6 @@ export default function ReturnRequestScreen() {
       console.error('Failed to submit return', error);
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

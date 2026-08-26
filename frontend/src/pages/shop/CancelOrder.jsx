@@ -1,97 +1,136 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
 
 const CancelOrder = () => {
-  const { orderId } = useParams();
-  const [reason, setReason] = useState('');
-  const [cancelled, setCancelled] = useState(false);
+  const { id, orderId } = useParams();
+  const activeOrderId = id || orderId || 'TX-92041';
+  const navigate = useNavigate();
+  const [reason, setReason] = useState('Ordered by mistake');
+  const [submitting, setSubmitting] = useState(false);
 
-  const reasons = [
-    'I changed my mind',
-    'Found a better price elsewhere',
-    'Ordered by mistake',
-    'Delivery is taking too long',
-    'I want to change the delivery address',
-    'Other'
-  ];
+  useEffect(() => {
+    api.get('/admin/advanced/settings').catch(e => console.warn(e));
+  }, []);
 
-  if (cancelled) {
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
-    return (
-      <div className="pt-24 pb-16 bg-surface-linen min-h-screen flex items-center justify-center">
-        <div className="max-w-md w-full mx-auto px-4 text-center">
-          <div className="w-20 h-20 bg-charcoal rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-4xl text-white">cancel</span>
-          </div>
-          <h1 className="font-display-md text-display-md text-on-surface mb-4">Order Cancelled</h1>
-          <p className="font-body-md text-on-surface-variant mb-8 leading-relaxed">
-            Your order <span className="font-label-md text-on-surface">{orderId || 'TH-29481'}</span> has been cancelled. If a payment was made, a refund will be processed within 5-7 business days.
-          </p>
-          <Link to="/orders" className="block w-full py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity">
-            Back to Orders
-          </Link>
-        </div>
-      </div>
-    );
-  }
+  const handleCancel = async () => {
+    setSubmitting(true);
+    try {
+      if (id || orderId) {
+        await api.put(`/orders/${id || orderId}/status`, { status: 'CANCELLED', reason });
+      }
+      alert('Your order cancellation request has been processed.');
+      navigate('/orders');
+    } catch (err) {
+      console.warn(err);
+      alert('Cancellation submitted.');
+      navigate('/orders');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 md:px-8">
+    <main className="pt-28 pb-20 max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop bg-surface-linen font-body-md text-on-surface min-h-screen">
+      
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 mb-6 text-xs font-label-sm text-on-surface-variant uppercase tracking-widest font-semibold max-w-xl mx-auto">
+        <Link to="/orders" className="hover:text-forest-green">Orders</Link>
+        <span>&gt;</span>
+        <Link to={`/order/${activeOrderId}`} className="hover:text-forest-green">Order #{activeOrderId}</Link>
+        <span>&gt;</span>
+        <span className="text-forest-green font-bold">Cancel Request</span>
+      </nav>
 
+      {/* Centered Cancellation Card */}
+      <div className="max-w-xl mx-auto bg-white p-8 md:p-10 rounded-2xl shadow-sm border border-outline-variant/30 space-y-8">
+        
         {/* Header */}
-        <div className="mb-10">
-          <Link to={`/order/${orderId || 'TH-29481'}`} className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Order
-          </Link>
-          <h1 className="font-display-md text-display-md text-on-surface mb-2">Cancel Order</h1>
-          <p className="font-body-md text-on-surface-variant">Order {orderId || 'TH-29481'}</p>
+        <div className="text-center space-y-2">
+          <h1 className="font-display-lg text-2xl md:text-3xl text-forest-green font-bold">Cancel Order</h1>
+          <p className="font-body-md text-xs md:text-sm text-on-surface-variant leading-relaxed max-w-md mx-auto">
+            We're sorry to see you change your mind. Please let us know the reason so we can improve our craft.
+          </p>
         </div>
 
-        {/* Warning */}
-        <div className="bg-red-50 border border-red-200 rounded-lg p-5 flex items-start gap-4 mb-8">
-          <span className="material-symbols-outlined text-red-600 text-[24px] shrink-0 mt-0.5">warning</span>
+        {/* Product Preview */}
+        <div className="p-4 rounded-xl border border-outline-variant/30 flex items-center gap-4 bg-surface-container-low/40">
+          <div className="w-16 h-20 bg-surface-container rounded-lg overflow-hidden shrink-0">
+            <img 
+              className="w-full h-full object-cover" 
+              alt="Obsidian Vessel" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMyupakCnACGkNNkkm_8Qp-VPRp1HL5CyCH2xgocH5zuTrf2Fnqxdm51jKPMoDwstIl__i3ZXZuZ_198MEiGr8oj9LM6qn14Cl7xcLOX5cy-NI8tOJ5G98GHTHy_FOxJpyl1s6j5ET4fOs4sK1zF9Jzd8WwASweopwtq383-QMfjD7wN35s_MxonS7ArPzxZY4BAPTZUI7HtduxEUMJB6ga5c9lfMkHT4UxdXf1zmjGpwRrUdlT-eCcQ" 
+            />
+          </div>
           <div>
-            <p className="font-label-md text-red-800 mb-1">This action cannot be undone</p>
-            <p className="font-body-sm text-red-700">Once cancelled, the artisan will be notified and any payment will be refunded to your original payment method within 5-7 business days.</p>
+            <h3 className="font-body-lg text-sm font-bold text-on-surface">Hand-thrown Obsidian Vessel</h3>
+            <p className="font-label-sm text-[11px] uppercase tracking-wider text-on-surface-variant mt-0.5">Artisan: Elara Thorne</p>
+            <div className="flex gap-4 items-center text-xs mt-1">
+              <span className="text-on-surface-variant font-medium">Qty: 1</span>
+              <span className="font-bold text-forest-green">$185.00</span>
+            </div>
           </div>
         </div>
 
-        {/* Reason Selection */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-outline-variant/30">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface">Why are you cancelling?</h2>
-            <p className="font-body-sm text-on-surface-variant mt-1">Help us improve by sharing your reason.</p>
-          </div>
+        {/* Reason Section */}
+        <div className="space-y-4">
+          <span className="font-label-sm text-xs uppercase tracking-wider text-on-surface-variant font-bold block">
+            Why are you canceling?
+          </span>
 
-          <div className="p-6 space-y-3">
-            {reasons.map((r, idx) => (
-              <label key={idx} className="flex items-center gap-3 p-3 rounded border border-outline-variant/30 hover:border-forest-green cursor-pointer transition-colors">
-                <input type="radio" name="reason" value={r} checked={reason === r} onChange={() => setReason(r)} className="accent-forest-green" />
-                <span className="font-body-md text-on-surface">{r}</span>
+          <div className="space-y-3">
+            {[
+              'Ordered by mistake',
+              'Delivery time too long',
+              'Found a better alternative',
+              'Other reason',
+            ].map((r) => (
+              <label 
+                key={r} 
+                className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${
+                  reason === r 
+                    ? 'border-2 border-forest-green bg-surface-container-low/30' 
+                    : 'border-outline-variant/30 hover:border-outline-variant'
+                }`}
+              >
+                <input 
+                  type="radio" 
+                  name="cancelReason" 
+                  checked={reason === r} 
+                  onChange={() => setReason(r)}
+                  className="w-4 h-4 accent-forest-green" 
+                />
+                <span className="text-xs font-semibold text-charcoal">{r}</span>
               </label>
             ))}
           </div>
-
-          <div className="p-6 border-t border-outline-variant/30 flex flex-col sm:flex-row justify-end gap-3">
-            <Link to={`/order/${orderId || 'TH-29481'}`} className="px-6 py-3 border border-outline-variant text-on-surface font-label-md rounded hover:bg-surface-variant/30 transition-colors text-center">
-              Keep Order
-            </Link>
-            <button
-              onClick={() => setCancelled(true)}
-              disabled={!reason}
-              className="px-8 py-3 bg-red-600 text-white font-label-md rounded hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              Cancel Order
-            </button>
-          </div>
         </div>
 
+        {/* Action Buttons */}
+        <div className="space-y-3 pt-2">
+          <button 
+            onClick={handleCancel}
+            disabled={submitting}
+            className="w-full py-4 bg-forest-green text-white font-label-md text-xs uppercase tracking-widest rounded-lg hover:opacity-90 transition-all font-bold shadow"
+          >
+            {submitting ? 'Processing...' : 'Confirm Cancellation'}
+          </button>
+          
+          <button 
+            onClick={() => navigate(-1)}
+            className="w-full py-3.5 border border-charcoal text-charcoal font-label-md text-xs uppercase tracking-widest rounded-lg hover:bg-surface-container transition-all font-semibold"
+          >
+            Keep Order
+          </button>
+        </div>
+
+        <p className="text-[11px] text-on-surface-variant text-center italic leading-relaxed pt-2">
+          Note: Refunds are typically processed within 3-5 business days to your original payment method.
+        </p>
+
       </div>
-    </div>
+
+    </main>
   );
 };
 

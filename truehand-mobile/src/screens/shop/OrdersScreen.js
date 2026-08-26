@@ -75,7 +75,6 @@ export default function OrdersScreen({ navigation }) {
 
     const statusStyle = getStatusStyles(item.status);
     const displayStatus = getDisplayStatus(item.status);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
     return (

@@ -16,7 +16,6 @@ export default function OrderDetailScreen() {
   const order = orders.find(o => o.id === orderId) || null;
 
   if (!order) {
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
     return (
       <SafeAreaView style={styles.safeArea}>

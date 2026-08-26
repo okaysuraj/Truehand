@@ -49,7 +49,6 @@ export default function RegisterScreen({ navigation }) {
       setLoading(false);
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

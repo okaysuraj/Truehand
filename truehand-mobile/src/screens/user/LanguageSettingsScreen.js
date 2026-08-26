@@ -17,7 +17,6 @@ const LANGUAGES = [
 export default function LanguageSettingsScreen() {
   const navigation = useNavigation();
   const [selectedLanguage, setSelectedLanguage] = useState('en');
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

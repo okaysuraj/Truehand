@@ -35,7 +35,6 @@ const PAYMENT_METHODS = [
 
 export default function PaymentMethodsScreen() {
   const navigation = useNavigation();
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

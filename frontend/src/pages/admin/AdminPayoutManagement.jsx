@@ -13,19 +13,9 @@ const AdminPayoutManagement = () => {
       try {
         const res = await api.get('/admin/payouts');
         setPayouts(res.data || []);
-      } catch {
-        // Derive from completed seller orders as a fallback
-        try {
-          const usersRes = await api.get('/admin/users');
-          const sellers = (usersRes.data || []).filter(u => u.role === 'SELLER');
-          const mockPayouts = sellers.slice(0, 5).map((s, i) => ({
-            id: i + 1, sellerId: s.id, sellerName: s.username, amount: (Math.random() * 1000 + 100).toFixed(2),
-            status: i % 3 === 0 ? 'APPROVED' : i % 3 === 1 ? 'REJECTED' : 'PENDING',
-            requestedAt: new Date(Date.now() - i * 86400000).toISOString(),
-            bankAccount: '•••• 4242',
-          }));
-          setPayouts(mockPayouts);
-        } catch { setPayouts([]); }
+      } catch (err) {
+        console.error("Failed to fetch payouts", err);
+        setPayouts([]);
       }
       setLoading(false);
     };

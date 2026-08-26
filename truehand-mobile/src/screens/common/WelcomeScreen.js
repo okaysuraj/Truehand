@@ -42,7 +42,6 @@ export default function WelcomeScreen() {
   const viewConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
 
   const renderItem = ({ item }) => {
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
     return (
       <View style={styles.slide}>
@@ -61,7 +60,7 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Image source={require('../../assets/logo.png')} style={{ height: 40, width: 150 }} resizeMode="contain" />
+        <Image source={require('../../../assets/logo.png')} style={{ height: 40, width: 150 }} resizeMode="contain" />
       </View>
       
       <View style={styles.carouselContainer}>

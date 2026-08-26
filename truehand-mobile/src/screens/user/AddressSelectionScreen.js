@@ -32,7 +32,6 @@ export default function AddressSelectionScreen() {
       phone: null
     }
   ];
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

@@ -18,8 +18,8 @@ export default function TrendingProductsScreen() {
 
   const fetchTrendingProducts = async () => {
     try {
-      const res = await productService.getAllProducts();
-      setProducts(res); // Mocking trending products
+      const res = await productService.getTrendingProducts();
+      setProducts(res); // Using actual trending products
     } catch (err) {
       console.error('Failed to fetch trending products', err);
     } finally {
@@ -30,7 +30,6 @@ export default function TrendingProductsScreen() {
   const renderProduct = ({ item, index }) => {
     // To simulate masonry, we can alternate aspect ratios
     const isTall = index % 3 === 0;
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
     return (

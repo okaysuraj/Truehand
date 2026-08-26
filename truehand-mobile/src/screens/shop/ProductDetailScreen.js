@@ -35,7 +35,6 @@ export default function ProductDetailScreen() {
   };
   
   if (isLoading || !currentProduct) {
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
     return (
       <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>

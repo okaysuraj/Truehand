@@ -1,153 +1,332 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthProvider';
+
+const INITIAL_BANK_ACCOUNTS = [
+  {
+    id: 1,
+    bankName: 'Chase Sapphire Checking',
+    lastFour: '4291',
+    isPrimary: true,
+    status: 'Verified',
+    type: 'checking',
+  },
+  {
+    id: 2,
+    bankName: 'Amex Platinum Business',
+    lastFour: '8802',
+    isPrimary: false,
+    status: 'Verified',
+    type: 'wallet',
+  },
+];
 
 const BankAccounts = () => {
-  const [accounts, setAccounts] = useState([
-    {
-      id: 1,
-      bankName: "Chase Bank",
-      accountType: "Checking",
-      lastFour: "4582",
-      isDefault: true,
-      status: "Verified"
-    }
-  ]);
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [accounts, setAccounts] = useState(INITIAL_BANK_ACCOUNTS);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newBank, setNewBank] = useState({
+    bankName: 'Chase',
+    accountType: 'Checking',
+    accountNumber: '',
+    routingNumber: '',
+  });
 
-  const [showAddForm, setShowAddForm] = useState(false);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
+  useEffect(() => {
+    api.get('/wallet/banks')
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          setAccounts(res.data.map(b => ({
+            id: b.id,
+            bankName: b.bankName || 'Linked Bank',
+            lastFour: b.accountNumber ? b.accountNumber.slice(-4) : '4291',
+            isPrimary: !!b.isDefault,
+            status: 'Verified',
+            type: 'checking',
+          })));
+        }
+      })
+      .catch(e => console.warn(e));
+  }, []);
+
+  const makePrimary = (id) => {
+    setAccounts(prev => prev.map(a => ({
+      ...a,
+      isPrimary: a.id === id,
+    })));
+  };
+
+  const removeAccount = (id) => {
+    setAccounts(prev => prev.filter(a => a.id !== id));
+  };
+
+  const handleAddSubmit = (e) => {
+    e.preventDefault();
+    if (!newBank.accountNumber) return;
+    const added = {
+      id: Date.now(),
+      bankName: `${newBank.bankName} ${newBank.accountType}`,
+      lastFour: newBank.accountNumber.slice(-4) || '9988',
+      isPrimary: accounts.length === 0,
+      status: 'Verified',
+      type: 'checking',
+    };
+    setAccounts([...accounts, added]);
+    setShowAddModal(false);
+    setNewBank({ bankName: 'Chase', accountType: 'Checking', accountNumber: '', routingNumber: '' });
+  };
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 md:px-8">
+    <div className="flex min-h-screen bg-surface-linen font-body-md text-on-surface pt-20">
+      
+      {/* Studio Manager Sidebar */}
+      <aside className="w-64 bg-white border-r border-outline-variant/30 hidden lg:flex flex-col justify-between p-6 shrink-0">
+        <div className="space-y-8">
+          
+          <div className="px-1">
+            <h1 className="font-display-md text-base font-bold text-forest-green">Studio Manager</h1>
+            <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold mt-0.5">Handcrafted Excellence</p>
+          </div>
+
+          <nav className="space-y-1 text-xs font-semibold">
+            <Link to="/seller/dashboard" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              Dashboard
+            </Link>
+            <Link to="/seller/inventory" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+              Inventory
+            </Link>
+            <Link to="/seller/orders" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+              Orders
+            </Link>
+            <Link to="/settings" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-surface-container text-forest-green font-bold shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+              Settings
+            </Link>
+          </nav>
+        </div>
+
+        {/* User Card */}
+        <div className="pt-6 border-t border-outline-variant/20 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container shrink-0">
+            <img 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBcj7IISN_7_oHxrRMUyMUiLa0g-qyTMzVaezbLlTmzVom90-X4IuHa2YQEzW8BCySHkzrFgttfdXpQ1MALR4pWvivmsW5X3XbudnO8NdtWqOx77sswNbf6w86WW37rfU6FVFdUe8BO7DNrR84ogZobRgKV6_koHV-kIXcA7uM9OHBo6GFiCTFBeyWoCM33qPHCx_NzzY53RIXwJ0pMG9fu07JWVPRNz5gKYjq_sxjTyExB267wER1wmA" 
+              alt="Elara Vance" 
+              className="w-full h-full object-cover" 
+            />
+          </div>
+          <div>
+            <p className="font-label-md text-xs font-bold text-forest-green">Elara Vance</p>
+            <p className="text-[10px] text-on-surface-variant">Master Potter</p>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-1 p-6 md:p-12 max-w-5xl">
         
-        {/* Header */}
+        {/* Breadcrumbs */}
+        <nav className="flex items-center gap-2 mb-6 text-xs text-on-surface-variant font-label-sm">
+          <Link to="/settings" className="hover:text-forest-green">Settings</Link>
+          <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+          <span className="font-semibold text-forest-green">Payout &amp; Bank Accounts</span>
+        </nav>
+
+        {/* Header Description */}
         <div className="mb-10">
-          <Link to="/wallet" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Wallet
-          </Link>
-          <div className="flex justify-between items-end">
-            <div>
-              <h1 className="font-display-md text-display-md text-on-surface mb-2">Bank Accounts</h1>
-              <p className="font-body-md text-on-surface-variant">Manage your linked accounts for withdrawals and payments.</p>
+          <h2 className="font-display-lg text-2xl md:text-4xl text-forest-green font-bold mb-2">Linked Accounts</h2>
+          <p className="text-on-surface-variant max-w-2xl font-body-md text-xs md:text-sm leading-relaxed">
+            Manage the accounts where you receive payouts from sales and workshops. Changes to primary accounts may take up to 2 business days to verify.
+          </p>
+        </div>
+
+        {/* Bento Accounts Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          {accounts.map(acc => (
+            <div 
+              key={acc.id}
+              className="bg-white rounded-2xl p-6 md:p-8 border border-outline-variant/30 shadow-sm flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex justify-between items-start mb-6">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-surface-container-low text-forest-green">
+                    <span className="material-symbols-outlined text-2xl">
+                      {acc.type === 'wallet' ? 'account_balance_wallet' : 'account_balance'}
+                    </span>
+                  </div>
+                  {acc.isPrimary && (
+                    <span className="bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider">
+                      Primary
+                    </span>
+                  )}
+                </div>
+                <h3 className="font-headline-md text-sm sm:text-base font-bold text-forest-green mb-1">{acc.bankName}</h3>
+                <p className="text-on-surface-variant font-mono text-xs tracking-widest">•••• •••• •••• {acc.lastFour}</p>
+              </div>
+
+              <div className="flex items-center justify-between mt-8 pt-4 border-t border-outline-variant/20">
+                {acc.isPrimary ? (
+                  <div className="flex items-center gap-1.5 text-xs text-forest-green font-semibold">
+                    <span className="material-symbols-outlined text-[18px]">verified</span>
+                    <span>Verified</span>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => makePrimary(acc.id)}
+                    className="text-xs text-forest-green hover:underline font-bold"
+                  >
+                    Make Primary
+                  </button>
+                )}
+
+                <div className="flex gap-3 text-on-surface-variant">
+                  <button 
+                    onClick={() => alert(`Editing account ${acc.bankName}`)}
+                    className="hover:text-forest-green transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">edit</span>
+                  </button>
+                  <button 
+                    onClick={() => removeAccount(acc.id)}
+                    className="hover:text-red-700 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
+                </div>
+              </div>
             </div>
-            {!showAddForm && (
-              <button 
-                onClick={() => setShowAddForm(true)}
-                className="px-6 py-2.5 bg-forest-green text-white font-label-md rounded flex items-center gap-2 hover:opacity-90 transition-opacity"
-              >
-                <span className="material-symbols-outlined text-[18px]">add</span>
-                Add Account
-              </button>
-            )}
+          ))}
+        </div>
+
+        {/* Link New Account Dashed Card */}
+        <div 
+          onClick={() => setShowAddModal(true)}
+          className="border-2 border-dashed border-outline-variant/60 rounded-2xl p-8 hover:bg-white hover:border-forest-green transition-all cursor-pointer text-center flex flex-col items-center justify-center mb-12 group"
+        >
+          <div className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-forest-green mb-3 group-hover:bg-forest-green group-hover:text-white transition-colors">
+            <span className="material-symbols-outlined text-xl">add</span>
+          </div>
+          <span className="font-label-md text-xs uppercase tracking-widest text-charcoal font-bold group-hover:text-forest-green">
+            Link New Account
+          </span>
+        </div>
+
+        {/* Plaid Secure Connection Banner */}
+        <div className="bg-white p-6 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center text-forest-green shrink-0">
+              <span className="material-symbols-outlined text-xl">lock</span>
+            </div>
+            <div>
+              <h4 className="font-headline-md text-xs font-bold text-charcoal">Secure Connection</h4>
+              <p className="text-[11px] text-on-surface-variant leading-relaxed">
+                We use industry-standard 256-bit encryption to protect your data. Your login credentials are never stored on our servers.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-bold tracking-widest text-on-surface-variant uppercase shrink-0">
+            <span>Partnered with</span>
+            <span className="text-forest-green font-black">PLAID</span>
           </div>
         </div>
 
-        {/* Add Account Form */}
-        {showAddForm && (
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 md:p-8 shadow-sm mb-8 animate-fade-in">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="font-headline-sm text-headline-sm text-on-surface">Link New Bank Account</h2>
-              <button onClick={() => setShowAddForm(false)} className="text-on-surface-variant hover:text-charcoal transition-colors">
+        {/* Supported Institutions */}
+        <div className="bg-surface-container-low/70 p-6 rounded-2xl border border-outline-variant/20">
+          <span className="font-label-sm text-[10px] uppercase tracking-widest text-on-surface-variant font-bold block mb-4">
+            Supported Institutions
+          </span>
+          <div className="flex flex-wrap gap-4 text-xs font-semibold text-charcoal">
+            {['Chase', 'Bank of America', 'Wells Fargo', 'Citibank', 'US Bank', 'Fidelity'].map(b => (
+              <span key={b} className="px-4 py-2 bg-white rounded-lg border border-outline-variant/30 shadow-sm">
+                {b}
+              </span>
+            ))}
+          </div>
+          <button 
+            onClick={() => alert('Viewing all 20,000+ supported institutions...')}
+            className="text-xs text-forest-green font-bold hover:underline inline-flex items-center gap-1 mt-4"
+          >
+            <span>View all 20,000+</span>
+            <span className="material-symbols-outlined text-[14px]">north_east</span>
+          </button>
+        </div>
+
+      </main>
+
+      {/* Add Bank Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-charcoal/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-outline-variant/30 space-y-6 animate-in fade-in">
+            <div className="flex justify-between items-center pb-3 border-b border-outline-variant/20">
+              <h3 className="font-display-md text-lg text-forest-green font-bold">Link Bank Account</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-on-surface-variant hover:text-charcoal">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            
-            <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setShowAddForm(false); }}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="block font-label-sm text-on-surface">Routing Number *</label>
-                  <input type="text" required className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" placeholder="9-digit routing number" />
-                </div>
-                <div className="space-y-2">
-                  <label className="block font-label-sm text-on-surface">Account Number *</label>
-                  <input type="text" required className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" placeholder="Account number" />
-                </div>
-                <div className="space-y-2">
-                  <label className="block font-label-sm text-on-surface">Confirm Account Number *</label>
-                  <input type="text" required className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" placeholder="Confirm account number" />
-                </div>
-                <div className="space-y-2">
-                  <label className="block font-label-sm text-on-surface">Account Type *</label>
-                  <div className="relative">
-                    <select required className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface appearance-none">
-                      <option value="checking">Checking</option>
-                      <option value="savings">Savings</option>
-                    </select>
-                    <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">expand_more</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="block font-label-sm text-on-surface">Name on Account *</label>
-                <input type="text" required className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" placeholder="Full name as it appears on account" />
+
+            <form onSubmit={handleAddSubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-label-sm uppercase font-semibold text-on-surface-variant mb-1">Bank Name</label>
+                <input 
+                  type="text" 
+                  required
+                  value={newBank.bankName}
+                  onChange={(e) => setNewBank({ ...newBank, bankName: e.target.value })}
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2.5" 
+                  placeholder="e.g. Chase Bank"
+                />
               </div>
 
-              <div className="pt-4 flex justify-end gap-4">
-                <button type="button" onClick={() => setShowAddForm(false)} className="px-6 py-2.5 border border-outline-variant/50 text-on-surface font-label-md rounded hover:bg-surface-variant/30 transition-colors">
+              <div>
+                <label className="block font-label-sm uppercase font-semibold text-on-surface-variant mb-1">Routing Number</label>
+                <input 
+                  type="text" 
+                  required
+                  maxLength={9}
+                  value={newBank.routingNumber}
+                  onChange={(e) => setNewBank({ ...newBank, routingNumber: e.target.value })}
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2.5 font-mono" 
+                  placeholder="9-digit routing"
+                />
+              </div>
+
+              <div>
+                <label className="block font-label-sm uppercase font-semibold text-on-surface-variant mb-1">Account Number</label>
+                <input 
+                  type="password" 
+                  required
+                  value={newBank.accountNumber}
+                  onChange={(e) => setNewBank({ ...newBank, accountNumber: e.target.value })}
+                  className="w-full bg-surface-container-low border border-outline-variant rounded-lg p-2.5 font-mono" 
+                  placeholder="Account number"
+                />
+              </div>
+
+              <div className="pt-4 flex gap-3">
+                <button 
+                  type="button" 
+                  onClick={() => setShowAddModal(false)}
+                  className="flex-1 py-3 border border-charcoal rounded-lg font-semibold uppercase tracking-wider"
+                >
                   Cancel
                 </button>
-                <button type="submit" className="px-6 py-2.5 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity">
-                  Link Account
+                <button 
+                  type="submit" 
+                  className="flex-1 py-3 bg-forest-green text-white rounded-lg font-bold uppercase tracking-wider shadow"
+                >
+                  Save &amp; Link
                 </button>
               </div>
             </form>
           </div>
-        )}
-
-        {/* Existing Accounts List */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-sm">
-          {accounts.length === 0 ? (
-            <div className="p-12 text-center">
-              <span className="material-symbols-outlined text-4xl text-outline-variant mb-4">account_balance</span>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No Linked Accounts</h3>
-              <p className="font-body-md text-on-surface-variant">You don't have any bank accounts linked yet.</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-outline-variant/30">
-              {accounts.map((acc) => (
-                <div key={acc.id} className="p-6 flex flex-col sm:flex-row justify-between items-center gap-6">
-                  <div className="flex items-center gap-4 w-full sm:w-auto">
-                    <div className="w-12 h-12 bg-surface-variant rounded-full flex items-center justify-center shrink-0">
-                      <span className="material-symbols-outlined text-charcoal text-[24px]">account_balance</span>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="font-headline-sm text-headline-sm text-on-surface">{acc.bankName}</h3>
-                        {acc.isDefault && (
-                          <span className="bg-forest-green/10 text-forest-green font-label-sm px-2 py-0.5 rounded uppercase tracking-wider text-[10px]">Default</span>
-                        )}
-                      </div>
-                      <p className="font-body-sm text-on-surface-variant">{acc.accountType} ending in {acc.lastFour}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 w-full sm:w-auto justify-end">
-                    <span className="flex items-center gap-1.5 text-forest-green font-label-sm">
-                      <span className="material-symbols-outlined text-[16px]">verified</span>
-                      {acc.status}
-                    </span>
-                    <button className="p-2 text-on-surface-variant hover:text-charcoal transition-colors">
-                      <span className="material-symbols-outlined text-[20px]">more_vert</span>
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
+      )}
 
-        <div className="mt-6 flex items-start gap-3 p-4 bg-surface-variant/30 rounded border border-outline-variant/30">
-          <span className="material-symbols-outlined text-on-surface-variant shrink-0 mt-0.5">lock</span>
-          <p className="font-body-sm text-on-surface-variant leading-relaxed">
-            Your bank information is securely encrypted and stored by our payment partner, Stripe. TrueHand does not store your full bank account numbers on our servers.
-          </p>
-        </div>
-
-      </div>
     </div>
   );
 };

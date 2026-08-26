@@ -15,7 +15,6 @@ export default function SellerEarningsPayoutScreen() {
   React.useEffect(() => {
     fetchStats();
   }, [fetchStats]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

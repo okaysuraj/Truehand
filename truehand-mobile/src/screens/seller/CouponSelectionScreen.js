@@ -39,7 +39,6 @@ export default function CouponSelectionScreen() {
       expired: true
     }
   ];
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

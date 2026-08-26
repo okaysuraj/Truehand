@@ -34,7 +34,6 @@ const COLLECTION_ITEMS = [
 
 export default function WishlistCollectionScreen() {
   const navigation = useNavigation();
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

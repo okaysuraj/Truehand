@@ -1,148 +1,135 @@
-import api from '../../services/api';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const ReportIssue = () => {
-  const [formData, setFormData] = useState({
-    issueType: '',
-    orderNumber: '',
-    subject: '',
-    description: ''
-  });
-  const [submitted, setSubmitted] = useState(false);
+  const navigate = useNavigate();
+  const [nature, setNature] = useState('');
+  const [orderRef, setOrderRef] = useState('');
+  const [details, setDetails] = useState('');
+  const [files, setFiles] = useState([]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Simulate API call
-    setTimeout(() => {
-      setSubmitted(true);
-    }, 800);
+    if (!orderRef || !details) {
+      alert('Please fill in the order reference and details.');
+      return;
+    }
+    alert('Report submitted successfully. Our concierge team will respond within 24 hours.');
+    navigate('/support/requests');
   };
-
-  const handleChange = (e) => {
-    setFormData({...formData, [e.target.name]: e.target.value});
-  };
-
-  if (submitted) {
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
-    return (
-      <div className="pt-24 pb-16 bg-surface-linen min-h-screen flex items-center justify-center">
-        <div className="max-w-md w-full mx-auto px-4 text-center">
-          <div className="w-20 h-20 bg-forest-green rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="material-symbols-outlined text-4xl text-white">check</span>
-          </div>
-          <h1 className="font-display-md text-display-md text-on-surface mb-4">Request Submitted</h1>
-          <p className="font-body-md text-on-surface-variant mb-8 leading-relaxed">
-            Thank you for reaching out. A member of our concierge team will review your request and get back to you within 24-48 hours.
-          </p>
-          <Link to="/" className="inline-flex justify-center items-center w-full px-6 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity">
-            Return to Home
-          </Link>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 md:px-8">
+    <div className="min-h-screen bg-[#faf8f5] font-body-md text-on-surface flex flex-col justify-between pt-20">
+      
+      {/* Main Container */}
+      <main className="flex-1 max-w-2xl w-full mx-auto p-6 md:p-12 space-y-8">
         
-        {/* Header */}
-        <div className="mb-10 text-center">
-          <Link to="/help" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-6 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Help Center
-          </Link>
-          <h1 className="font-display-md text-display-md text-on-surface mb-4">Contact Support</h1>
-          <p className="font-body-md text-on-surface-variant">
-            Please provide details about your issue so we can direct it to the right team.
-          </p>
-        </div>
+        {/* Form Card */}
+        <div className="bg-white p-8 md:p-12 rounded-3xl border border-outline-variant/30 shadow-xl space-y-8 text-xs">
+          
+          <div className="text-center space-y-2">
+            <h1 className="font-display-lg text-3xl md:text-4xl font-bold text-charcoal">
+              Tell us what happened
+            </h1>
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant leading-relaxed">
+              Our artisans take pride in every piece. If something isn't perfect, we're here to make it right.
+            </p>
+          </div>
 
-        {/* Form */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 md:p-8 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            <div className="space-y-2">
-              <label className="block font-label-sm text-on-surface">What do you need help with? *</label>
-              <div className="relative">
-                <select 
-                  name="issueType"
-                  required
-                  value={formData.issueType}
-                  onChange={handleChange}
-                  className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface appearance-none"
-                >
-                  <option value="" disabled>Select a category</option>
-                  <option value="order_status">Where is my order?</option>
-                  <option value="return_exchange">Return or Exchange</option>
-                  <option value="damaged_item">Item arrived damaged</option>
-                  <option value="account_issue">Account or Login Issue</option>
-                  <option value="artisan_question">Question for an Artisan</option>
-                  <option value="other">Other</option>
-                </select>
-                <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none">expand_more</span>
+            {/* Nature of Issue */}
+            <div className="space-y-1.5">
+              <label className="block font-label-sm uppercase font-bold text-on-surface-variant text-[10px] tracking-wider">
+                NATURE OF ISSUE
+              </label>
+              <select 
+                value={nature}
+                onChange={(e) => setNature(e.target.value)}
+                className="w-full bg-transparent border-b border-outline-variant/60 py-3 text-xs font-semibold text-charcoal focus:outline-none focus:border-forest-green"
+              >
+                <option value="">Select an option</option>
+                <option value="damaged">Damaged or fractured upon arrival</option>
+                <option value="incorrect">Incorrect piece or finish received</option>
+                <option value="delayed">Severe delivery delay</option>
+                <option value="customization">Bespoke sizing/color mismatch</option>
+              </select>
+            </div>
+
+            {/* Order Reference */}
+            <div className="space-y-1.5">
+              <label className="block font-label-sm uppercase font-bold text-on-surface-variant text-[10px] tracking-wider">
+                ORDER REFERENCE
+              </label>
+              <input 
+                type="text"
+                value={orderRef}
+                onChange={(e) => setOrderRef(e.target.value)}
+                placeholder="TH-0000-00"
+                className="w-full bg-transparent border-b border-outline-variant/60 py-3 font-mono font-bold text-xs text-charcoal focus:outline-none focus:border-forest-green"
+              />
+            </div>
+
+            {/* Details */}
+            <div className="space-y-1.5">
+              <label className="block font-label-sm uppercase font-bold text-on-surface-variant text-[10px] tracking-wider">
+                DETAILS
+              </label>
+              <textarea 
+                rows={4}
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Describe the issue in detail..."
+                className="w-full bg-transparent border-b border-outline-variant/60 py-3 text-xs font-body-md text-charcoal focus:outline-none focus:border-forest-green"
+              />
+            </div>
+
+            {/* Supporting Media Dropzone */}
+            <div className="space-y-1.5">
+              <label className="block font-label-sm uppercase font-bold text-on-surface-variant text-[10px] tracking-wider">
+                SUPPORTING MEDIA
+              </label>
+              <div 
+                onClick={() => alert('Browse image files')}
+                className="p-8 border-2 border-dashed border-outline-variant/60 rounded-2xl text-center space-y-2 cursor-pointer hover:border-forest-green transition-colors bg-surface-container-lowest"
+              >
+                <span className="material-symbols-outlined text-3xl text-on-surface-variant">cloud_upload</span>
+                <p className="font-bold text-charcoal text-xs">
+                  Drop files here or click to browse
+                </p>
+                <p className="text-[10px] text-on-surface-variant font-mono">
+                  Max size 10MB. Formats: JPG, PNG, HEIC
+                </p>
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="block font-label-sm text-on-surface">Order Number (Optional)</label>
-              <input 
-                type="text"
-                name="orderNumber"
-                placeholder="e.g. TH-19284"
-                value={formData.orderNumber}
-                onChange={handleChange}
-                className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block font-label-sm text-on-surface">Subject *</label>
-              <input 
-                type="text"
-                name="subject"
-                required
-                placeholder="Brief summary of your issue"
-                value={formData.subject}
-                onChange={handleChange}
-                className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="block font-label-sm text-on-surface">Description *</label>
-              <textarea 
-                name="description"
-                required
-                rows="5"
-                placeholder="Please provide as much detail as possible..."
-                value={formData.description}
-                onChange={handleChange}
-                className="w-full p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface resize-y"
-              ></textarea>
-            </div>
-
-            <div className="space-y-2 border border-dashed border-outline-variant/50 rounded p-6 text-center hover:bg-surface-variant/30 transition-colors cursor-pointer">
-              <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">upload_file</span>
-              <p className="font-label-md text-on-surface">Upload Images (Optional)</p>
-              <p className="font-body-sm text-on-surface-variant">Drag and drop or click to browse (Max 5MB)</p>
-            </div>
-
-            <div className="pt-4 border-t border-outline-variant/30 flex justify-end">
+            {/* Action CTA */}
+            <div className="space-y-2 pt-4">
               <button 
                 type="submit"
-                className="px-8 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity"
+                className="w-full py-4 bg-forest-green text-white rounded-xl font-label-md text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all shadow"
               >
-                Submit Request
+                SUBMIT REPORT
               </button>
+              <p className="text-[10px] text-center text-on-surface-variant">
+                We typically respond within 24 business hours.
+              </p>
             </div>
 
           </form>
+
         </div>
-        
-      </div>
+
+        {/* Back Link */}
+        <div className="text-center">
+          <Link to="/help" className="inline-flex items-center gap-1.5 text-xs text-on-surface-variant hover:text-charcoal transition-colors">
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
+            Back to help center
+          </Link>
+        </div>
+
+      </main>
+
     </div>
   );
 };

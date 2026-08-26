@@ -24,7 +24,6 @@ export default function NoInternetScreen() {
       ])
     ).start();
   }, [pulseAnim]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

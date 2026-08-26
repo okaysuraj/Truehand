@@ -30,7 +30,6 @@ export default function DeliveryLoginScreen() {
       navigation.replace('DeliveryHome');
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

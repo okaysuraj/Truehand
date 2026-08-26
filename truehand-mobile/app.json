@@ -4,7 +4,7 @@
     "slug": "truehand-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/favicon.png",
+    "icon": "./assets/web-app-manifest-512x512.png",
     "splash": {
       "image": "./assets/logo.png",
       "resizeMode": "contain",
@@ -17,7 +17,7 @@
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#fcf9f8",
-        "foregroundImage": "./assets/favicon.png"
+        "foregroundImage": "./assets/web-app-manifest-512x512.png"
       }
     },
     "web": {

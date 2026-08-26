@@ -37,7 +37,7 @@ const ProductDetail = () => {
         const recRes = await api.get(`/products/${id}/recommendations`);
         setRecommendations(recRes.data);
       } catch (err) {
-        console.log('No recommendations found');
+        // No recommendations found
       }
     } catch (err) {
       console.error(err);
@@ -247,6 +247,37 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Material & Craft Section */}
+      <section className="mt-section-gap grid grid-cols-1 md:grid-cols-12 gap-gutter items-center">
+        <div className="md:col-span-6 space-y-6">
+          <h3 className="font-headline-lg text-headline-lg text-forest-green font-bold">Material &amp; Craft</h3>
+          <p className="font-body-lg text-on-surface-variant leading-relaxed text-sm md:text-base">
+            Our stoneware starts as raw earth, harvested from the riverbeds of the Hudson Valley. This high-iron clay provides a natural speckle and structural integrity that lasts generations. The process involves a delicate balance of physical strength on the wheel and chemical precision in the kiln, firing at 2,350°F to achieve vitrification.
+          </p>
+          <div className="flex gap-8 pt-2">
+            <div>
+              <div className="font-headline-md text-2xl text-terracotta font-bold">2.3k°</div>
+              <div className="font-label-sm text-xs uppercase tracking-wider text-on-surface-variant">Kiln Temp</div>
+            </div>
+            <div>
+              <div className="font-headline-md text-2xl text-terracotta font-bold">12h</div>
+              <div className="font-label-sm text-xs uppercase tracking-wider text-on-surface-variant">Throwing Time</div>
+            </div>
+            <div>
+              <div className="font-headline-md text-2xl text-terracotta font-bold">0%</div>
+              <div className="font-label-sm text-xs uppercase tracking-wider text-on-surface-variant">Lead Content</div>
+            </div>
+          </div>
+        </div>
+        <div className="md:col-span-6 h-[380px] md:h-[450px] rounded-xl overflow-hidden shadow-sm">
+          <img 
+            className="w-full h-full object-cover" 
+            alt="Artisan hands on wheel" 
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMyupakCnACGkNNkkm_8Qp-VPRp1HL5CyCH2xgocH5zuTrf2Fnqxdm51jKPMoDwstIl__i3ZXZuZ_198MEiGr8oj9LM6qn14Cl7xcLOX5cy-NI8tOJ5G98GHTHy_FOxJpyl1s6j5ET4fOs4sK1zF9Jzd8WwASweopwtq383-QMfjD7wN35s_MxonS7ArPzxZY4BAPTZUI7HtduxEUMJB6ga5c9lfMkHT4UxdXf1zmjGpwRrUdlT-eCcQ" 
+          />
+        </div>
+      </section>
 
       {/* Maker's Note */}
       <section className="mt-section-gap bg-surface-container p-stack-lg md:p-24 flex flex-col items-center text-center rounded-lg">

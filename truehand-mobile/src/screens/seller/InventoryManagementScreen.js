@@ -36,7 +36,6 @@ export default function InventoryManagementScreen() {
       console.error(e);
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

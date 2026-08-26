@@ -15,7 +15,6 @@ const CATEGORIES = [
 
 export default function HelpCenterScreen() {
   const navigation = useNavigation();
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

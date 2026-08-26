@@ -1,127 +1,233 @@
+import React, { useState, useEffect } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+
+const DEFAULT_QUESTIONS = [
+  {
+    id: 1,
+    question: 'Is this bowl dishwasher safe?',
+    user: 'Julian V.',
+    date: '2 days ago',
+    answer: 'While our stoneware is kiln-fired at high temperatures making it extremely durable, we recommend hand-washing with mild detergent to preserve the subtle luster of the oatmeal glaze over many years of use.',
+    responder: 'Aesthete Studio Artisan',
+    isPending: false,
+  },
+  {
+    id: 2,
+    question: 'Can I use this for hot soups or only cold items?',
+    user: 'Elena R.',
+    date: '1 week ago',
+    answer: 'It is perfectly suited for hot liquids. The stoneware has excellent thermal retention properties, keeping your contents warm for longer than standard porcelain.',
+    responder: 'Aesthete Studio Artisan',
+    isPending: false,
+  },
+  {
+    id: 3,
+    question: 'Do you offer custom sizing for this specific glaze?',
+    user: 'Marcus T.',
+    date: '4 hours ago',
+    answer: null,
+    responder: null,
+    isPending: true,
+  },
+];
 
 const ProductQA = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const questions = [
-    {
-      id: 1,
-      user: "Sarah L.",
-      date: "Oct 15, 2023",
-      question: "Is this ceramic vase watertight? Can it hold fresh flowers?",
-      answer: "Yes, it is glazed on the inside and fired at a high temperature, making it completely watertight and perfect for fresh flowers.",
-      artisan: "Elena Studio",
-      upvotes: 24
-    },
-    {
-      id: 2,
-      user: "Michael T.",
-      date: "Sep 22, 2023",
-      question: "What are the exact dimensions?",
-      answer: "The vase is approximately 8 inches tall and 4.5 inches wide at the base, though as a handmade piece, expect slight variations of up to a quarter inch.",
-      artisan: "Elena Studio",
-      upvotes: 12
-    }
-  ];
+  const [questions, setQuestions] = useState(DEFAULT_QUESTIONS);
+  const [newQuestion, setNewQuestion] = useState('');
+  const [submitted, setSubmitted] = useState(false);
 
-  const filteredQuestions = questions.filter(q => 
-    q.question.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    q.answer.toLowerCase().includes(searchTerm.toLowerCase())
+  useEffect(() => {
+    api.get(`/questions/product/${id || 1}`)
+      .then(res => {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          const mapped = res.data.map(q => ({
+            id: q.id,
+            question: q.content || q.question,
+            user: q.userName || 'Patron',
+            date: 'Recently',
+            answer: q.answer || (q.answers?.[0]?.content),
+            responder: 'Artisan',
+            isPending: !q.answer && (!q.answers || q.answers.length === 0),
+          }));
+          setQuestions([...mapped, ...DEFAULT_QUESTIONS]);
+        }
+      })
+      .catch(e => console.warn(e));
+  }, [id]);
+
+  const handleSubmitInquiry = (e) => {
+    e.preventDefault();
+    if (!newQuestion.trim()) return;
+
+    setQuestions(prev => [
+      {
+        id: Date.now(),
+        question: newQuestion.trim(),
+        user: 'You',
+        date: 'Just now',
+        answer: null,
+        responder: null,
+        isPending: true,
+      },
+      ...prev,
+    ]);
+    setNewQuestion('');
+    setSubmitted(true);
+    setTimeout(() => setSubmitted(false), 4000);
+  };
+
+  const filtered = questions.filter(q =>
+    q.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (q.answer && q.answer.toLowerCase().includes(searchTerm.toLowerCase()))
   );
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
-        
-        {/* Header */}
-        <div className="mb-10">
-          <Link to={`/product/${id || 1}`} className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Product
-          </Link>
-          <h1 className="font-display-md text-display-md text-on-surface mb-2">Questions & Answers</h1>
-          <p className="font-body-md text-on-surface-variant">Find out more about this handcrafted piece directly from the community and the artisan.</p>
-        </div>
-
-        {/* Search and Ask */}
-        <div className="flex flex-col md:flex-row gap-4 mb-10">
-          <div className="flex-1 relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-            <input 
-              type="text" 
-              placeholder="Search for answers..." 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface transition-colors"
+    <main className="pt-28 pb-20 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto min-h-screen bg-surface font-body-md text-on-surface">
+      
+      {/* Breadcrumb / Header Section */}
+      <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between border-b border-outline-variant/30 pb-6 gap-4">
+        <div className="flex items-center gap-6">
+          <div className="w-20 h-20 bg-white rounded-lg overflow-hidden shrink-0 shadow-sm border border-outline-variant/20">
+            <img 
+              className="w-full h-full object-cover" 
+              alt="Hand-thrown Stoneware Bowl" 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAzLUlGwx1msKPavVFQ7178AIasC8jn3loMyoqwCfB7Ld0v-JnvApOb14t1vBtMtitSxT32AvvDm7sCgDpDtNovx24_asyILC5x46PiubkHFEYuEdmq_U1fXqmm2dWCRCNIYXlmUJvbXD1VsBIFyTOt8MAMT0DYrdKLiZMC_g7YcKNr278l68Y_sb5zV9D4CkfCS4Xd86e7QF3Pf4Jq0NTNyHvyMwzNmuox30wB25pl_pAZDaVEFsrsmg" 
             />
           </div>
-          <button className="px-6 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity whitespace-nowrap">
-            Ask a Question
-          </button>
+          <div>
+            <h1 className="font-headline-lg text-headline-lg text-forest-green mb-1 font-bold">Hand-thrown Stoneware Bowl</h1>
+            <p className="font-label-md text-xs text-on-surface-variant uppercase tracking-widest">Product Inquiry &amp; Community Q&amp;A</p>
+          </div>
         </div>
 
-        {/* Q&A List */}
-        <div className="space-y-6">
-          {filteredQuestions.length === 0 ? (
-            <div className="p-12 text-center bg-surface-container-lowest border border-outline-variant/30 rounded-lg">
-              <span className="material-symbols-outlined text-4xl text-outline-variant mb-4">forum</span>
-              <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">No results found</h3>
-              <p className="font-body-md text-on-surface-variant">We couldn't find any questions matching your search.</p>
-            </div>
-          ) : (
-            filteredQuestions.map((qa) => (
-              <div key={qa.id} className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
-                
-                {/* Question */}
-                <div className="flex gap-4 mb-6">
-                  <div className="w-8 h-8 rounded-full bg-forest-green/10 flex items-center justify-center shrink-0">
-                    <span className="font-label-md text-forest-green">Q</span>
-                  </div>
-                  <div>
-                    <h3 className="font-headline-sm text-headline-sm text-on-surface mb-2">{qa.question}</h3>
-                    <div className="flex items-center gap-3 text-on-surface-variant font-label-sm">
-                      <span>{qa.user}</span>
-                      <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
-                      <span>{qa.date}</span>
-                    </div>
-                  </div>
-                </div>
+        <Link 
+          to={`/product/${id || 1}`} 
+          className="flex items-center gap-1.5 text-on-surface-variant hover:text-forest-green transition-colors font-label-md text-sm font-semibold"
+        >
+          <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span>Return to Product</span>
+        </Link>
+      </div>
 
-                {/* Answer */}
-                <div className="flex gap-4 bg-surface-linen/50 p-4 rounded border border-outline-variant/20 ml-12">
-                  <div className="w-8 h-8 rounded-full bg-charcoal text-white flex items-center justify-center shrink-0">
-                    <span className="font-label-md">A</span>
-                  </div>
-                  <div>
-                    <p className="font-body-md text-on-surface mb-2 leading-relaxed">{qa.answer}</p>
-                    <div className="flex items-center gap-3 font-label-sm">
-                      <span className="text-forest-green font-medium">{qa.artisan}</span>
-                      <span className="w-1 h-1 rounded-full bg-outline-variant"></span>
-                      <span className="text-on-surface-variant">Artisan</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Upvote */}
-                <div className="mt-4 ml-12 flex items-center gap-2">
-                  <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-outline-variant/50 text-on-surface-variant hover:border-forest-green hover:text-forest-green transition-colors font-label-sm">
-                    <span className="material-symbols-outlined text-[16px]">thumb_up</span>
-                    Helpful ({qa.upvotes})
-                  </button>
-                </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+        
+        {/* Sidebar Info / Stats */}
+        <aside className="md:col-span-4 space-y-6">
+          <div className="p-6 bg-white shadow-sm rounded-lg border border-outline-variant/30">
+            <h3 className="font-label-md text-xs text-forest-green mb-4 uppercase tracking-wider font-bold">Overview</h3>
+            <div className="space-y-3">
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-on-surface-variant">Questions</span>
+                <span className="font-bold text-on-surface">{questions.length}</span>
               </div>
-            ))
-          )}
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-on-surface-variant">Avg. Response Time</span>
+                <span className="font-bold text-on-surface">24h</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6 border border-outline-variant/30 rounded-lg bg-surface-container-low/50">
+            <p className="font-body-md text-xs text-on-surface-variant italic leading-relaxed">
+              "Aesthete pieces are crafted to be heirloom quality. Our artisans personally respond to material and care inquiries."
+            </p>
+          </div>
+        </aside>
+
+        {/* Q&A Feed */}
+        <div className="md:col-span-8 space-y-6">
+          
+          {/* Search Bar */}
+          <div className="relative w-full">
+            <input 
+              className="w-full bg-white border border-outline-variant/40 rounded-lg px-4 py-3 pr-10 focus:outline-none focus:border-forest-green font-body-md text-sm shadow-sm" 
+              placeholder="Search for a specific question..." 
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-sm">search</span>
+          </div>
+
+          {/* Vertical Feed */}
+          <div className="space-y-6">
+            {filtered.map(qa => (
+              <div 
+                key={qa.id}
+                className={`p-6 rounded-lg shadow-sm border ${
+                  qa.isPending 
+                    ? 'bg-surface-container-low/60 border-dashed border-outline-variant' 
+                    : 'bg-white border-outline-variant/20'
+                }`}
+              >
+                <div className="flex gap-4">
+                  <div className={`text-4xl font-display-lg leading-none select-none font-bold ${
+                    qa.isPending ? 'text-terracotta/40' : 'text-terracotta'
+                  }`}>
+                    Q
+                  </div>
+                  <div className="flex-grow pt-1">
+                    <h4 className="font-headline-md text-headline-md text-forest-green mb-1 font-semibold text-lg">{qa.question}</h4>
+                    <p className="text-on-surface-variant text-xs mb-4 uppercase tracking-wider">Asked by {qa.user} • {qa.date}</p>
+
+                    {qa.isPending ? (
+                      <span className="inline-block px-3 py-1 bg-amber-100 text-amber-800 text-xs uppercase tracking-widest rounded-full font-semibold">
+                        Pending Response
+                      </span>
+                    ) : (
+                      <div className="flex gap-4 mt-4 border-t border-outline-variant/20 pt-4">
+                        <div className="text-4xl font-display-lg text-forest-green leading-none select-none font-bold">
+                          A
+                        </div>
+                        <div className="pt-1">
+                          <p className="font-body-lg text-sm text-on-surface leading-relaxed">{qa.answer}</p>
+                          <div className="mt-3 flex items-center gap-1.5 text-forest-green font-semibold text-xs">
+                            <span className="material-symbols-outlined text-[16px]">verified</span>
+                            <span className="font-label-md uppercase tracking-wider">{qa.responder}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Ask a Question Field */}
+          <div className="mt-12 bg-forest-green p-8 rounded-xl text-white shadow-md">
+            <h3 className="font-headline-md text-headline-md mb-3 font-bold text-white">Curiosity is welcomed.</h3>
+            <form onSubmit={handleSubmitInquiry}>
+              <textarea 
+                className="w-full bg-white/10 border-b border-white/30 focus:border-white focus:outline-none text-white placeholder:text-white/50 font-body-md text-sm p-4 rounded-t outline-none resize-none mb-4" 
+                placeholder="Write your question here..." 
+                rows="3"
+                value={newQuestion}
+                onChange={(e) => setNewQuestion(e.target.value)}
+              />
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <p className="font-label-sm text-xs text-white/70 italic">
+                  {submitted ? 'Inquiry submitted for curator review!' : 'Your question will be reviewed by our curators before being posted.'}
+                </p>
+                <button 
+                  type="submit"
+                  className="bg-white text-forest-green px-6 py-3 font-label-md text-xs uppercase tracking-widest hover:bg-surface-linen transition-all rounded font-semibold whitespace-nowrap shadow"
+                >
+                  Submit Inquiry
+                </button>
+              </div>
+            </form>
+          </div>
+
         </div>
 
       </div>
-    </div>
+
+    </main>
   );
 };
 

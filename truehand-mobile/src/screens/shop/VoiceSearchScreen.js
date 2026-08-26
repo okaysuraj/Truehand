@@ -52,7 +52,6 @@ export default function VoiceSearchScreen() {
     createRipple(scale1, opacity1, 0);
     createRipple(scale2, opacity2, 1000);
   }, [scale1, opacity1, scale2, opacity2]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

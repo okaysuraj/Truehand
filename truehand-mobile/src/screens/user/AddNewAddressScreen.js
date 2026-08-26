@@ -17,12 +17,25 @@ export default function AddNewAddressScreen() {
     zip: ''
   });
 
-  const handleSave = () => {
-    // Mock save address logic
-    navigation.goBack();
+  const handleSave = async () => {
+    try {
+      const payload = {
+        label: "Home", // Defaulting for now
+        streetAddress: `${form.address1} ${form.address2}`.trim(),
+        city: form.city,
+        state: form.state,
+        postalCode: form.zip,
+        country: "USA",
+        isDefault: false
+      };
+      // Fallback userId = 1 for demo purposes
+      await api.post('/addresses/user/1', payload);
+      navigation.goBack();
+    } catch (err) {
+      console.warn("Failed to save address", err);
+      alert("Failed to save address. Please try again.");
+    }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>

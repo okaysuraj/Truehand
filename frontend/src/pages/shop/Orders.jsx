@@ -1,152 +1,212 @@
 import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../../services/api';
 import { useAuth } from '../../context/AuthProvider';
 
+const SAMPLE_ORDERS = [
+  {
+    id: 'AH-928374',
+    orderNumber: '#AH-928374',
+    name: 'Sumi-e Inspired Glazed Vessel',
+    artisan: 'By Artisan Kenji Nakamura',
+    price: 485.00,
+    status: 'IN TRANSIT',
+    statusTag: 'In Transit',
+    statusColor: 'bg-emerald-100 text-emerald-800',
+    estimatedArrival: 'Oct 24, 2024',
+    currentLocation: 'Kyoto Hub',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBxErMHRhrn2KkUOXA18bGbCos5_fd9pw1YBh0ocHhUnaIHEJxDFws_74yq_iB_himwxbHWzqM2BEYcqZOuCVo3CN2RlR93gNaUA3WnX6oYUyeptNi_PSJrzkwv0KeZUOGM_vnH1frl3UVVwid0Lak_QIHjumia3urt26J2qMRf7v14cG_xUieyxqE7RfO3Etxs35v_pUICyZ2jw4QdUL5x-S20xH-SUsVuKqR6xINIntrJzUrUNS1NRQ',
+    type: 'active',
+  },
+  {
+    id: 'AH-928112',
+    orderNumber: '#AH-928112',
+    name: 'Highlands Merino Weave',
+    artisan: 'Studio Atelier Nord',
+    price: 320.00,
+    status: 'PREPARING',
+    statusTag: 'Preparing Shipment',
+    statusColor: 'bg-amber-100 text-amber-900',
+    estimatedArrival: 'Oct 28, 2024',
+    currentLocation: null,
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDeCYhd7I4h-n4OM1vRaUr-klBuiAWPt303dcypGEeiQkgQNi6_Xv0cYw0ZcpS5QT1zScqAD19e49mMXCzODp8ERcB3QOqfywWILT7TYZJolsC869cHiXOyNTmb1gsvcnGb5tGdcFiERAxHzA71PQNa6Xlwijgtn2Yb7ah8-2Dfbe9FZGTW_GBJ9VpW1oc567uw1kDm43JPK2-f3VFcc4SQQ9gTZwb3Cuxi07FbV2Wtxsy1ylB0bZdaFg',
+    type: 'active',
+  },
+  {
+    id: 'AH-912003',
+    orderNumber: '#AH-912003',
+    name: 'Hand-Carved Walnut Nesting Set',
+    artisan: 'The Oregon Woodsmith',
+    price: 215.00,
+    status: 'DELIVERED',
+    statusTag: 'Delivered',
+    statusColor: 'bg-surface-container-high text-on-surface-variant',
+    deliveredOn: 'Sept 12, 2024',
+    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCZqd4TL6YM-02s_QxvUuoHr9W8C8c6zr6POoUxUDOS0PxjQcYqP3L1S8V1b-eE8dFGBE6-eGZ4EruYb3UHYl1jp36TbyAAeDPJSx472DW2rZMvOQQJ8bEMQUBJulQvwF5PAxoG9o578JKM48AdILKjy-a0BYsJ5S0SgVO9mw-SqRqLabQtaHE-V0e5Im0EIJdDRvnMEBmJTH3S2iPK9fdX-6_WtAXXkL7s4E9yeMmFRcI62hlgt-tVRg',
+    type: 'completed',
+  },
+];
+
 const Orders = () => {
-  const [orders, setOrders] = useState([]);
-  const [filter, setFilter] = useState('all'); // all, active, completed
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [tab, setTab] = useState('All Orders');
+  const [orders, setOrders] = useState(SAMPLE_ORDERS);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      if (!user) return;
-      try {
-        const res = await api.get(`/orders/user/${user.id}`);
-        setOrders(res.data || []);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchOrders();
+    if (user?.id) {
+      api.get(`/orders/user/${user.id}`)
+        .then(res => {
+          if (res.data && res.data.length > 0) {
+            const mapped = res.data.map(o => ({
+              id: o.id.toString(),
+              orderNumber: `#TH-${o.id}`,
+              name: o.orderItems?.[0]?.productName || 'Artisan Handcrafted Piece',
+              artisan: 'TrueHand Studio Collective',
+              price: o.totalAmount || 180.00,
+              status: o.status || 'IN TRANSIT',
+              statusTag: o.status === 'DELIVERED' ? 'Delivered' : 'In Transit',
+              statusColor: o.status === 'DELIVERED' ? 'bg-surface-container-high text-on-surface-variant' : 'bg-emerald-100 text-emerald-800',
+              estimatedArrival: 'In 3-5 days',
+              currentLocation: 'Regional Fulfillment Hub',
+              image: o.orderItems?.[0]?.productImage || SAMPLE_ORDERS[0].image,
+              type: o.status === 'DELIVERED' ? 'completed' : 'active',
+            }));
+            setOrders(mapped);
+          }
+        })
+        .catch(e => console.warn(e));
+    }
   }, [user]);
 
   const filteredOrders = orders.filter(o => {
-    if (filter === 'active') return o.status !== 'DELIVERED' && o.status !== 'CANCELLED';
-    if (filter === 'completed') return o.status === 'DELIVERED';
+    if (tab === 'Active') return o.type === 'active';
+    if (tab === 'Completed') return o.type === 'completed';
     return true;
   });
 
   return (
-    <main className="pt-32 pb-section-gap max-w-container-max mx-auto px-margin-desktop min-h-screen">
-      {/* Header Section */}
-      <header className="mb-stack-lg animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h1 className="font-display-lg text-display-lg text-forest-green mb-base">Your Acquisitions</h1>
-        <p className="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Refined craftsmanship takes time. Trace the journey of your hand-selected pieces from the artisan's studio to your home.</p>
-      </header>
-
-      {/* Tabbed Navigation */}
-      <div className="relative border-b border-outline-variant mb-12">
-        <div className="flex gap-stack-lg relative">
-          <button 
-            className={`relative pb-4 font-label-md text-label-md transition-all duration-300 cursor-pointer ${filter === 'all' ? 'text-forest-green border-b-2 border-forest-green' : 'text-on-surface-variant hover:text-forest-green'}`}
-            onClick={() => setFilter('all')}
-          >
-            All Orders
-          </button>
-          <button 
-            className={`relative pb-4 font-label-md text-label-md transition-all duration-300 cursor-pointer ${filter === 'active' ? 'text-forest-green border-b-2 border-forest-green' : 'text-on-surface-variant hover:text-forest-green'}`}
-            onClick={() => setFilter('active')}
-          >
-            Active
-          </button>
-          <button 
-            className={`relative pb-4 font-label-md text-label-md transition-all duration-300 cursor-pointer ${filter === 'completed' ? 'text-forest-green border-b-2 border-forest-green' : 'text-on-surface-variant hover:text-forest-green'}`}
-            onClick={() => setFilter('completed')}
-          >
-            Completed
-          </button>
-        </div>
+    <main className="flex-grow pt-28 pb-20 max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop bg-surface-linen font-body-md text-on-surface min-h-screen">
+      
+      {/* Title */}
+      <div className="mb-8">
+        <h1 className="font-display-lg text-3xl md:text-5xl text-forest-green font-bold mb-2">Your Acquisitions</h1>
+        <p className="font-body-md text-on-surface-variant text-xs md:text-sm max-w-2xl leading-relaxed">
+          Refined craftsmanship takes time. Trace the journey of your hand-selected pieces from the artisan's studio to your home.
+        </p>
       </div>
 
-      {/* Orders Grid/List */}
-      {filteredOrders.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-32 text-center">
-          <span className="material-symbols-outlined text-6xl text-outline-variant mb-stack-md">auto_awesome_motion</span>
-          <h2 className="font-headline-lg text-headline-lg text-forest-green mb-2">No acquisitions yet</h2>
-          <p className="font-body-lg text-body-lg text-on-surface-variant mb-stack-lg">Discover timeless pieces crafted by world-class artisans.</p>
-          <Link to="/products" className="px-8 py-3 bg-forest-green text-white font-label-md text-label-md hover:bg-forest-green/90 transition-all duration-300 uppercase tracking-widest rounded-sm">
-            Browse Collections
-          </Link>
-        </div>
-      ) : (
-        <div className="space-y-gutter">
-          {filteredOrders.map(o => {
-            const isCompleted = o.status === 'DELIVERED';
-            const isActive = o.status !== 'DELIVERED' && o.status !== 'CANCELLED';
-            return (
-              <div key={o.id} className="order-card-hover bg-white border border-surface-container-high p-gutter flex flex-col md:flex-row gap-gutter group cursor-default shadow-sm hover:shadow-md transition-all rounded-sm">
-                <div className={`w-full md:w-48 h-48 overflow-hidden bg-surface-container rounded-sm flex-shrink-0 ${isCompleted ? 'opacity-90 group-hover:opacity-100' : ''}`}>
-                  <img src={`https://picsum.photos/400/400?random=${o.id}`} alt="Order Item" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-                </div>
-                
-                <div className="flex-grow flex flex-col justify-between py-2">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <p className="font-label-sm text-label-sm text-on-surface-variant mb-1 uppercase tracking-widest">Order #{o.orderNumber.substring(0, 15)}</p>
-                      <h3 className="font-headline-md text-headline-md text-forest-green">Curated Collection</h3>
-                      <p className="font-body-md text-body-md text-on-surface-variant mt-1">Placed: {new Date(o.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div className="flex flex-col items-end">
-                      <span className={`inline-flex items-center px-3 py-1 font-label-sm text-label-sm rounded-full mb-2 ${
-                        isCompleted ? 'bg-surface-linen text-forest-green border border-outline-variant' : 
-                        isActive ? 'bg-primary-fixed text-on-primary-fixed' : 
-                        'bg-surface-container-high text-on-surface-variant'
-                      }`}>
-                        <span className="material-symbols-outlined text-[14px] mr-1">
-                          {isCompleted ? 'task_alt' : isActive ? 'local_shipping' : 'history_edu'}
-                        </span>
-                        {o.status.replace(/_/g, ' ')}
-                      </span>
-                      <p className="font-label-md text-label-md text-forest-green">${o.totalAmount.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-4 md:mt-0 flex flex-col md:flex-row justify-between items-end md:items-center gap-stack-md">
-                    <div className="flex gap-gutter items-center">
-                      <div>
-                        <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{isCompleted ? 'Delivered On' : 'Estimated Arrival'}</p>
-                        <p className="font-body-md text-body-md font-semibold text-forest-green">
-                          {isCompleted ? new Date(o.updatedAt).toLocaleDateString() : 'Processing'}
-                        </p>
-                      </div>
-                      {!isCompleted && (
-                        <>
-                          <div className="h-8 w-px bg-outline-variant"></div>
-                          <div>
-                            <p className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Delivery To</p>
-                            <p className="font-body-md text-body-md text-forest-green truncate max-w-[150px]">{o.deliveryAddress || 'Home'}</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                    
-                    <div className="flex gap-stack-sm w-full md:w-auto">
-                      {isActive && (
-                        <button 
-                          onClick={() => navigate(`/tracking/${o.id}`)}
-                          className="flex-1 md:flex-none px-6 py-2 border border-charcoal text-charcoal font-label-md text-label-md hover:bg-charcoal hover:text-white transition-all duration-300 rounded-sm"
-                        >
-                          Track Order
-                        </button>
-                      )}
-                      {isCompleted && (
-                        <button className="flex-1 md:flex-none px-6 py-2 border border-charcoal text-charcoal font-label-md text-label-md hover:bg-charcoal hover:text-white transition-all duration-300 rounded-sm">
-                          Download Invoice
-                        </button>
-                      )}
-                      <button className="flex-1 md:flex-none px-6 py-2 bg-forest-green text-white font-label-md text-label-md hover:bg-forest-green/90 transition-all duration-300 rounded-sm">
-                        Order Details
-                      </button>
-                    </div>
-                  </div>
-                </div>
+      {/* Filter Tabs */}
+      <div className="flex gap-8 border-b border-outline-variant/30 mb-8 overflow-x-auto">
+        {['All Orders', 'Active', 'Completed'].map(t => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`pb-3 font-label-md text-xs uppercase tracking-wider font-semibold transition-colors whitespace-nowrap ${
+              tab === t 
+                ? 'border-b-2 border-forest-green text-forest-green' 
+                : 'text-on-surface-variant hover:text-forest-green'
+            }`}
+          >
+            {t}
+          </button>
+        ))}
+      </div>
+
+      {/* Orders List */}
+      <div className="space-y-6">
+        {filteredOrders.map(order => (
+          <div 
+            key={order.id} 
+            className="bg-white p-6 md:p-8 rounded-2xl border border-outline-variant/30 shadow-sm flex flex-col md:flex-row gap-6 md:items-center justify-between"
+          >
+            <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+              <div 
+                className="w-28 h-28 bg-surface-container rounded-xl overflow-hidden shrink-0 cursor-pointer"
+                onClick={() => navigate(`/order/${order.id}`)}
+              >
+                <img className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" alt={order.name} src={order.image} />
               </div>
-            );
-          })}
-        </div>
-      )}
+
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <span className="font-mono text-xs text-on-surface-variant uppercase font-semibold">{order.orderNumber}</span>
+                  <span className={`font-label-sm text-[10px] uppercase tracking-wider font-bold px-2.5 py-0.5 rounded-full ${order.statusColor}`}>
+                    {order.statusTag}
+                  </span>
+                </div>
+                <h3 
+                  onClick={() => navigate(`/order/${order.id}`)}
+                  className="font-headline-md text-lg text-forest-green font-bold hover:text-terracotta transition-colors cursor-pointer"
+                >
+                  {order.name}
+                </h3>
+                <p className="font-body-md text-xs text-on-surface-variant">{order.artisan}</p>
+                <p className="font-headline-md text-sm text-charcoal font-bold pt-1">${order.price.toFixed(2)}</p>
+
+                {order.estimatedArrival && (
+                  <div className="flex items-center gap-4 text-[11px] text-on-surface-variant pt-2">
+                    <div>
+                      <span className="uppercase text-[9px] font-bold text-outline block">Estimated Arrival</span>
+                      <span className="font-semibold text-charcoal">{order.estimatedArrival}</span>
+                    </div>
+                    {order.currentLocation && (
+                      <div>
+                        <span className="uppercase text-[9px] font-bold text-outline block">Current Location</span>
+                        <span className="font-semibold text-charcoal">{order.currentLocation}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {order.deliveredOn && (
+                  <div className="text-[11px] text-on-surface-variant pt-2">
+                    <span className="uppercase text-[9px] font-bold text-outline block">Delivered On</span>
+                    <span className="font-semibold text-charcoal">{order.deliveredOn}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex sm:flex-col gap-2.5 shrink-0 pt-4 md:pt-0 border-t md:border-t-0 border-outline-variant/20">
+              {order.type === 'active' ? (
+                <>
+                  <button 
+                    onClick={() => navigate(`/tracking/${order.id}`)}
+                    className="px-5 py-2.5 border border-outline-variant text-charcoal font-label-md text-xs uppercase tracking-wider rounded-lg hover:bg-surface-container transition-colors font-semibold"
+                  >
+                    Track Order
+                  </button>
+                  <button 
+                    onClick={() => navigate(`/order/${order.id}`)}
+                    className="px-5 py-2.5 bg-forest-green text-white font-label-md text-xs uppercase tracking-wider rounded-lg hover:opacity-90 transition-all font-semibold shadow"
+                  >
+                    Order Details
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button 
+                    onClick={() => alert('Downloading original tax invoice PDF...')}
+                    className="px-5 py-2.5 border border-outline-variant text-charcoal font-label-md text-xs uppercase tracking-wider rounded-lg hover:bg-surface-container transition-colors font-semibold"
+                  >
+                    Download Invoice
+                  </button>
+                  <button 
+                    onClick={() => navigate('/products')}
+                    className="px-5 py-2.5 bg-forest-green text-white font-label-md text-xs uppercase tracking-wider rounded-lg hover:opacity-90 transition-all font-semibold shadow"
+                  >
+                    Reorder
+                  </button>
+                </>
+              )}
+            </div>
+
+          </div>
+        ))}
+      </div>
+
     </main>
   );
 };

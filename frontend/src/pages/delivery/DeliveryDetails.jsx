@@ -1,132 +1,209 @@
-import api from '../../services/api';
-import React, { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const DeliveryDetails = () => {
-  const { deliveryId } = useParams();
-  const [otpVerified, setOtpVerified] = useState(false);
-
-  const delivery = {
-    id: deliveryId || 'DEL-4819',
-    orderId: 'TH-29462',
-    status: 'In Transit',
-    customer: { name: 'Michael T.', phone: '+1 (555) 234-5678', address: '456 Market Street, Suite 200, Portland, OR 97204' },
-    pickup: { name: 'Tidal Textiles HQ', address: '100 Warehouse Way, Portland, OR 97201' },
-    items: [{ name: 'Woven Indigo Throw', qty: 1 }],
-    otp: '4829',
-    distance: '5.8 km',
-    estimatedTime: '25 min'
-  };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
+  const navigate = useNavigate();
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-3xl mx-auto px-4 md:px-8">
-        <div className="mb-10">
-          <Link to="/delivery/assigned" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>Back to Deliveries
+    <div className="min-h-screen bg-[#faf8f5] font-body-md text-on-surface flex flex-col justify-between pt-20">
+      
+      {/* Main Area */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-10 space-y-8">
+        
+        {/* Back link & Top Banner */}
+        <div className="space-y-4">
+          <Link 
+            to="/delivery/assigned" 
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-forest-green transition-colors"
+          >
+            <span className="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Tasks
           </Link>
-          <div className="flex justify-between items-end">
+
+          <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
             <div>
-              <h1 className="font-display-md text-display-md text-on-surface mb-1">Delivery {delivery.id}</h1>
-              <p className="font-body-md text-on-surface-variant">Order {delivery.orderId}</p>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="px-2.5 py-0.5 rounded text-[10px] uppercase font-bold bg-charcoal text-white">
+                  IN PROGRESS
+                </span>
+                <span className="text-xs text-on-surface-variant font-mono">#TX-29384-H</span>
+              </div>
+              <h1 className="font-display-lg text-2xl md:text-4xl font-bold text-charcoal">
+                Fulfillment: Heirloom Ceramic Set
+              </h1>
+              <p className="text-xs text-on-surface-variant mt-0.5">
+                Assigned to: <strong className="text-charcoal">Marcus Thorne</strong> &bull; Priority: <strong className="text-terracotta">High</strong>
+              </p>
             </div>
-            <span className="bg-blue-50 text-blue-700 border border-blue-200 font-label-md px-3 py-1 rounded">{delivery.status}</span>
+
+            <div className="flex gap-3 shrink-0">
+              <button 
+                onClick={() => alert('Issue report dialog opened')}
+                className="px-5 py-2.5 border border-charcoal text-charcoal rounded-xl font-label-md text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-colors"
+              >
+                Report Issue
+              </button>
+              <button 
+                onClick={() => {
+                  alert('Delivery completed successfully!');
+                  navigate('/delivery/success');
+                }}
+                className="px-6 py-2.5 bg-forest-green text-white rounded-xl font-label-md text-xs uppercase tracking-widest font-bold hover:opacity-90 transition-all shadow"
+              >
+                Complete Delivery
+              </button>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {/* Route Info */}
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface mb-5">Route Details</h2>
-            <div className="space-y-6">
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-4 h-4 rounded-full bg-forest-green border-2 border-forest-green"></div>
-                  <div className="w-0.5 h-12 bg-outline-variant/40"></div>
+        {/* 2-Column Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Column: Destination Map & Customer */}
+          <div className="lg:col-span-7 space-y-6">
+            
+            {/* Destination Card */}
+            <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-4 text-xs">
+              <div className="flex justify-between items-start">
+                <div>
+                  <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider block">Destination</span>
+                  <h4 className="font-headline-md text-base font-bold text-charcoal mt-1">1242 Artisan Way, Ste 4</h4>
+                  <p className="text-[11px] text-on-surface-variant">Pacific Palisades, CA 90272</p>
                 </div>
-                <div className="-mt-1">
-                  <p className="font-label-sm text-forest-green mb-1">PICKUP</p>
-                  <p className="font-label-md text-on-surface">{delivery.pickup.name}</p>
-                  <p className="font-body-sm text-on-surface-variant">{delivery.pickup.address}</p>
-                </div>
+                <button 
+                  onClick={() => alert('Opening Google Maps navigation...')}
+                  className="text-forest-green font-bold text-xs flex items-center gap-1 hover:underline"
+                >
+                  <span className="material-symbols-outlined text-base">map</span>
+                  Open in Maps
+                </button>
               </div>
-              <div className="flex gap-4">
-                <div className="flex flex-col items-center">
-                  <div className="w-4 h-4 rounded-full bg-red-500 border-2 border-red-500"></div>
-                </div>
-                <div className="-mt-1">
-                  <p className="font-label-sm text-red-500 mb-1">DROP-OFF</p>
-                  <p className="font-label-md text-on-surface">{delivery.customer.name}</p>
-                  <p className="font-body-sm text-on-surface-variant">{delivery.customer.address}</p>
+
+              {/* Map Preview Canvas */}
+              <div className="h-64 rounded-2xl overflow-hidden bg-surface-container-low border border-outline-variant/20 relative flex items-center justify-center">
+                <div className="text-center space-y-2 text-on-surface-variant/70">
+                  <span className="material-symbols-outlined text-4xl text-forest-green animate-bounce">location_on</span>
+                  <p className="text-xs font-semibold">1242 Artisan Way, Pacific Palisades</p>
                 </div>
               </div>
             </div>
-            <div className="flex gap-6 mt-6 pt-4 border-t border-outline-variant/20 font-body-sm text-on-surface-variant">
-              <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">straighten</span>{delivery.distance}</span>
-              <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">schedule</span>Est. {delivery.estimatedTime}</span>
-            </div>
-          </div>
 
-          {/* Items */}
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface mb-4">Package Contents</h2>
-            {delivery.items.map((item, idx) => (
-              <div key={idx} className="flex justify-between items-center">
-                <p className="font-body-md text-on-surface">{item.name}</p>
-                <p className="font-label-sm text-on-surface-variant">Qty: {item.qty}</p>
+            {/* Customer Details */}
+            <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm flex items-center justify-between text-xs">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl overflow-hidden bg-surface-container shrink-0 border border-outline-variant/30">
+                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlOai5w5doVJG7jbU3S2KjMr-lBrGQpzN4Ax05R4eK0suYlGCaB3JUUkqQEp6Jo9UZewI8iYG_17Ca43RvmQK0eiiWjLKvxfuzaXtKKsJ5M3M8IASzHHgS48pV3CoAIBnMPZ_ebslKrObmJUUOtVfi-O4wlmQgNK4xH6jTGWC0RxbpfFYmz8r_moNtxOmrfig-lmotvCT4sUHfAiWZB76EzdTozSUiXjl2urusX0QN-XoQYO7CNfE5DA" alt="" className="w-full h-full object-cover" />
+                </div>
+                <div>
+                  <h4 className="font-headline-md text-sm font-bold text-charcoal">Eleanor Vance</h4>
+                  <p className="text-[11px] text-on-surface-variant">Premium Member &bull; Since 2019</p>
+                </div>
               </div>
-            ))}
-          </div>
 
-          {/* Customer Contact */}
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface mb-4">Customer Contact</h2>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-label-md text-on-surface">{delivery.customer.name}</p>
-                <p className="font-body-sm text-on-surface-variant">{delivery.customer.phone}</p>
-              </div>
               <div className="flex gap-2">
-                <button className="w-10 h-10 rounded-full bg-forest-green/10 flex items-center justify-center text-forest-green hover:bg-forest-green/20 transition-colors">
-                  <span className="material-symbols-outlined text-[20px]">call</span>
+                <button className="w-10 h-10 rounded-xl border border-outline-variant/40 flex items-center justify-center text-charcoal hover:bg-surface-container">
+                  <span className="material-symbols-outlined text-lg">phone</span>
                 </button>
-                <button className="w-10 h-10 rounded-full bg-forest-green/10 flex items-center justify-center text-forest-green hover:bg-forest-green/20 transition-colors">
-                  <span className="material-symbols-outlined text-[20px]">chat</span>
+                <button className="w-10 h-10 rounded-xl border border-outline-variant/40 flex items-center justify-center text-charcoal hover:bg-surface-container">
+                  <span className="material-symbols-outlined text-lg">chat</span>
                 </button>
               </div>
             </div>
+
           </div>
 
-          {/* OTP Verification */}
-          <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-6 shadow-sm">
-            <h2 className="font-headline-sm text-headline-sm text-on-surface mb-2">Delivery Verification</h2>
-            <p className="font-body-sm text-on-surface-variant mb-4">Enter the OTP provided by the customer to confirm delivery.</p>
-            {!otpVerified ? (
-              <form onSubmit={(e) => { e.preventDefault(); setOtpVerified(true); }} className="flex gap-3">
-                <input type="text" maxLength="4" placeholder="Enter 4-digit OTP" className="flex-1 p-3 bg-transparent border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface text-center tracking-[0.5em] font-mono" />
-                <button type="submit" className="px-6 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity">Verify</button>
-              </form>
-            ) : (
-              <div className="flex items-center gap-3 bg-forest-green/10 border border-forest-green/20 rounded-lg p-4">
-                <span className="material-symbols-outlined text-forest-green">check_circle</span>
-                <p className="font-label-md text-forest-green">Delivery verified successfully!</p>
+          {/* Right Column: Order Contents, Special Instructions, Delivery Updates */}
+          <div className="lg:col-span-5 space-y-6 text-xs">
+            
+            {/* Order Contents */}
+            <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-4">
+              <h3 className="font-display-md text-base font-bold text-charcoal">Order Contents</h3>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between gap-3 pb-3 border-b border-outline-variant/10">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-surface-container shrink-0 border border-outline-variant/30">
+                      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDEw_f2jMHylziVWvmywfGVy6-kAtNqiIUgLbkahDmRa8e3UK5McvPv7KYDEC8tlOStS2470vzt_SfXG_BL8BgxjsMKFwb7VelYsZ_umF8QUveV5i7Zl2AiWgTgr1C-ePOE5Wl25iIfX2RMqQ5Mo_51kTIJEEtDjCtmAdb8_43wxF96paE82CXy-TMeW1Ml8ess0IoFC7Di6OB4TXDNJ3ctlcBdhoHQfl7AonNDWkDFYXeoqNqYrlYDQ" alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-charcoal">Heirloom Ceramic Vase</h5>
+                      <div className="flex gap-1.5 mt-1">
+                        <span className="px-2 py-0.5 rounded bg-surface-container text-[9px] uppercase font-bold text-charcoal">LARGE</span>
+                        <span className="px-2 py-0.5 rounded bg-surface-container text-[9px] uppercase font-bold text-charcoal">Hand-thrown</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="font-bold text-charcoal font-mono">x1</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-surface-container shrink-0 border border-outline-variant/30">
+                      <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXEnG8NDjIN-1fYsguVvbxY_KcuIEwgS3ANzKAEfYxDl7eZ-ALXNFmFH6OSX7f-kSQOBHkSskNlDpEF9tw5pdNzKyNjJcLjGbrJ_-8qKkQFcj0D_sm81jZcFejDYcmRkVgDWpwNt_QuughiZbyOh2E3Z-NH2GvPbhX8tcJXnYbVyhf4PUd19u4abuU2e9eNzGnRhpHze5__XkEy24yymg1-Wb89UMFnnU-nSAW7h6ue6GjSxfCGHQO5A" alt="" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h5 className="font-bold text-charcoal">Charcoal Dinner Plate Set</h5>
+                      <div className="flex gap-1.5 mt-1">
+                        <span className="px-2 py-0.5 rounded bg-surface-container text-[9px] uppercase font-bold text-charcoal">SET OF 4</span>
+                        <span className="px-2 py-0.5 rounded bg-surface-container text-[9px] uppercase font-bold text-charcoal">Reactive Glaze</span>
+                      </div>
+                    </div>
+                  </div>
+                  <span className="font-bold text-charcoal font-mono">x1</span>
+                </div>
               </div>
-            )}
+            </div>
+
+            {/* Special Instructions */}
+            <div className="bg-[#163428] text-white p-6 rounded-3xl space-y-3 shadow-md">
+              <div className="flex items-center gap-2 text-emerald-300 font-bold">
+                <span className="material-symbols-outlined text-base">info</span>
+                <span className="text-xs uppercase tracking-wider">Special Instructions</span>
+              </div>
+              <div className="p-4 rounded-2xl bg-white/10 border border-white/10 text-xs leading-relaxed text-white/90 italic">
+                "Please ring the service bell at the side gate. The items are fragile; please ensure the package remains upright. No contact delivery preferred, leave on the teak bench near the entrance."
+              </div>
+            </div>
+
+            {/* Delivery Updates Timeline */}
+            <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-4">
+              <h3 className="font-display-md text-base font-bold text-charcoal">Delivery Updates</h3>
+
+              <div className="space-y-4 relative pl-6 before:content-[''] before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-outline-variant/40">
+                <div className="relative">
+                  <span className="w-5 h-5 rounded-full bg-forest-green text-white flex items-center justify-center text-[10px] absolute -left-6 top-0 font-bold">&check;</span>
+                  <h5 className="font-bold text-charcoal">On Route to Destination</h5>
+                  <p className="text-[10px] text-on-surface-variant">Today, 2:45 PM</p>
+                </div>
+                <div className="relative">
+                  <span className="w-5 h-5 rounded-full bg-surface-container text-charcoal flex items-center justify-center text-[10px] absolute -left-6 top-0">&bull;</span>
+                  <h5 className="font-bold text-charcoal">Departed Logistics Hub</h5>
+                  <p className="text-[10px] text-on-surface-variant">Today, 1:15 PM</p>
+                </div>
+                <div className="relative">
+                  <span className="w-5 h-5 rounded-full bg-surface-container text-charcoal flex items-center justify-center text-[10px] absolute -left-6 top-0">&bull;</span>
+                  <h5 className="font-bold text-charcoal">Order Processed &amp; Wrapped</h5>
+                  <p className="text-[10px] text-on-surface-variant">Yesterday, 4:30 PM</p>
+                </div>
+              </div>
+            </div>
+
           </div>
 
-          {/* Actions */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link to="/delivery/proof-upload" className="flex-1 py-3 bg-forest-green text-white font-label-md rounded hover:opacity-90 transition-opacity text-center flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">photo_camera</span>Upload Proof of Delivery
-            </Link>
-            <button className="flex-1 py-3 border border-outline-variant text-on-surface font-label-md rounded hover:bg-surface-variant/30 transition-colors flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">navigation</span>Navigate
-            </button>
-          </div>
         </div>
-      </div>
+
+      </main>
+
+      {/* Bottom Footer */}
+      <footer className="px-6 md:px-12 py-5 border-t border-outline-variant/20 bg-white flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-on-surface-variant">
+        <span>&copy; 2024 TrueHand Artisan Marketplace. Logistical Excellence.</span>
+        <div className="flex items-center gap-6">
+          <Link to="/settings" className="hover:text-charcoal">Terms of Service</Link>
+          <Link to="/settings" className="hover:text-charcoal">Privacy Policy</Link>
+          <Link to="/settings" className="hover:text-charcoal">Carrier Agreement</Link>
+        </div>
+      </footer>
+
     </div>
   );
 };

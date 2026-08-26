@@ -41,7 +41,6 @@ export default function KYCVerificationScreen() {
       setLoading(false);
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

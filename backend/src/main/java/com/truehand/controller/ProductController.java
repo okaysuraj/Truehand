@@ -31,9 +31,20 @@ public class ProductController {
         return ResponseEntity.ok(productService.getTrendingProducts());
     }
 
+    @GetMapping("/flash-sale")
+    public ResponseEntity<List<ProductDTO>> getFlashSaleProducts() {
+        return ResponseEntity.ok(productService.getFlashSaleProducts());
+    }
+
     @GetMapping("/{id}/recommendations")
     public ResponseEntity<List<ProductDTO>> getRecommendations(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getRecommendations(id));
+    }
+
+    @GetMapping("/recently-viewed/{userId}")
+    public ResponseEntity<List<ProductDTO>> getRecentlyViewed(@PathVariable Integer userId) {
+        // Return empty list for now since browsing history tracking isn't implemented. Replaces mock data.
+        return ResponseEntity.ok(new java.util.ArrayList<>());
     }
 
     @GetMapping("/filter")

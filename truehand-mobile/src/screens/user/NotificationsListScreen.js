@@ -56,7 +56,6 @@ const NOTIFICATIONS = [
 export default function NotificationsListScreen() {
   const navigation = useNavigation();
   const [activeTab, setActiveTab] = useState('Activity');
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

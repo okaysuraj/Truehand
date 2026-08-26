@@ -23,7 +23,6 @@ export default function CheckoutScreen() {
     });
     navigation.navigate('PaymentMethodSelection');
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

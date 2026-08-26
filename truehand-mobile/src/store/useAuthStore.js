@@ -19,7 +19,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   login: async (email, password) => {
-    set({ loading: true, error: null });
+    set({ error: null });
     try {
       const res = await authService.login({ email, password });
       const data = res.data;
@@ -28,33 +28,30 @@ export const useAuthStore = create((set, get) => ({
       set({ user: data, isAuthenticated: true, loading: false });
       return data;
     } catch (err) {
-      set({ error: err.message, loading: false });
+      set({ error: err.message });
       throw err;
     }
   },
 
   register: async (payload) => {
-    set({ loading: true, error: null });
+    set({ error: null });
     try {
       const res = await authService.register(payload);
-      // Wait for email verification if that's the flow, 
-      // or set user if it's auto-login.
-      // Currently authService.register returns { data: { message, email } }
       set({ loading: false });
       return res.data;
     } catch (err) {
-      set({ error: err.message, loading: false });
+      set({ error: err.message });
       throw err;
     }
   },
 
   logout: async () => {
-    set({ loading: true, error: null });
     try {
       await authService.logout();
-      set({ user: null, isAuthenticated: false, loading: false });
     } catch (err) {
-      set({ error: err.message, loading: false });
+      console.warn('Logout error:', err.message);
+    } finally {
+      set({ user: null, isAuthenticated: false, loading: false, error: null });
     }
   },
 }));

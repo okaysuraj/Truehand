@@ -44,7 +44,6 @@ export default function CategoryGridScreen() {
   const navigation = useNavigation();
 
   const renderCategoryItem = ({ item }) => {
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
     return (
       <TouchableOpacity 

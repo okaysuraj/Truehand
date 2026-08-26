@@ -16,7 +16,6 @@ export default function CartScreen() {
 
   const total = getTotal();
   const itemCount = cartItems.reduce((acc, item) => acc + (item.quantity || 1), 0);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

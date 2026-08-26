@@ -17,7 +17,6 @@ const RECENT_PHOTOS = [
 
 export default function ImageSearchUploadScreen() {
   const navigation = useNavigation();
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

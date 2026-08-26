@@ -1,135 +1,253 @@
-import api from '../../services/api';
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+
+const FAQS = {
+  orders: [
+    {
+      q: 'When will my artisanal piece arrive?',
+      a: 'Each piece is hand-crafted and packaged with white-glove care. Delivery typically occurs within 3-5 business days after artisan completion.',
+    },
+    {
+      q: 'Do you offer international climate-neutral shipping?',
+      a: 'Yes, TrueHand partners with dedicated low-emission couriers and offsets 100% of transit carbon for global destinations.',
+    },
+  ],
+  artisans: [
+    {
+      q: 'How do you select your featured artisans?',
+      a: 'Artisans undergo a thorough review for ethical sourcing, mastery of ancestral craft, and dedication to sustainable production.',
+    },
+    {
+      q: 'Are the materials ethically sourced?',
+      a: 'All clays, timber, linens, and metals are traceable directly to sustainable mills and regional quarries.',
+    },
+    {
+      q: 'Can I request a custom material or finish?',
+      a: 'Yes! You can contact the artisan directly via their studio page or request a bespoke customization order.',
+    },
+  ],
+};
 
 const FAQ = () => {
-  const [activeTab, setActiveTab] = useState('All');
-  const [expandedId, setExpandedId] = useState(1);
+  const navigate = useNavigate();
+  const [activeCategory, setActiveCategory] = useState('orders');
+  const [openItems, setOpenItems] = useState({});
+  const [search, setSearch] = useState('');
 
-  const tabs = ['All', 'Shipping', 'Returns', 'Products', 'Payment'];
-
-  const faqs = [
-    {
-      id: 1,
-      category: 'Shipping',
-      question: "How long does shipping take?",
-      answer: "Since our products are handcrafted and shipped directly from the artisan's studio, shipping times vary. Generally, domestic orders arrive within 5-10 business days. Custom or made-to-order pieces may take 2-4 weeks before they are shipped. You can find specific shipping estimates on each product page."
-    },
-    {
-      id: 2,
-      category: 'Shipping',
-      question: "Do you ship internationally?",
-      answer: "Yes, we ship to over 50 countries. International shipping rates are calculated at checkout based on the weight and destination of your order. Please note that international orders may be subject to customs fees or import duties, which are the responsibility of the customer."
-    },
-    {
-      id: 3,
-      category: 'Returns',
-      question: "What is your return policy?",
-      answer: "We offer a 14-day return policy for most items in original condition. Because of the unique nature of handcrafted goods, custom orders and personalized items are final sale and cannot be returned. If an item arrives damaged, please contact us within 48 hours with photos."
-    },
-    {
-      id: 4,
-      category: 'Products',
-      question: "Are the ceramics dishwasher and microwave safe?",
-      answer: "Unless specifically stated otherwise on the product page, we recommend hand-washing all handcrafted ceramics to preserve the glaze and structural integrity. Items with metallic accents (like gold luster) should never be placed in a microwave."
-    },
-    {
-      id: 5,
-      category: 'Payment',
-      question: "What payment methods do you accept?",
-      answer: "We accept all major credit cards (Visa, MasterCard, American Express, Discover), PayPal, Apple Pay, and Google Pay. We also offer payment installments through Affirm for orders over $150."
-    },
-    {
-      id: 6,
-      category: 'Products',
-      question: "How do I care for my woven textiles?",
-      answer: "Care instructions vary by material. Most cotton and linen pieces can be gently hand-washed in cold water and laid flat to dry. Wool and delicate blends should be dry-cleaned. Always check the specific care card included with your order."
-    }
-  ];
-
-  const filteredFaqs = activeTab === 'All' ? faqs : faqs.filter(f => f.category === activeTab);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
+  const toggleItem = (key) => {
+    setOpenItems(prev => ({
+      ...prev,
+      [key]: !prev[key]
+    }));
+  };
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-4xl mx-auto px-4 md:px-8">
+    <div className="min-h-screen bg-[#faf8f5] font-body-md text-on-surface flex flex-col justify-between pt-20">
+      
+      {/* Main Container */}
+      <main className="flex-1 max-w-6xl w-full mx-auto p-6 md:p-12 space-y-12">
         
         {/* Header */}
-        <div className="mb-10 text-center">
-          <Link to="/help" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-6 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Help Center
-          </Link>
-          <h1 className="font-display-md text-display-md text-on-surface mb-4">Frequently Asked Questions</h1>
-          <p className="font-body-md text-on-surface-variant max-w-xl mx-auto">
-            Find answers to common questions about shipping, returns, product care, and our artisan partners.
+        <div className="text-center space-y-4 max-w-2xl mx-auto">
+          <h1 className="font-display-lg text-4xl md:text-5xl lg:text-6xl font-bold text-charcoal">
+            How can we assist you?
+          </h1>
+          <p className="font-body-md text-sm md:text-base text-on-surface-variant leading-relaxed">
+            Explore our curated guide to the most common inquiries regarding our artisanal process and services.
           </p>
+
+          <div className="relative max-w-xl mx-auto pt-2">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">
+              search
+            </span>
+            <input 
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search for answers..."
+              className="w-full bg-white border border-outline-variant/40 rounded-2xl py-3.5 pl-12 pr-4 text-xs font-semibold text-charcoal shadow-sm focus:outline-none focus:border-forest-green"
+            />
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex flex-wrap justify-center gap-2 mb-10">
-          {tabs.map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2 rounded-full font-label-md transition-colors ${
-                activeTab === tab 
-                  ? 'bg-charcoal text-white' 
-                  : 'bg-surface-container border border-outline-variant/30 text-on-surface hover:border-forest-green hover:text-forest-green'
-              }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+        {/* 2-Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Sidebar */}
+          <div className="lg:col-span-4 space-y-6 text-xs">
+            <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-4">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider block">
+                CATEGORIES
+              </span>
 
-        {/* FAQ Accordion */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg overflow-hidden shadow-sm">
-          {filteredFaqs.length === 0 ? (
-            <div className="p-12 text-center">
-              <p className="font-body-md text-on-surface-variant">No FAQs found for this category.</p>
+              <nav className="space-y-1 font-semibold">
+                <button 
+                  onClick={() => setActiveCategory('orders')}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
+                    activeCategory === 'orders' ? 'bg-surface-container text-forest-green font-bold' : 'text-on-surface-variant hover:text-charcoal'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-forest-green" />
+                  Orders &amp; Shipping
+                </button>
+                <button 
+                  onClick={() => setActiveCategory('artisans')}
+                  className={`w-full text-left px-4 py-2.5 rounded-xl transition-all flex items-center gap-2 ${
+                    activeCategory === 'artisans' ? 'bg-surface-container text-forest-green font-bold' : 'text-on-surface-variant hover:text-charcoal'
+                  }`}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                  Artisans &amp; Materials
+                </button>
+                <button 
+                  onClick={() => setActiveCategory('care')}
+                  className="w-full text-left px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-charcoal flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                  Care &amp; Maintenance
+                </button>
+                <button 
+                  onClick={() => setActiveCategory('returns')}
+                  className="w-full text-left px-4 py-2.5 rounded-xl text-on-surface-variant hover:text-charcoal flex items-center gap-2"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-transparent" />
+                  Returns &amp; Refunds
+                </button>
+              </nav>
             </div>
-          ) : (
-            <div className="divide-y divide-outline-variant/30">
-              {filteredFaqs.map((faq) => (
-                <div key={faq.id} className="group">
-                  <button 
-                    onClick={() => setExpandedId(expandedId === faq.id ? null : faq.id)}
-                    className="w-full text-left p-6 flex justify-between items-center hover:bg-surface-linen/50 transition-colors focus:outline-none"
-                  >
-                    <h3 className={`font-headline-sm text-headline-sm pr-8 ${expandedId === faq.id ? 'text-forest-green' : 'text-on-surface'}`}>
-                      {faq.question}
-                    </h3>
-                    <span className={`material-symbols-outlined shrink-0 transition-transform duration-300 ${expandedId === faq.id ? 'rotate-180 text-forest-green' : 'text-on-surface-variant'}`}>
-                      expand_more
-                    </span>
-                  </button>
-                  
-                  <div 
-                    className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                      expandedId === faq.id ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-                    }`}
-                  >
-                    <div className="p-6 pt-0 font-body-md text-on-surface-variant leading-relaxed">
-                      {faq.answer}
+
+            {/* Need More Help Box */}
+            <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/30 space-y-3">
+              <span className="text-[10px] text-on-surface-variant font-semibold">Need more help?</span>
+              <h4 className="font-display-md text-base font-bold text-charcoal">
+                Speak with a Concierge
+              </h4>
+              <button 
+                onClick={() => navigate('/report-issue')}
+                className="w-full py-2.5 bg-forest-green text-white rounded-xl font-label-md text-xs uppercase tracking-wider font-bold hover:opacity-90 shadow"
+              >
+                Contact Us
+              </button>
+            </div>
+          </div>
+
+          {/* Right Accordions List */}
+          <div className="lg:col-span-8 space-y-8 text-xs">
+            
+            {/* Orders & Shipping Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 font-bold text-charcoal pb-1">
+                <span className="material-symbols-outlined text-forest-green text-xl">local_shipping</span>
+                <h3 className="font-display-md text-xl font-bold">Orders &amp; Shipping</h3>
+              </div>
+
+              <div className="space-y-3">
+                {FAQS.orders.map((item, idx) => {
+                  const key = `orders_${idx}`;
+                  const isOpen = !!openItems[key];
+
+                  return (
+                    <div key={key} className="bg-white rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden">
+                      <button
+                        onClick={() => toggleItem(key)}
+                        className="w-full p-5 text-left font-bold text-charcoal flex justify-between items-center gap-4 hover:bg-surface-container-low/40 transition-colors"
+                      >
+                        <span className="font-display-md text-sm">{item.q}</span>
+                        <span className={`material-symbols-outlined text-base transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+                          expand_more
+                        </span>
+                      </button>
+                      {isOpen && (
+                        <div className="p-5 pt-0 text-on-surface-variant font-body-md text-xs leading-relaxed border-t border-outline-variant/10">
+                          {item.a}
+                        </div>
+                      )}
                     </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Artisans & Materials Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 font-bold text-charcoal pb-1">
+                <span className="material-symbols-outlined text-terracotta text-xl">edit</span>
+                <h3 className="font-display-md text-xl font-bold">Artisans &amp; Materials</h3>
+              </div>
+
+              <div className="space-y-3">
+                {FAQS.artisans.slice(0, 2).map((item, idx) => {
+                  const key = `artisan_${idx}`;
+                  const isOpen = !!openItems[key];
+
+                  return (
+                    <div key={key} className="bg-white rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden">
+                      <button
+                        onClick={() => toggleItem(key)}
+                        className="w-full p-5 text-left font-bold text-charcoal flex justify-between items-center gap-4 hover:bg-surface-container-low/40 transition-colors"
+                      >
+                        <span className="font-display-md text-sm">{item.q}</span>
+                        <span className={`material-symbols-outlined text-base transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+                          expand_more
+                        </span>
+                      </button>
+                      {isOpen && (
+                        <div className="p-5 pt-0 text-on-surface-variant font-body-md text-xs leading-relaxed border-t border-outline-variant/10">
+                          {item.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* The Human Touch photo card */}
+                <div className="rounded-3xl overflow-hidden relative shadow-md p-8 md:p-12 min-h-[220px] flex flex-col justify-end text-white">
+                  <img 
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlOai5w5doVJG7jbU3S2KjMr-lBrGQpzN4Ax05R4eK0suYlGCaB3JUUkqQEp6Jo9UZewI8iYG_17Ca43RvmQK0eiiWjLKvxfuzaXtKKsJ5M3M8IASzHHgS48pV3CoAIBnMPZ_ebslKrObmJUUOtVfi-O4wlmQgNK4xH6jTGWC0RxbpfFYmz8r_moNtxOmrfig-lmotvCT4sUHfAiWZB76EzdTozSUiXjl2urusX0QN-XoQYO7CNfE5DA" 
+                    alt="Artisan potter hands" 
+                    className="absolute inset-0 w-full h-full object-cover" 
+                  />
+                  <div className="absolute inset-0 bg-black/40" />
+                  <div className="relative z-10 space-y-1">
+                    <h4 className="font-display-lg text-2xl md:text-3xl font-bold">The Human Touch</h4>
+                    <p className="text-xs text-white/90 font-serif italic">
+                      Every piece tells the story of the hands that shaped it.
+                    </p>
                   </div>
                 </div>
-              ))}
+
+                {FAQS.artisans.slice(2).map((item, idx) => {
+                  const key = `artisan_custom_${idx}`;
+                  const isOpen = !!openItems[key];
+
+                  return (
+                    <div key={key} className="bg-white rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden">
+                      <button
+                        onClick={() => toggleItem(key)}
+                        className="w-full p-5 text-left font-bold text-charcoal flex justify-between items-center gap-4 hover:bg-surface-container-low/40 transition-colors"
+                      >
+                        <span className="font-display-md text-sm">{item.q}</span>
+                        <span className={`material-symbols-outlined text-base transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+                          expand_more
+                        </span>
+                      </button>
+                      {isOpen && (
+                        <div className="p-5 pt-0 text-on-surface-variant font-body-md text-xs leading-relaxed border-t border-outline-variant/10">
+                          {item.a}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </div>
-        
-        {/* Contact Footer */}
-        <div className="mt-12 text-center">
-          <p className="font-body-md text-on-surface-variant mb-4">Still have questions?</p>
-          <Link to="/report-issue" className="inline-flex items-center px-6 py-3 border border-forest-green text-forest-green font-label-md rounded hover:bg-forest-green/5 transition-colors">
-            Contact Support
-          </Link>
+
+          </div>
+
         </div>
 
-      </div>
+      </main>
+
     </div>
   );
 };

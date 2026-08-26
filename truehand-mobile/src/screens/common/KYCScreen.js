@@ -17,7 +17,6 @@ export default function KYCScreen() {
     }
     Alert.alert('Success', 'Vehicle details saved temporarily (not wired to backend yet).');
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

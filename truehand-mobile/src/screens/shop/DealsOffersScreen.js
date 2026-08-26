@@ -18,17 +18,14 @@ export default function DealsOffersScreen() {
 
   const fetchDeals = async () => {
     try {
-      // Mocking fetch deals from backend - in reality, we could filter by tags like 'discount' or fetch a specific curated endpoint.
-      const products = await productService.getAllProducts();
-      // Filter products that might have a deal/discount or just take first few for mockup
-      setDeals(products.slice(0, 3));
+      const res = await api.get('/products/flash-sale');
+      setDeals(res.data.slice(0, 2) || []);
     } catch (err) {
       console.error('Failed to fetch deals', err);
     } finally {
       setLoading(false);
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

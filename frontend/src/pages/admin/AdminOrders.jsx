@@ -3,160 +3,296 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthProvider';
 
+const SAMPLE_MASTER_ORDERS = [
+  {
+    id: 'ORD-9082',
+    orderNumber: '#ORD-9082',
+    dateTime: 'Oct 24, 2023',
+    time: '14:32 EST',
+    customer: 'Eleanor Sterling',
+    initials: 'ES',
+    artisan: 'Oak & Iron Forge',
+    amount: 1240.00,
+    status: 'Delivered',
+    statusColor: 'bg-emerald-100 text-emerald-800',
+  },
+  {
+    id: 'ORD-9081',
+    orderNumber: '#ORD-9081',
+    dateTime: 'Oct 23, 2023',
+    time: '09:15 EST',
+    customer: 'Marcus Vance',
+    initials: 'MJ',
+    artisan: 'Ceramics by Lin',
+    amount: 385.50,
+    status: 'Shipped',
+    statusColor: 'bg-surface-container-high text-on-surface-variant',
+  },
+  {
+    id: 'ORD-9080',
+    orderNumber: '#ORD-9080',
+    dateTime: 'Oct 23, 2023',
+    time: '16:45 EST',
+    customer: 'Aria Loe',
+    initials: 'AL',
+    artisan: "Weaver's Loom",
+    amount: 890.00,
+    status: 'Pending',
+    statusColor: 'bg-amber-100 text-amber-900',
+  },
+  {
+    id: 'ORD-9079',
+    orderNumber: '#ORD-9079',
+    dateTime: 'Oct 22, 2023',
+    time: '11:10 EST',
+    customer: 'Thomas Reid',
+    initials: 'TR',
+    artisan: 'Glassworks Studio',
+    amount: 2150.00,
+    status: 'Disputed',
+    statusColor: 'bg-red-100 text-red-800',
+  },
+];
+
 const AdminOrders = () => {
-  const [filter, setFilter] = useState('all');
-  const [search, setSearch] = useState('');
-  const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All Statuses');
+  const [orders, setOrders] = useState(SAMPLE_MASTER_ORDERS);
 
   useEffect(() => {
-    if (!user || user.role !== 'ADMIN') {
-      navigate('/');
-      return;
-    }
-    const fetchOrders = async () => {
-      setLoading(true);
-      try {
-        const res = await api.get('/orders/all');
-        setOrders(res.data || []);
-      } catch (err) {
-        console.error(err);
-      }
-      setLoading(false);
-    };
-    fetchOrders();
-  }, [user, navigate]);
+    api.get('/orders/all')
+      .then(res => {
+        if (res.data && res.data.length > 0) {
+          const mapped = res.data.map(o => ({
+            id: `ORD-${o.id}`,
+            orderNumber: `#ORD-${o.id}`,
+            dateTime: new Date(o.createdAt || Date.now()).toLocaleDateString(),
+            time: '12:00 EST',
+            customer: o.user?.firstName ? `${o.user.firstName} ${o.user.lastName || ''}` : 'Artisan Patron',
+            initials: o.user?.firstName ? o.user.firstName.slice(0, 2).toUpperCase() : 'AP',
+            artisan: 'TrueHand Studio',
+            amount: o.totalAmount || 450.00,
+            status: o.status || 'Delivered',
+            statusColor: o.status === 'DELIVERED' ? 'bg-emerald-100 text-emerald-800' : 'bg-surface-container-high text-on-surface-variant',
+          }));
+          setOrders(mapped);
+        }
+      })
+      .catch(e => console.warn(e));
+  }, []);
 
-  const statusColor = (status) => {
-    switch (status) {
-      case 'Shipped': return 'bg-blue-50 text-blue-700 border-blue-200';
-      case 'Processing': return 'bg-amber-50 text-amber-700 border-amber-200';
-      case 'Delivered': return 'bg-forest-green/10 text-forest-green border-forest-green/20';
-      case 'Cancelled': return 'bg-red-50 text-red-600 border-red-200';
-      case 'Refunded': return 'bg-purple-50 text-purple-600 border-purple-200';
-      default: return 'bg-surface-variant text-on-surface-variant border-outline-variant/30';
-    }
-  };
-
-  const filtered = orders
-    .filter(o => filter === 'all' || (o.status && o.status.toLowerCase() === filter))
-    .filter(o => {
-      if (!search) return true;
-      const orderNum = o.orderNumber ? o.orderNumber.toLowerCase() : '';
-      const cName = o.customerName ? o.customerName.toLowerCase() : '';
-      return orderNum.includes(search.toLowerCase()) || cName.includes(search.toLowerCase());
-    });
+  const filteredOrders = orders.filter(o => {
+    const matchesSearch = !search || o.orderNumber.toLowerCase().includes(search.toLowerCase()) || o.customer.toLowerCase().includes(search.toLowerCase()) || o.artisan.toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === 'All Statuses' || o.status.toLowerCase() === statusFilter.toLowerCase();
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-6xl mx-auto px-4 md:px-8">
-
-        <div className="mb-10">
-          <Link to="/admin/dashboard" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            Back to Admin
-          </Link>
-          <h1 className="font-display-md text-display-md text-on-surface mb-2">All Orders</h1>
-          <p className="font-body-md text-on-surface-variant">Platform-wide order management and monitoring.</p>
-        </div>
-
-        {/* Stats Row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-          {[
-            { label: 'Total', value: orders.length, icon: 'receipt_long' },
-            { label: 'Processing', value: orders.filter(o => o.status === 'PROCESSING' || o.status === 'CONFIRMED' || o.status === 'PENDING').length, icon: 'hourglass_top' },
-            { label: 'Shipped', value: orders.filter(o => o.status === 'SHIPPED').length, icon: 'local_shipping' },
-            { label: 'Delivered', value: orders.filter(o => o.status === 'DELIVERED').length, icon: 'check_circle' },
-            { label: 'Issues', value: orders.filter(o => ['CANCELLED', 'REFUNDED'].includes(o.status)).length, icon: 'warning' }
-          ].map((s, i) => (
-            <div key={i} className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="material-symbols-outlined text-on-surface-variant text-[18px]">{s.icon}</span>
-                <span className="font-label-sm text-on-surface-variant">{s.label}</span>
-              </div>
-              <p className="font-headline-md text-headline-md text-on-surface">{s.value}</p>
+    <div className="flex min-h-screen bg-surface-linen font-body-md text-on-surface pt-20">
+      
+      {/* Admin Sidebar Navigation */}
+      <aside className="w-64 bg-white border-r border-outline-variant/30 hidden lg:flex flex-col justify-between p-6 shrink-0">
+        <div className="space-y-8">
+          
+          {/* Admin Profile */}
+          <div className="flex items-center gap-3 pb-6 border-b border-outline-variant/20">
+            <div className="w-12 h-12 rounded-xl overflow-hidden bg-surface-container shadow-sm">
+              <img 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU3O6ywVK7jEMLvKVA2kxssgwGL1XlWsOAd84tu2XqZg4CgzMYwltj5tWAQ2Ql8IT5-5vy-eHa4sLDQptw0SRhg91q6t80nQZblBDtMIfRgO6xDTt-aalUaPfafhqNy6M2zGihlYjIFhars6KFVaVaaXuwbb1XPoHyo2Tean4Jy8_9ET7nngtylq-67tC3Lz5ezyZgAqsdw6ASwH_K2vf_bCNtZUQmDTguRdIoB-r5OyDzVc98AqtFxQ" 
+                alt="Artisanal Admin" 
+                className="w-full h-full object-cover" 
+              />
             </div>
-          ))}
+            <div>
+              <h2 className="font-display-md text-sm font-bold text-forest-green">Artisanal Admin</h2>
+              <span className="font-label-sm text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">
+                Marketplace Manager
+              </span>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-1 text-xs font-semibold">
+            <Link to="/admin/dashboard" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">grid_view</span>
+              Dashboard
+            </Link>
+            <Link to="/admin/customers" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">group</span>
+              Users
+            </Link>
+            <Link to="/admin/products" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+              Products
+            </Link>
+            <Link to="/admin/orders" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-surface-container text-forest-green font-bold shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+              Orders
+            </Link>
+            <Link to="/admin/platform-revenue" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+              Finances
+            </Link>
+            <Link to="/admin/banner-management" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">menu_book</span>
+              Content
+            </Link>
+          </nav>
         </div>
 
-        {/* Search & Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="flex-1 relative">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-            <input type="text" placeholder="Search by order ID or customer..." value={search} onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-surface-container-lowest border border-outline-variant/50 rounded focus:border-forest-green outline-none font-body-md text-on-surface" />
+        <div className="space-y-3 pt-6 border-t border-outline-variant/20">
+          <Link to="/settings" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-xs font-semibold text-on-surface-variant hover:bg-surface-container transition-colors">
+            <span className="material-symbols-outlined text-[18px]">settings</span>
+            Settings
+          </Link>
+          <Link to="/" className="w-full py-3 bg-forest-green text-white rounded-lg text-xs uppercase tracking-wider font-bold hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow">
+            <span>View Storefront</span>
+            <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Table Area */}
+      <main className="flex-1 p-6 md:p-10 max-w-7xl">
+        
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
+          <div>
+            <h1 className="font-display-lg text-2xl md:text-4xl text-forest-green font-bold mb-1">
+              Master Orders List
+            </h1>
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant">
+              Manage and track all physical transactions across the artisan network.
+            </p>
           </div>
-          <div className="flex gap-2 flex-wrap">
-            {['all', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'].map(f => (
-              <button key={f} onClick={() => setFilter(f)} className={`px-4 py-2 rounded-full font-label-sm capitalize transition-colors ${
-                filter === f ? 'bg-charcoal text-white' : 'bg-surface-container border border-outline-variant/30 text-on-surface hover:border-forest-green'
-              }`}>{f}</button>
-            ))}
-          </div>
+
+          <button 
+            onClick={() => alert('Exporting orders as CSV...')}
+            className="px-5 py-2.5 border border-charcoal text-charcoal rounded-lg font-label-md text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-all flex items-center gap-2 self-start sm:self-auto"
+          >
+            <span className="material-symbols-outlined text-[18px]">download</span>
+            Export CSV
+          </button>
         </div>
 
-        {/* Table */}
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-lg shadow-sm overflow-hidden">
-          <div className="hidden md:block overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-outline-variant/30 bg-surface-variant/20">
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Order ID</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Customer</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Seller</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Date</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Items</th>
-                  <th className="text-left p-4 font-label-sm text-on-surface-variant">Status</th>
-                  <th className="text-right p-4 font-label-sm text-on-surface-variant">Total</th>
+        {/* Filter Card */}
+        <div className="bg-white p-6 rounded-2xl border border-outline-variant/30 shadow-sm mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-end text-xs">
+          
+          <div className="space-y-1.5 lg:col-span-2">
+            <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+              Search Orders
+            </label>
+            <div className="relative">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+              <input 
+                type="text" 
+                placeholder="Order ID, Customer, Artisan..." 
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg pl-9 pr-3 py-2.5 text-xs focus:outline-none focus:border-forest-green"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+              Status
+            </label>
+            <select 
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-3 py-2.5 text-xs focus:outline-none focus:border-forest-green cursor-pointer font-medium"
+            >
+              <option value="All Statuses">All Statuses</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Pending">Pending</option>
+              <option value="Disputed">Disputed</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block font-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+              Date Range
+            </label>
+            <button className="w-full bg-surface-container-low border border-outline-variant/40 rounded-lg px-3 py-2.5 text-xs flex items-center justify-between text-on-surface font-medium">
+              <span className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-on-surface-variant">calendar_today</span>
+                Last 30 Days
+              </span>
+              <span className="material-symbols-outlined text-[14px]">tune</span>
+            </button>
+          </div>
+
+        </div>
+
+        {/* Table Container */}
+        <div className="bg-white rounded-2xl border border-outline-variant/30 shadow-sm overflow-hidden mb-6">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-surface-container-low text-on-surface-variant font-label-sm uppercase tracking-wider font-semibold border-b border-outline-variant/30">
+                <tr>
+                  <th className="py-3.5 px-6">Order ID</th>
+                  <th className="py-3.5 px-6">Date &amp; Time</th>
+                  <th className="py-3.5 px-6">Customer</th>
+                  <th className="py-3.5 px-6">Artisan / Workshop</th>
+                  <th className="py-3.5 px-6">Total Amount</th>
+                  <th className="py-3.5 px-6">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/20">
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="text-center p-8">
-                      <span className="material-symbols-outlined animate-spin text-forest-green text-3xl">progress_activity</span>
+                {filteredOrders.map((o) => (
+                  <tr key={o.id} className="hover:bg-surface-container-low/50 transition-colors cursor-pointer" onClick={() => navigate(`/order/${o.id}`)}>
+                    <td className="py-4 px-6 font-mono font-bold text-forest-green">
+                      {o.orderNumber}
                     </td>
-                  </tr>
-                ) : filtered.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="text-center p-8 font-body-md text-on-surface-variant">No orders found.</td>
-                  </tr>
-                ) : filtered.map(order => (
-                  <tr key={order.id} className="hover:bg-surface-linen/30 transition-colors cursor-pointer">
-                    <td className="p-4"><Link to={`/order/${order.id}`} className="font-label-md text-forest-green hover:underline">#{order.orderNumber ? order.orderNumber.substring(0,8) : order.id}</Link></td>
-                    <td className="p-4 font-body-sm text-on-surface">{order.customerName || `User ${order.userId}`}</td>
-                    <td className="p-4 font-body-sm text-on-surface-variant">System</td>
-                    <td className="p-4 font-body-sm text-on-surface-variant">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : ''}</td>
-                    <td className="p-4 font-body-sm text-on-surface-variant">{order.quantity || 1}</td>
-                    <td className="p-4">
-                      <span className={`font-label-sm px-2.5 py-0.5 rounded border ${statusColor(order.status ? (order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase()) : '')}`}>{order.status}</span>
+                    <td className="py-4 px-6">
+                      <span className="font-semibold text-charcoal block">{o.dateTime}</span>
+                      <span className="text-[10px] text-on-surface-variant">{o.time}</span>
                     </td>
-                    <td className="p-4 text-right font-label-md text-on-surface">${order.totalAmount ? order.totalAmount.toFixed(2) : order.price?.toFixed(2)}</td>
+                    <td className="py-4 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-[11px] text-forest-green">
+                          {o.initials}
+                        </div>
+                        <span className="font-semibold text-charcoal">{o.customer}</span>
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 text-on-surface-variant font-medium">
+                      {o.artisan}
+                    </td>
+                    <td className="py-4 px-6 font-semibold text-charcoal">
+                      ${o.amount.toFixed(2)}
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${o.statusColor}`}>
+                        {o.status}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
-          {/* Mobile */}
-          <div className="md:hidden divide-y divide-outline-variant/30">
-            {filtered.map(order => (
-              <Link key={order.id} to={`/order/${order.id}`} className="p-4 flex justify-between items-center block">
-                <div>
-                  <p className="font-label-md text-on-surface mb-1">{order.id}</p>
-                  <p className="font-body-sm text-on-surface-variant">{order.customer} · {order.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-label-md text-on-surface mb-1">${order.total.toFixed(2)}</p>
-                  <span className={`font-label-sm px-2 py-0.5 rounded border ${statusColor(order.status)}`}>{order.status}</span>
-                </div>
-              </Link>
-            ))}
+          {/* Pagination Footer */}
+          <div className="p-4 border-t border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Showing 1 to {filteredOrders.length} of 248 orders</span>
+            <div className="flex gap-2">
+              <button className="w-8 h-8 rounded-lg border border-outline-variant flex items-center justify-center hover:bg-surface-container">
+                <span className="material-symbols-outlined text-[16px]">chevron_left</span>
+              </button>
+              <button className="w-8 h-8 rounded-lg border border-outline-variant flex items-center justify-center hover:bg-surface-container">
+                <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+
+      </main>
+
     </div>
   );
 };

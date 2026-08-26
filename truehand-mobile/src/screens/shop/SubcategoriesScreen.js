@@ -56,7 +56,6 @@ export default function SubcategoriesScreen() {
       </View>
     </TouchableOpacity>
   );
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

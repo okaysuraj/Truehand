@@ -33,7 +33,6 @@ export default function ReportIssueScreen() {
       console.error('Failed to submit report', error);
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

@@ -20,7 +20,6 @@ export default function WishlistScreen() {
   React.useEffect(() => {
     fetchWishlist();
   }, [fetchWishlist]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

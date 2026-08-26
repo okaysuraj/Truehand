@@ -47,7 +47,6 @@ export default function OrderSuccessConfirmationScreen() {
     };
     animateRings();
   }, [ring1Scale, ring1Opacity, ring2Scale, ring2Opacity]);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

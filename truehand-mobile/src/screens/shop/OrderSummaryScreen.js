@@ -30,7 +30,6 @@ export default function OrderSummaryScreen() {
       // ideally show toast here
     }
   };
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

@@ -18,8 +18,8 @@ export default function PersonalizedRecommendationsScreen() {
 
   const fetchRecommendations = async () => {
     try {
-      const res = await productService.getAllProducts();
-      setProducts(res.slice(1, 5)); // Mock recommendations
+      const res = await productService.getTrendingProducts();
+      setProducts(res || []); // Real trending products
     } catch (err) {
       console.error('Failed to fetch recommendations', err);
     } finally {
@@ -51,7 +51,6 @@ export default function PersonalizedRecommendationsScreen() {
       </View>
     </TouchableOpacity>
   );
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

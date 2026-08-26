@@ -9,7 +9,6 @@ import { colors, typography, spacing } from '../../theme/theme';
 export default function SecuritySettingsScreen() {
   const navigation = useNavigation();
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(true);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

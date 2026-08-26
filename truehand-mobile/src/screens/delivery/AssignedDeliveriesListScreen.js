@@ -12,7 +12,6 @@ export default function AssignedDeliveriesListScreen() {
   const deliveries = useDeliveryStore(state => state.deliveries);
   const startDelivery = useDeliveryStore(state => state.startDelivery);
   const setActiveDelivery = useDeliveryStore(state => state.setActiveDelivery);
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
   
 
   return (

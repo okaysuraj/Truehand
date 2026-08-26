@@ -19,10 +19,22 @@ export const productService = {
     return response.data; // Expected format: List<ProductDTO>
   },
 
+  // Get flash sale products
+  getFlashSaleProducts: async () => {
+    const response = await api.get('/products/flash-sale');
+    return response.data; // Expected format: List<ProductDTO>
+  },
+
   // Get recommendations for a product
   getRecommendations: async (id) => {
     const response = await api.get(`/products/${id}/recommendations`);
     return response.data; // Expected format: List<ProductDTO>
+  },
+
+  // Get recently viewed products
+  getRecentlyViewed: async (userId) => {
+    const response = await api.get(`/products/recently-viewed/${userId}`);
+    return response.data;
   },
 
   // Filter products

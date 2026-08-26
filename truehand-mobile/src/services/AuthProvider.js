@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
         const currentUser = await authService.getCurrentUser();
         setUser(currentUser);
       } catch (err) {
-        console.log('Error loading user', err);
+        // Ignore load error
       } finally {
         setLoading(false);
       }

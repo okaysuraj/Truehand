@@ -1,97 +1,117 @@
-import api from '../../services/api';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider';
 
 const NotificationDetail = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  // Get notification id from URL (used as index into stored notifications)
-  const id = window.location.pathname.split('/').pop();
-
-  const [notification, setNotification] = useState(null);
-
-  useEffect(() => {
-    // Load from local mock store (notifications are typically push-delivered)
-    const stored = JSON.parse(localStorage.getItem('truehand_notifications') || '[]');
-    const found = stored.find(n => String(n.id) === String(id));
-    if (found) {
-      setNotification(found);
-      // Mark as read
-      const updated = stored.map(n => n.id === found.id ? { ...n, read: true } : n);
-      localStorage.setItem('truehand_notifications', JSON.stringify(updated));
-    } else {
-      // Demo notification
-      setNotification({
-        id,
-        title: 'Order Shipped!',
-        body: 'Your order #TH-12345 has been shipped and is on its way. Expected delivery: 2-3 business days.',
-        type: 'order',
-        icon: 'local_shipping',
-        timestamp: new Date().toISOString(),
-        read: true,
-        action: { label: 'Track Order', path: '/orders' }
-      });
-    }
-  }, [id]);
-
-  if (!notification) return (
-    <div className="pt-24 pb-16 min-h-screen bg-surface-linen flex items-center justify-center">
-      <span className="material-symbols-outlined animate-spin text-forest-green text-4xl">progress_activity</span>
-    </div>
-  );
-
-  const iconColor = {
-    order: 'bg-blue-50 text-blue-600',
-    promo: 'bg-amber-50 text-amber-600',
-    system: 'bg-surface-variant text-on-surface-variant',
-    review: 'bg-forest-green/10 text-forest-green',
-  }[notification.type] || 'bg-surface-variant text-on-surface-variant';
-  React.useEffect(() => { api.get('/admin/advanced/settings').catch(e=>console.warn(e)); }, []);
-  
 
   return (
-    <div className="pt-24 pb-16 bg-surface-linen min-h-screen">
-      <div className="max-w-2xl mx-auto px-4 md:px-8">
+    <div className="min-h-screen bg-[#faf8f5] font-body-md text-on-surface flex flex-col justify-between pt-20">
+      
+      {/* Main Container */}
+      <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-12 space-y-10 text-xs">
+        
+        {/* Back Link */}
+        <button 
+          onClick={() => navigate('/notifications')}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-charcoal transition-colors"
+        >
+          <span className="material-symbols-outlined text-sm">arrow_back</span>
+          BACK TO NOTIFICATIONS
+        </button>
 
-        <div className="mb-8">
-          <Link to="/notifications" className="inline-flex items-center text-on-surface-variant hover:text-forest-green mb-4 transition-colors font-label-md">
-            <span className="material-symbols-outlined text-[18px] mr-1">arrow_back</span>
-            All Notifications
-          </Link>
-        </div>
-
-        <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm p-8">
-          {/* Icon */}
-          <div className={`w-16 h-16 rounded-full ${iconColor} flex items-center justify-center mb-6`}>
-            <span className="material-symbols-outlined text-3xl">{notification.icon || 'notifications'}</span>
+        {/* 2-Column Hero Story Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 md:p-10 rounded-3xl border border-outline-variant/30 shadow-sm">
+          
+          {/* Left: Kiln Image */}
+          <div className="lg:col-span-6 h-80 md:h-[460px] rounded-2xl overflow-hidden bg-surface-container shadow-inner">
+            <img 
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXEnG8NDjIN-1fYsguVvbxY_KcuIEwgS3ANzKAEfYxDl7eZ-ALXNFmFH6OSX7f-kSQOBHkSskNlDpEF9tw5pdNzKyNjJcLjGbrJ_-8qKkQFcj0D_sm81jZcFejDYcmRkVgDWpwNt_QuughiZbyOh2E3Z-NH2GvPbhX8tcJXnYbVyhf4PUd19u4abuU2e9eNzGnRhpHze5__XkEy24yymg1-Wb89UMFnnU-nSAW7h6ue6GjSxfCGHQO5A" 
+              alt="Pottery kiln firing" 
+              className="w-full h-full object-cover" 
+            />
           </div>
 
-          {/* Title & Time */}
-          <div className="mb-6">
-            <h1 className="font-headline-md text-headline-md text-on-surface mb-2">{notification.title}</h1>
-            <p className="font-label-sm text-on-surface-variant">
-              {notification.timestamp ? new Date(notification.timestamp).toLocaleString() : 'Just now'}
+          {/* Right: Craft Story Content */}
+          <div className="lg:col-span-6 space-y-6">
+            <div className="space-y-2">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-terracotta tracking-wider block">
+                THE FINAL FIRING
+              </span>
+              <h1 className="font-display-lg text-3xl md:text-5xl font-bold text-charcoal leading-tight">
+                Your piece is finished.
+              </h1>
+            </div>
+
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant leading-relaxed">
+              After three weeks of patient transformation, your handcrafted ceramic vase has emerged from its final firing. Master Artisan Elias Thorne oversaw the twelve-hour cooling process, ensuring the reactive glaze reached its intended depth of forest and charcoal hues.
+            </p>
+
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant leading-relaxed">
+              The piece has been inspected for structural integrity and tactile finish. It now rests in our workshop, cooling completely before it is carefully wrapped in sustainable linen and prepared for its journey to you.
+            </p>
+
+            <div className="flex flex-wrap gap-3 pt-2">
+              <button 
+                onClick={() => navigate('/tracking')}
+                className="px-6 py-3 bg-forest-green text-white rounded-xl font-label-md text-xs uppercase tracking-wider font-bold hover:opacity-90 transition-all shadow flex items-center gap-2"
+              >
+                <span>TRACK JOURNEY</span>
+                <span className="material-symbols-outlined text-sm">local_shipping</span>
+              </button>
+
+              <button 
+                onClick={() => alert('Viewing artisan studio notes...')}
+                className="px-6 py-3 border border-outline-variant text-charcoal rounded-xl font-label-md text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-colors shadow-sm"
+              >
+                VIEW ARTISAN NOTES
+              </button>
+            </div>
+
+            {/* Artisan Signature Badge */}
+            <div className="flex items-center gap-3 pt-4 border-t border-outline-variant/20">
+              <div className="w-10 h-10 rounded-full overflow-hidden bg-surface-container border border-outline-variant/30 shrink-0">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlOai5w5doVJG7jbU3S2KjMr-lBrGQpzN4Ax05R4eK0suYlGCaB3JUUkqQEp6Jo9UZewI8iYG_17Ca43RvmQK0eiiWjLKvxfuzaXtKKsJ5M3M8IASzHHgS48pV3CoAIBnMPZ_ebslKrObmJUUOtVfi-O4wlmQgNK4xH6jTGWC0RxbpfFYmz8r_moNtxOmrfig-lmotvCT4sUHfAiWZB76EzdTozSUiXjl2urusX0QN-XoQYO7CNfE5DA" alt="Elias Thorne" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <h5 className="font-bold text-charcoal text-xs">ELIAS THORNE</h5>
+                <p className="text-[10px] text-on-surface-variant font-mono uppercase tracking-wider">MASTER CERAMICIST</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 3 Value Bento Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-2">
+            <span className="material-symbols-outlined text-forest-green text-xl">diamond</span>
+            <h4 className="font-display-md text-base font-bold text-charcoal">Material Origin</h4>
+            <p className="text-on-surface-variant font-body-md text-[11px] leading-relaxed">
+              Harvested from the riverbeds of the Loire Valley, the clay used for your piece is celebrated for its purity and thermal resilience.
             </p>
           </div>
 
-          {/* Body */}
-          <div className="border-t border-outline-variant/20 pt-6 mb-8">
-            <p className="font-body-md text-on-surface leading-relaxed">{notification.body}</p>
+          <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-2">
+            <span className="material-symbols-outlined text-forest-green text-xl">schedule</span>
+            <h4 className="font-display-md text-base font-bold text-charcoal">48 Hours of Heat</h4>
+            <p className="text-on-surface-variant font-body-md text-[11px] leading-relaxed">
+              The vase underwent a meticulous two-stage firing process, reaching temperatures of 2,300°F to achieve its stone-like durability.
+            </p>
           </div>
 
-          {/* Action */}
-          {notification.action && (
-            <button
-              onClick={() => navigate(notification.action.path)}
-              className="w-full py-3 bg-forest-green text-white font-label-md rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-            >
-              <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-              {notification.action.label}
-            </button>
-          )}
+          <div className="bg-white p-6 rounded-3xl border border-outline-variant/30 shadow-sm space-y-2">
+            <span className="material-symbols-outlined text-forest-green text-xl">verified</span>
+            <h4 className="font-display-md text-base font-bold text-charcoal">Certified Grade</h4>
+            <p className="text-on-surface-variant font-body-md text-[11px] leading-relaxed">
+              Every piece is hand-stamped with the AESTHETE seal of authenticity, confirming it meets our 12-point craft standard.
+            </p>
+          </div>
+
         </div>
-      </div>
+
+      </main>
+
     </div>
   );
 };

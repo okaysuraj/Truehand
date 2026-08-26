@@ -1,292 +1,305 @@
-import React, { useState, useEffect } from 'react';
-import api from '../../services/api';
-import { useAuth } from '../../context/AuthProvider';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [metrics, setMetrics] = useState(null);
-  const [pendingSellers, setPendingSellers] = useState([]);
-  const [pendingDeliveries, setPendingDeliveries] = useState([]);
-  const [activeTab, setActiveTab] = useState('overview'); // overview, sellers, deliveries
-
-  useEffect(() => {
-    if (!user || user.role !== 'ADMIN') {
-      navigate('/');
-      return;
-    }
-    fetchMetrics();
-    fetchPendingSellers();
-    fetchPendingDeliveries();
-  }, [user, navigate]);
-
-  const fetchMetrics = async () => {
-    try {
-      const res = await api.get('/admin/metrics');
-      setMetrics(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchPendingSellers = async () => {
-    try {
-      const res = await api.get('/admin/kyc/seller/pending');
-      setPendingSellers(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const fetchPendingDeliveries = async () => {
-    try {
-      const res = await api.get('/admin/kyc/delivery/pending');
-      setPendingDeliveries(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const handleSellerApproval = async (sellerId, status, reason = null) => {
-    try {
-      await api.put(`/admin/kyc/seller/${sellerId}`, { status, reason });
-      fetchPendingSellers();
-      fetchMetrics();
-    } catch (err) {
-      alert('Error updating status');
-    }
-  };
-
-  const handleDeliveryApproval = async (deliveryId, status, reason = null) => {
-    try {
-      await api.put(`/admin/kyc/delivery/${deliveryId}`, { status, reason });
-      fetchPendingDeliveries();
-      fetchMetrics();
-    } catch (err) {
-      alert('Error updating status');
-    }
-  };
-
-  if (!user || user.role !== 'ADMIN') return null;
+  const [dateRange, setDateRange] = useState('Last 30 Days');
 
   return (
-    <div className="min-h-screen bg-surface-linen text-on-surface font-body-md flex">
-      {/* SideNavBar */}
-      <nav className="bg-surface-container-lowest shadow-sm h-screen w-64 fixed left-0 top-0 flex flex-col py-base z-50 hidden md:flex border-r border-outline-variant/20">
-        <div className="px-6 py-8 border-b border-surface-variant mb-6">
-          <h1 className="font-headline-md text-headline-md text-forest-green tracking-tight">Artisanal Admin</h1>
-          <p className="font-label-sm text-label-sm text-on-surface-variant mt-1 uppercase tracking-wider">Marketplace Manager</p>
+    <div className="flex min-h-screen bg-surface-linen font-body-md text-on-surface pt-20">
+      
+      {/* Side Navigation */}
+      <aside className="w-64 bg-white border-r border-outline-variant/30 hidden lg:flex flex-col justify-between p-6 shrink-0">
+        <div className="space-y-8">
+          <div className="px-1">
+            <h1 className="font-display-md text-base font-bold text-charcoal">Artisanal Admin</h1>
+            <p className="text-[10px] text-on-surface-variant uppercase tracking-widest font-semibold mt-0.5">Marketplace Manager</p>
+          </div>
+
+          <nav className="space-y-1 text-xs font-semibold">
+            <Link to="/admin/dashboard" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg bg-surface-container text-forest-green font-bold shadow-sm">
+              <span className="material-symbols-outlined text-[18px]">dashboard</span>
+              Dashboard
+            </Link>
+            <Link to="/admin/customers" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">group</span>
+              Users
+            </Link>
+            <Link to="/admin/product-approvals" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">inventory_2</span>
+              Products
+            </Link>
+            <Link to="/admin/orders" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+              Orders
+            </Link>
+            <Link to="/admin/analytics" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">insights</span>
+              Analytics
+            </Link>
+            <Link to="/admin/finances" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">payments</span>
+              Finances
+            </Link>
+            <Link to="/settings" className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+              <span className="material-symbols-outlined text-[18px]">settings</span>
+              Settings
+            </Link>
+          </nav>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          <ul className="space-y-2">
-            <li>
-              <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center pl-4 py-3 transition-all duration-200 ${activeTab === 'overview' ? 'text-forest-green font-bold border-l-4 border-forest-green bg-surface-container-low' : 'text-on-surface-variant border-l-4 border-transparent hover:bg-surface-container'}`}>
-                <span className="material-symbols-outlined mr-4">dashboard</span>
-                <span className="font-label-md text-label-md">Overview</span>
-              </button>
-            </li>
-            <li>
-              <button onClick={() => setActiveTab('sellers')} className={`w-full flex items-center pl-4 py-3 transition-all duration-200 ${activeTab === 'sellers' ? 'text-forest-green font-bold border-l-4 border-forest-green bg-surface-container-low' : 'text-on-surface-variant border-l-4 border-transparent hover:bg-surface-container'}`}>
-                <span className="material-symbols-outlined mr-4">group</span>
-                <span className="font-label-md text-label-md">Pending Sellers</span>
-                {pendingSellers.length > 0 && <span className="ml-auto mr-4 bg-terracotta text-white text-[10px] px-2 py-0.5 rounded-full">{pendingSellers.length}</span>}
-              </button>
-            </li>
-            <li>
-              <button onClick={() => setActiveTab('deliveries')} className={`w-full flex items-center pl-4 py-3 transition-all duration-200 ${activeTab === 'deliveries' ? 'text-forest-green font-bold border-l-4 border-forest-green bg-surface-container-low' : 'text-on-surface-variant border-l-4 border-transparent hover:bg-surface-container'}`}>
-                <span className="material-symbols-outlined mr-4">local_shipping</span>
-                <span className="font-label-md text-label-md">Pending Deliveries</span>
-                {pendingDeliveries.length > 0 && <span className="ml-auto mr-4 bg-terracotta text-white text-[10px] px-2 py-0.5 rounded-full">{pendingDeliveries.length}</span>}
-              </button>
-            </li>
-          </ul>
-        </div>
-        <div className="px-6 py-6 border-t border-surface-variant mt-auto">
-          <div className="flex items-center mb-6">
-            <img className="w-10 h-10 rounded-full object-cover border border-outline-variant" src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.firstName} ${user.lastName}&backgroundColor=163428&textColor=ffffff`} alt="Admin Avatar" />
-            <div className="ml-3">
-              <p className="font-label-sm text-label-sm text-on-surface font-semibold">{user.firstName} {user.lastName}</p>
+
+        <div className="pt-6 border-t border-outline-variant/20 space-y-3">
+          <div className="flex items-center gap-3 px-3 py-2 bg-surface-container-low rounded-xl">
+            <div className="w-8 h-8 rounded-full bg-forest-green text-white flex items-center justify-center font-bold text-xs">
+              AD
+            </div>
+            <div>
+              <p className="font-label-md text-xs font-bold text-charcoal">Admin User</p>
+              <p className="text-[10px] text-on-surface-variant">System Manager</p>
             </div>
           </div>
-          <button onClick={() => navigate('/')} className="w-full border border-charcoal text-charcoal font-label-md text-label-md py-2 px-4 rounded-sm hover:bg-surface-container transition-colors flex items-center justify-center">
-            <span>View Storefront</span>
-            <span className="material-symbols-outlined ml-2 text-[18px]">open_in_new</span>
+
+          <Link 
+            to="/storefront-preview" 
+            className="w-full py-2.5 border border-charcoal text-charcoal rounded-lg text-xs uppercase tracking-wider font-semibold hover:bg-surface-container transition-all flex items-center justify-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-sm">storefront</span>
+            View Storefront
+          </Link>
+        </div>
+      </aside>
+
+      {/* Main Dashboard Area */}
+      <main className="flex-1 p-6 md:p-10 max-w-6xl">
+        
+        {/* Top Search bar */}
+        <div className="flex justify-between items-center gap-4 mb-8">
+          <div className="relative max-w-md w-full">
+            <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+            <input 
+              type="text" 
+              placeholder="Search marketplace, orders, artisans..."
+              className="w-full bg-white border border-outline-variant/40 rounded-full py-2.5 pl-10 pr-4 text-xs focus:outline-none focus:border-forest-green shadow-sm"
+            />
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button className="p-2 text-on-surface-variant hover:text-charcoal rounded-full hover:bg-white relative">
+              <span className="material-symbols-outlined text-xl">notifications</span>
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-terracotta" />
+            </button>
+            <button className="p-2 text-on-surface-variant hover:text-charcoal rounded-full hover:bg-white">
+              <span className="material-symbols-outlined text-xl">help</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Overview Header & Date Picker */}
+        <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4 mb-8">
+          <div>
+            <h1 className="font-display-lg text-2xl md:text-4xl font-bold text-charcoal mb-1">Overview</h1>
+            <p className="font-body-md text-xs md:text-sm text-on-surface-variant">
+              A high-level view of marketplace performance and recent artisanal activity.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 text-xs font-semibold text-charcoal">
+            <span className="text-on-surface-variant">DATE RANGE</span>
+            <select 
+              value={dateRange}
+              onChange={(e) => setDateRange(e.target.value)}
+              className="bg-white border border-outline-variant/40 rounded-lg px-3 py-2 text-xs font-bold text-charcoal focus:outline-none shadow-sm cursor-pointer"
+            >
+              <option>Last 30 Days</option>
+              <option>Last 7 Days</option>
+              <option>This Quarter</option>
+              <option>Year to Date</option>
+            </select>
+          </div>
+        </div>
+
+        {/* 4 Metric Bento Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          
+          <div className="bg-white p-5 rounded-2xl border border-outline-variant/30 shadow-sm space-y-3">
+            <div className="flex justify-between items-start">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">Gross Merchandise Value</span>
+              <span className="material-symbols-outlined text-forest-green text-lg">receipt_long</span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="font-display-lg text-2xl font-bold text-charcoal">$124,500</span>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">&uarr; +12.5%</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-outline-variant/30 shadow-sm space-y-3">
+            <div className="flex justify-between items-start">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">Total Orders</span>
+              <span className="material-symbols-outlined text-forest-green text-lg">local_shipping</span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="font-display-lg text-2xl font-bold text-charcoal">842</span>
+              <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">&uarr; +4.2%</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-outline-variant/30 shadow-sm space-y-3">
+            <div className="flex justify-between items-start">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">Active Artisans</span>
+              <span className="material-symbols-outlined text-forest-green text-lg">handyman</span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="font-display-lg text-2xl font-bold text-charcoal">156</span>
+              <span className="text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">&rarr; 0.0%</span>
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-2xl border border-outline-variant/30 shadow-sm space-y-3">
+            <div className="flex justify-between items-start">
+              <span className="font-label-sm text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">New Collectors</span>
+              <span className="material-symbols-outlined text-forest-green text-lg">person_add</span>
+            </div>
+            <div className="flex items-baseline justify-between">
+              <span className="font-display-lg text-2xl font-bold text-charcoal">328</span>
+              <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full">&darr; -2.1%</span>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 2-Column Section: Marketplace Health Chart & Recent Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+          
+          {/* Marketplace Health Chart */}
+          <div className="lg:col-span-8 bg-white p-6 md:p-8 rounded-2xl border border-outline-variant/30 shadow-sm space-y-6">
+            <div className="flex justify-between items-center">
+              <h3 className="font-display-md text-base font-bold text-charcoal">Marketplace Health</h3>
+              <button className="text-on-surface-variant hover:text-charcoal">
+                <span className="material-symbols-outlined text-base">more_horiz</span>
+              </button>
+            </div>
+
+            {/* Custom Smooth SVG Chart */}
+            <div className="h-64 relative flex items-end">
+              <svg viewBox="0 0 500 200" className="w-full h-full overflow-visible">
+                {/* Background grid lines */}
+                <line x1="0" y1="40" x2="500" y2="40" stroke="#f0ece9" strokeWidth="1" />
+                <line x1="0" y1="90" x2="500" y2="90" stroke="#f0ece9" strokeWidth="1" />
+                <line x1="0" y1="140" x2="500" y2="140" stroke="#f0ece9" strokeWidth="1" />
+
+                {/* GMV Solid Line */}
+                <path 
+                  d="M 0 170 C 80 160, 150 120, 250 80 C 320 60, 400 70, 500 20" 
+                  fill="none" 
+                  stroke="#163428" 
+                  strokeWidth="4" 
+                  strokeLinecap="round"
+                />
+
+                {/* Order Volume Dashed Line */}
+                <path 
+                  d="M 0 185 C 100 175, 200 140, 300 95 C 380 75, 420 120, 500 65" 
+                  fill="none" 
+                  stroke="#c28468" 
+                  strokeWidth="3" 
+                  strokeDasharray="6 6"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+
+            <div className="flex justify-between text-[11px] text-on-surface-variant border-t border-outline-variant/20 pt-3 font-semibold">
+              <span>Mon</span>
+              <span>Tue</span>
+              <span>Wed</span>
+              <span>Thu</span>
+              <span>Fri</span>
+              <span>Sat</span>
+              <span>Sun</span>
+            </div>
+
+            <div className="flex items-center justify-center gap-6 text-xs font-semibold text-charcoal pt-2">
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-forest-green" />
+                <span>GMV ($)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-[#c28468]" />
+                <span>Order Volume</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-outline-variant/30 shadow-sm space-y-6 flex flex-col justify-between text-xs">
+            <div className="space-y-6">
+              <h3 className="font-display-md text-base font-bold text-charcoal">Recent Activity</h3>
+
+              <div className="space-y-5">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 text-forest-green flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-base">verified</span>
+                  </div>
+                  <div>
+                    <h4 className="font-headline-md text-xs font-bold text-charcoal">New Artisan Approved</h4>
+                    <p className="text-[11px] text-on-surface-variant mt-0.5 leading-tight">Elena's Ceramics profile has been approved and published to the marketplace.</p>
+                    <span className="text-[10px] text-on-surface-variant mt-1 block">10 mins ago</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50 text-forest-green flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-base">payments</span>
+                  </div>
+                  <div>
+                    <h4 className="font-headline-md text-xs font-bold text-charcoal">High-Value Sale</h4>
+                    <p className="text-[11px] text-on-surface-variant mt-0.5 leading-tight">Order #8892 processed for 'Walnut Dining Table' ($3,200).</p>
+                    <span className="text-[10px] text-on-surface-variant mt-1 block">1 hour ago</span>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+                    <span className="material-symbols-outlined text-base">warning</span>
+                  </div>
+                  <div>
+                    <h4 className="font-headline-md text-xs font-bold text-charcoal">Dispute Opened</h4>
+                    <p className="text-[11px] text-on-surface-variant mt-0.5 leading-tight">Customer flagged issue with Order #8841 regarding shipping damage.</p>
+                    <span className="text-[10px] text-on-surface-variant mt-1 block">2 hours ago</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button 
+              onClick={() => navigate('/admin/orders')}
+              className="w-full py-2.5 text-center text-xs font-bold text-forest-green hover:underline border-t border-outline-variant/20 pt-4"
+            >
+              View All Activity
+            </button>
+          </div>
+
+        </div>
+
+        {/* Bottom Banner: Pending Approvals */}
+        <div className="bg-[#163428] text-white p-6 md:p-8 rounded-3xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-6">
+          <div className="space-y-1">
+            <h3 className="font-display-lg text-lg md:text-xl font-bold">Pending Approvals</h3>
+            <p className="font-body-md text-xs text-white/80 max-w-xl">
+              There are 12 artisan applications awaiting manual review this week to ensure they meet our craftsmanship standards.
+            </p>
+          </div>
+
+          <button 
+            onClick={() => navigate('/admin/product-approvals')}
+            className="px-6 py-3 bg-white text-forest-green rounded-xl font-label-md text-xs uppercase tracking-wider font-bold hover:bg-surface-container transition-all shadow shrink-0"
+          >
+            Review Applications
           </button>
         </div>
-      </nav>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col md:ml-64 w-full pt-20">
-        
-        <div className="p-margin-mobile md:p-margin-desktop max-w-container-max mx-auto w-full space-y-section-gap pb-24">
-          
-          {/* Page Header */}
-          <section className="flex flex-col md:flex-row md:items-end justify-between gap-stack-md border-b border-outline-variant/20 pb-4">
-            <div>
-              <h2 className="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-forest-green">
-                {activeTab === 'overview' && 'Platform Overview'}
-                {activeTab === 'sellers' && 'Seller Applications'}
-                {activeTab === 'deliveries' && 'Delivery Partner Applications'}
-              </h2>
-              <p className="font-body-lg text-body-lg text-on-surface-variant mt-2 max-w-2xl">
-                {activeTab === 'overview' && 'A high-level view of marketplace performance and recent artisanal activity.'}
-                {activeTab === 'sellers' && 'Review and approve new artisan shops to maintain platform quality.'}
-                {activeTab === 'deliveries' && 'Review and approve delivery partner KYC documents.'}
-              </p>
-            </div>
-          </section>
-
-          {activeTab === 'overview' && metrics && (
-            <>
-              {/* KPIs Bento Grid */}
-              <section className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-                <div className="bg-surface-container-lowest rounded-sm p-6 shadow-[0_4px_24px_-4px_rgba(22,52,40,0.04)] flex flex-col justify-between h-40 border border-surface-variant relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
-                    <span className="material-symbols-outlined text-[100px] text-forest-green">group</span>
-                  </div>
-                  <div className="flex justify-between items-start relative z-10">
-                    <h3 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Users</h3>
-                    <span className="material-symbols-outlined text-forest-green text-[20px]">people</span>
-                  </div>
-                  <div className="relative z-10">
-                    <span className="font-headline-md text-headline-md text-on-surface">{metrics.totalUsers}</span>
-                  </div>
-                </div>
-
-                <div className="bg-surface-container-lowest rounded-sm p-6 shadow-[0_4px_24px_-4px_rgba(22,52,40,0.04)] flex flex-col justify-between h-40 border border-surface-variant relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
-                    <span className="material-symbols-outlined text-[100px] text-forest-green">shopping_bag</span>
-                  </div>
-                  <div className="flex justify-between items-start relative z-10">
-                    <h3 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Total Orders</h3>
-                    <span className="material-symbols-outlined text-forest-green text-[20px]">local_shipping</span>
-                  </div>
-                  <div className="relative z-10">
-                    <span className="font-headline-md text-headline-md text-on-surface">{metrics.totalOrders}</span>
-                  </div>
-                </div>
-
-                <div className="bg-surface-container-lowest rounded-sm p-6 shadow-[0_4px_24px_-4px_rgba(22,52,40,0.04)] flex flex-col justify-between h-40 border border-surface-variant relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 transition-transform duration-500">
-                    <span className="material-symbols-outlined text-[100px] text-terracotta">assignment_late</span>
-                  </div>
-                  <div className="flex justify-between items-start relative z-10">
-                    <h3 className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Pending KYC</h3>
-                    <span className="material-symbols-outlined text-terracotta text-[20px]">pending_actions</span>
-                  </div>
-                  <div className="relative z-10">
-                    <span className="font-headline-md text-headline-md text-terracotta">{metrics.pendingSellers + metrics.pendingDelivery}</span>
-                  </div>
-                </div>
-              </section>
-
-              {/* Quick Actions Banner */}
-              {(pendingSellers.length > 0 || pendingDeliveries.length > 0) && (
-                <section className="bg-forest-green text-on-primary rounded-sm p-8 flex flex-col md:flex-row items-center justify-between shadow-[0_4px_24px_-4px_rgba(22,52,40,0.04)] relative overflow-hidden">
-                  <div className="absolute right-0 top-0 w-64 h-64 bg-primary-fixed/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
-                  <div className="relative z-10 mb-6 md:mb-0 max-w-xl">
-                    <h3 className="font-headline-md text-headline-md mb-2">Action Required: KYC Approvals</h3>
-                    <p className="font-body-md text-body-md text-on-primary/80">
-                      There are {pendingSellers.length} seller applications and {pendingDeliveries.length} delivery partner applications awaiting manual review.
-                    </p>
-                  </div>
-                  <div className="relative z-10 flex gap-4 w-full md:w-auto">
-                    <button onClick={() => setActiveTab(pendingSellers.length > 0 ? 'sellers' : 'deliveries')} className="bg-on-primary text-forest-green font-label-md text-label-md py-3 px-6 rounded-sm hover:bg-surface-container-low transition-colors w-full md:w-auto text-center shadow-sm">
-                      Review Applications
-                    </button>
-                  </div>
-                </section>
-              )}
-            </>
-          )}
-
-          {activeTab === 'sellers' && (
-            <div className="bg-surface-container-lowest rounded-sm shadow-sm border border-surface-variant overflow-hidden">
-              {pendingSellers.length === 0 ? (
-                <div className="p-12 text-center text-outline">
-                  <span className="material-symbols-outlined text-4xl mb-2">done_all</span>
-                  <p>No pending seller applications.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead className="bg-surface-container-low border-b border-surface-variant">
-                      <tr>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Business Name</th>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">PAN Number</th>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">GST Number</th>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pendingSellers.map(s => (
-                        <tr key={s.id} className="border-b border-surface-variant/50 hover:bg-surface-container-lowest transition-colors">
-                          <td className="p-4 font-label-md text-forest-green">{s.businessName}</td>
-                          <td className="p-4 font-body-md text-on-surface">{s.panNumber}</td>
-                          <td className="p-4 font-body-md text-on-surface">{s.gstNumber || 'N/A'}</td>
-                          <td className="p-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button onClick={() => handleSellerApproval(s.user.id, 'APPROVED')} className="px-4 py-2 bg-forest-green text-white font-label-sm rounded-sm hover:opacity-90 transition-opacity">Approve</button>
-                              <button onClick={() => {
-                                const reason = prompt('Rejection reason:');
-                                if(reason) handleSellerApproval(s.user.id, 'REJECTED', reason);
-                              }} className="px-4 py-2 border border-error-red text-error-red font-label-sm rounded-sm hover:bg-error-red/5 transition-colors">Reject</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'deliveries' && (
-            <div className="bg-surface-container-lowest rounded-sm shadow-sm border border-surface-variant overflow-hidden">
-              {pendingDeliveries.length === 0 ? (
-                <div className="p-12 text-center text-outline">
-                  <span className="material-symbols-outlined text-4xl mb-2">done_all</span>
-                  <p>No pending delivery applications.</p>
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
-                    <thead className="bg-surface-container-low border-b border-surface-variant">
-                      <tr>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Vehicle Type</th>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">Registration</th>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest">License Number</th>
-                        <th className="p-4 font-label-md text-on-surface-variant uppercase tracking-widest text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {pendingDeliveries.map(d => (
-                        <tr key={d.id} className="border-b border-surface-variant/50 hover:bg-surface-container-lowest transition-colors">
-                          <td className="p-4 font-label-md text-forest-green">{d.vehicleType}</td>
-                          <td className="p-4 font-body-md text-on-surface">{d.vehicleRegistrationNumber}</td>
-                          <td className="p-4 font-body-md text-on-surface">{d.drivingLicenseNumber}</td>
-                          <td className="p-4 text-right">
-                            <div className="flex justify-end gap-2">
-                              <button onClick={() => handleDeliveryApproval(d.user.id, 'APPROVED')} className="px-4 py-2 bg-forest-green text-white font-label-sm rounded-sm hover:opacity-90 transition-opacity">Approve</button>
-                              <button onClick={() => {
-                                const reason = prompt('Rejection reason:');
-                                if(reason) handleDeliveryApproval(d.user.id, 'REJECTED', reason);
-                              }} className="px-4 py-2 border border-error-red text-error-red font-label-sm rounded-sm hover:bg-error-red/5 transition-colors">Reject</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </div>
-          )}
-
-        </div>
       </main>
+
     </div>
   );
 };

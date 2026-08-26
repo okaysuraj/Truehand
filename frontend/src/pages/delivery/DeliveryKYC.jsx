@@ -26,7 +26,7 @@ const DeliveryKYC = () => {
         setStatus(res.data.kycStatus);
       }
     } catch (err) {
-      console.log('No existing KYC found');
+      // No existing KYC found
     }
   };
 
