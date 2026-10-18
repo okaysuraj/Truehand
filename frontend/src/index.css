@@ -1,3 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 :root {
   /* Colors */
   --color-surface: #fcf9f8;
@@ -15,11 +18,11 @@
   --color-on-primary: #ffffff;
   --color-secondary: #97472a;
   --color-on-secondary: #ffffff;
-  
+
   /* Typography */
   --font-serif: 'EB Garamond', serif;
   --font-sans: 'Hanken Grotesk', sans-serif;
-  
+
   /* Spacing */
   --spacing-unit: 4px;
   --container-max: 1280px;
@@ -38,7 +41,7 @@
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
-  
+
   /* Shadows */
   --shadow-sm: 0 4px 12px rgba(22, 52, 40, 0.04);
   --shadow-md: 0 8px 24px rgba(22, 52, 40, 0.08);
@@ -58,7 +61,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-serif);
   font-weight: 500;
   color: var(--color-on-surface);

@@ -1,23 +1,18 @@
 {
   "expo": {
-    "name": "truehand-mobile",
+    "name": "TrueHand",
     "slug": "truehand-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/web-app-manifest-512x512.png",
-    "splash": {
-      "image": "./assets/logo.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#fcf9f8"
-    },
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#fcf9f8",
-        "foregroundImage": "./assets/web-app-manifest-512x512.png"
+        "backgroundColor": "#163428",
+        "foregroundImage": "./assets/android-icon-foreground.png"
       }
     },
     "web": {
@@ -25,13 +20,46 @@
     },
     "plugins": [
       [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "TrueHand shares your live GPS only when you enable sharing for an active delivery.",
+          "isIosBackgroundLocationEnabled": false,
+          "isAndroidBackgroundLocationEnabled": false
+        }
+      ],
+      [
         "@stripe/stripe-react-native",
         {
           "merchantIdentifier": "merchant.com.truehand",
           "enableGooglePay": true
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "backgroundColor": "#163428",
+          "imageWidth": 200,
+          "resizeMode": "contain"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "TrueHand uses selected photos for product listings, support, and delivery evidence.",
+          "cameraPermission": "TrueHand uses the camera when you choose to photograph a product or delivery.",
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "TrueHand uses your microphone only when you choose voice search.",
+          "speechRecognitionPermission": "TrueHand converts your spoken catalog query into editable search text."
+        }
+      ],
+      "expo-notifications"
     ]
   }
 }

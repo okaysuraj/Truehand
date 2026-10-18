@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import api from '../../services/api';
+import { authService } from '../../services/authService';
 
 const ResetPasswordScreen = ({ navigation }) => {
   const [token, setToken] = useState('');
@@ -11,9 +21,9 @@ const ResetPasswordScreen = ({ navigation }) => {
     if (!token || !password) return;
     setLoading(true);
     try {
-      await api.post('/auth/password/reset', { token, password });
+      await authService.resetPassword({ token, password });
       Alert.alert('Success', 'Password successfully reset!', [
-        { text: 'OK', onPress: () => navigation.navigate('Login') }
+        { text: 'OK', onPress: () => navigation.navigate('Login') },
       ]);
     } catch (err) {
       Alert.alert('Error', err.response?.data || 'Failed to reset password. Token may be invalid.');
@@ -50,8 +60,8 @@ const ResetPasswordScreen = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleReset}
           disabled={loading || !token || !password}
         >

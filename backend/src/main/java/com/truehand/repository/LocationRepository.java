@@ -1,11 +1,12 @@
 package com.truehand.repository;
 
 import com.truehand.model.Location;
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import java.util.List;
 
 @Repository
 public interface LocationRepository extends JpaRepository<Location, Long> {
     List<Location> findByDeliveryIdOrderByTimestampDesc(Integer deliveryId);
+    List<Location> findTop100ByDeliveryIdOrderByTimestampDesc(Integer deliveryId);
 }

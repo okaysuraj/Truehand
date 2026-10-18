@@ -3,41 +3,62 @@ package com.truehand.controller;
 import com.truehand.model.DeliveryPersonnel;
 import com.truehand.model.SellerProfile;
 import com.truehand.service.AdminService;
+import com.truehand.service.ProductService;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
-import com.truehand.service.ProductService;
-
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class AdminController {
+
     private final AdminService adminService;
     private final ProductService productService;
+    private final com.truehand.repository.PayoutRequestRepository payoutRepo;
+    private final com.truehand.service.PayoutService payoutService;
+    private final com.truehand.service.MarketplaceFeatureService features;
 
     @GetMapping("/kyc/seller/pending")
-    public ResponseEntity<List<SellerProfile>> getPendingSellers() {
-        return ResponseEntity.ok(adminService.getPendingSellers());
+    public ResponseEntity<?> getPendingSellers(
+        @RequestParam(defaultValue = "false") boolean paged,
+        org.springframework.data.domain.Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(adminService.getPendingSellers(pageable), paged)
+        );
     }
 
     @GetMapping("/kyc/delivery/pending")
-    public ResponseEntity<List<DeliveryPersonnel>> getPendingDeliveryPartners() {
-        return ResponseEntity.ok(adminService.getPendingDeliveryPartners());
+    public ResponseEntity<?> getPendingDeliveryPartners(
+        @RequestParam(defaultValue = "false") boolean paged,
+        org.springframework.data.domain.Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(adminService.getPendingDeliveryPartners(pageable), paged)
+        );
     }
 
     @PutMapping("/kyc/seller/{sellerId}")
-    public ResponseEntity<SellerProfile> updateSellerKyc(@PathVariable Integer sellerId, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(adminService.approveSellerKyc(sellerId, body.get("status"), body.get("reason")));
+    public ResponseEntity<SellerProfile> updateSellerKyc(
+        @PathVariable Integer sellerId,
+        @RequestBody Map<String, String> body
+    ) {
+        return ResponseEntity.ok(
+            adminService.approveSellerKyc(sellerId, body.get("status"), body.get("reason"))
+        );
     }
 
     @PutMapping("/kyc/delivery/{deliveryId}")
-    public ResponseEntity<DeliveryPersonnel> updateDeliveryKyc(@PathVariable Integer deliveryId, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(adminService.approveDeliveryKyc(deliveryId, body.get("status"), body.get("reason")));
+    public ResponseEntity<DeliveryPersonnel> updateDeliveryKyc(
+        @PathVariable Integer deliveryId,
+        @RequestBody Map<String, String> body
+    ) {
+        return ResponseEntity.ok(
+            adminService.approveDeliveryKyc(deliveryId, body.get("status"), body.get("reason"))
+        );
     }
 
     @GetMapping("/metrics")
@@ -46,34 +67,61 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<com.truehand.model.User>> getAllUsers() {
-        return ResponseEntity.ok(adminService.getAllUsers());
+    public ResponseEntity<?> getAllUsers(
+        @RequestParam(defaultValue = "false") boolean paged,
+        org.springframework.data.domain.Pageable pageable
+    ) {
+        return ResponseEntity.ok(PagedResponses.body(adminService.getAllUsers(pageable), paged));
     }
 
     @GetMapping("/products/pending")
-    public ResponseEntity<List<com.truehand.dto.ProductDTO>> getPendingProducts() {
-        return ResponseEntity.ok(productService.getPendingProducts());
+    public ResponseEntity<?> getPendingProducts(
+        @RequestParam(defaultValue = "false") boolean paged,
+        org.springframework.data.domain.Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(productService.getPendingProducts(pageable), paged)
+        );
     }
 
     @PutMapping("/products/{id}/approve")
-    public ResponseEntity<com.truehand.dto.ProductDTO> approveProduct(@PathVariable Integer id, @RequestBody Map<String, String> body) {
-        return ResponseEntity.ok(productService.updateProductStatus(id, body.get("status")));
+    @org.springframework.transaction.annotation.Transactional
+    public ResponseEntity<com.truehand.dto.ProductDTO> approveProduct(
+        @PathVariable Integer id,
+        @RequestBody Map<String, String> body
+    ) {
+        var result = productService.updateProductStatus(id, body.get("status"));
+        features.audit(body.get("status"), "PRODUCT", id, Map.of());
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/payouts")
-    public ResponseEntity<List<com.truehand.model.PayoutRequest>> getAllPayouts(
-            @org.springframework.beans.factory.annotation.Autowired com.truehand.repository.PayoutRequestRepository payoutRepo) {
-        return ResponseEntity.ok(payoutRepo.findAll());
+    public ResponseEntity<?> getAllPayouts(
+        @RequestParam(defaultValue = "false") boolean paged,
+        org.springframework.data.domain.Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(
+                payoutRepo.findAll(
+                    PagedResponses.bounded(
+                        pageable,
+                        org.springframework.data.domain.Sort.by(
+                            org.springframework.data.domain.Sort.Direction.DESC,
+                            "requestedAt",
+                            "id"
+                        )
+                    )
+                ),
+                paged
+            )
+        );
     }
 
     @PutMapping("/payouts/{id}/{action}")
     public ResponseEntity<?> updatePayoutStatus(
-            @PathVariable Integer id, 
-            @PathVariable String action,
-            @org.springframework.beans.factory.annotation.Autowired com.truehand.repository.PayoutRequestRepository payoutRepo) {
-        
-        com.truehand.model.PayoutRequest payout = payoutRepo.findById(id).orElseThrow();
-        payout.setStatus(action.equalsIgnoreCase("approve") ? "APPROVED" : "REJECTED");
-        return ResponseEntity.ok(payoutRepo.save(payout));
+        @PathVariable Integer id,
+        @PathVariable String action
+    ) {
+        return ResponseEntity.ok(payoutService.decide(id, action));
     }
 }

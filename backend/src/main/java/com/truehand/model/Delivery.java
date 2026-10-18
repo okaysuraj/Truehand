@@ -1,21 +1,25 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "deliveries")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Delivery {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -36,9 +40,25 @@ public class Delivery {
 
     private BigDecimal deliveryDistanceKm;
 
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String otpHash;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime otpIssuedAt;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime otpExpiresAt;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private Integer otpAttempts;
+
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime otpVerifiedAt;
+
     @Column(updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 

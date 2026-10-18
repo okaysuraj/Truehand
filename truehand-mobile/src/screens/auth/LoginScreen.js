@@ -1,8 +1,20 @@
 import api from '../../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ImageBackground, KeyboardAvoidingView, Platform, Dimensions, Alert, Image } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  Alert,
+  Image,
+} from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/useAuthStore';
 import { colors, typography, spacing } from '../../theme/theme';
@@ -14,24 +26,25 @@ export default function LoginScreen() {
   const login = useAuthStore((state) => state.login);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ImageBackground 
-        source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB0hesUW3cRu6fb32xJJ7TUnKWli_lloKp4witWrJ2bwAXxLl8M4GnRpXu83kWwhZ-GoHzdUN0btshsR3lzMOGr3mCDgodKdL4GnGJVYA9XZh2nb0CDUKrb63idWaozeqtDwa-jsULtJPj5bv_N1R9HRzuLARovywwbU88q--xC8DNm514ZrtNmvNG8JdpwNVPMBq6vwCxAMCyoUiTO-H7Jni4Kb6VB2Hy-J0yF43WslCGFeyI8_Uj2fw' }}
-        style={styles.background}
-        imageStyle={styles.backgroundImage}
-      >
-        <KeyboardAvoidingView 
+      <View style={styles.background}>
+        <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={styles.container}
         >
           <View style={styles.card}>
             <View style={styles.header}>
-              <Image source={require('../../../assets/logo.png')} style={{ width: 150, height: 40, marginBottom: spacing.stackSm }} resizeMode="contain" />
+              <Image
+                source={require('../../../assets/logo.png')}
+                style={{ width: 150, height: 40, marginBottom: spacing.stackSm }}
+                resizeMode="contain"
+              />
               <Text style={styles.title}>Welcome Back</Text>
-              <Text style={styles.subtitle}>Sign in to continue exploring curated craftsmanship.</Text>
+              <Text style={styles.subtitle}>
+                Sign in to continue exploring curated craftsmanship.
+              </Text>
             </View>
 
             <View style={styles.form}>
@@ -39,7 +52,7 @@ export default function LoginScreen() {
                 <Text style={styles.label}>Email or Phone</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="Enter your email or phone number"
+                  placeholder="Enter your email address"
                   placeholderTextColor={colors.outline}
                   value={identifier}
                   onChangeText={setIdentifier}
@@ -60,7 +73,7 @@ export default function LoginScreen() {
                 />
               </View>
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.primaryButton}
                 onPress={async () => {
                   try {
@@ -75,23 +88,6 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.dividerRow}>
-              <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>OR CONTINUE WITH</Text>
-              <View style={styles.dividerLine} />
-            </View>
-
-            <View style={styles.socialRow}>
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-google" size={20} color={colors.charcoal} />
-                <Text style={styles.socialButtonText}>Google</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.socialButton}>
-                <Ionicons name="logo-apple" size={20} color={colors.charcoal} />
-                <Text style={styles.socialButtonText}>Apple</Text>
-              </TouchableOpacity>
-            </View>
-
             <View style={styles.footer}>
               <Text style={styles.footerText}>Don't have an account? </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -100,7 +96,7 @@ export default function LoginScreen() {
             </View>
           </View>
         </KeyboardAvoidingView>
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 }

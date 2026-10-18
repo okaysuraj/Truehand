@@ -1,25 +1,40 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import { auth } from '../config/firebase';
+import { guardApiSession } from '../../../shared/api-session';
 
-// For Android Emulator, localhost is 10.0.2.2. For iOS emulator it's localhost.
-// For physical devices, you MUST replace this with your computer's local IP address (e.g., 192.168.1.5).
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://10.85.178.156:8080';
+// Production: Render cloud backend. Override via EXPO_PUBLIC_API_URL in .env.local for local dev.
+const configuredUrl = (process.env.EXPO_PUBLIC_API_URL || 'https://truehand.onrender.com').replace(
+  /\/$/,
+  '',
+);
+const API_URL = configuredUrl.endsWith('/api') ? configuredUrl : `${configuredUrl}/api`;
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 20000,
   headers: { 'Content-Type': 'application/json' },
 });
 
-api.interceptors.request.use(async (config) => {
-  // Fix Axios 404 issue by manually appending /api to the URL
-  if (config.url && !config.url.startsWith('/api')) {
-    config.url = '/api' + (config.url.startsWith('/') ? config.url : '/' + config.url);
+api.interceptors.request.use((config) => {
+  if (config.url?.startsWith('/api/')) {
+    config.url = config.url.slice(4);
   }
-
-  const token = await AsyncStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
-export default api;
+let onUnauthorized = () => {};
+export const setUnauthorizedHandler = (handler) => {
+  onUnauthorized = handler;
+};
+const sessionApi = guardApiSession(
+  api,
+  auth,
+  (message) => new axios.CanceledError(message),
+  async () => {
+    onUnauthorized();
+    await AsyncStorage.multiRemove(['token', 'user']);
+  },
+);
+
+export default sessionApi;

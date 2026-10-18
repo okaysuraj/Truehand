@@ -8,11 +8,15 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "delivery_personnel")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DeliveryPersonnel {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;

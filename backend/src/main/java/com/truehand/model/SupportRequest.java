@@ -1,16 +1,20 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "support_requests")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class SupportRequest {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -19,11 +23,17 @@ public class SupportRequest {
     private String requestId;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(nullable = false)
     private String subject;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private Integer orderId;
 
     @Column(nullable = false)
     private String status;

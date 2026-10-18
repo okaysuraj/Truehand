@@ -1,382 +1,367 @@
-import api from '../../services/api';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { colors, typography, spacing } from '../../theme/theme';
-import { useProductStore } from '../../store/useProductStore';
+import api from '../../services/api';
+import { useAuthStore } from '../../store/useAuthStore';
 import { useCartStore } from '../../store/useCartStore';
-
-const { width } = Dimensions.get('window');
-
-export default function ProductDetailScreen() {
-  const navigation = useNavigation();
-  const route = useRoute();
-  
-  const { productId } = route.params || {};
-  const fetchProductById = useProductStore(state => state.fetchProductById);
-  const currentProduct = useProductStore(state => state.currentProduct);
-  const isLoading = useProductStore(state => state.isLoadingCurrentProduct);
-  
-  const addToCart = useCartStore(state => state.addToCart);
-
-  React.useEffect(() => {
-    if (productId) {
-      fetchProductById(productId);
+import {
+  createProductDetailHook,
+  selectedProduct,
+  variantLabel,
+} from '../../../../shared/product-detail';
+import { formatValue } from '../../../../shared/feature-contract';
+const useProductDetail = createProductDetailHook(React, api);
+const button = {
+  borderWidth: 1,
+  borderColor: '#163428',
+  padding: 14,
+  marginVertical: 6,
+};
+const input = {
+  borderWidth: 1,
+  borderColor: '#c1c8c3',
+  padding: 12,
+  marginVertical: 8,
+};
+export default function ProductDetailScreen({ route, navigation }) {
+  const id = route.params?.productId || route.params?.id || route.params?.product?.id;
+  const user = useAuthStore((state) => state.user);
+  const addToCart = useCartStore((state) => state.addToCart);
+  const { product, reviews, questions, gallery, recommendations, error, loading, reload } =
+    useProductDetail(id, user?.id);
+  const [variantId, setVariantId] = useState(null);
+  const [quantity, setQuantity] = useState('1');
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [question, setQuestion] = useState('');
+  const [comment, setComment] = useState('');
+  const [rating, setRating] = useState(5);
+  const variant = product?.variants?.find((item) => item.id === variantId);
+  const stock = variant
+    ? variant.stockQuantity
+    : product?.variants?.length
+      ? 0
+      : product?.stockQuantity;
+  async function mutate(action) {
+    setBusy(true);
+    setMessage('');
+    try {
+      const result = await action();
+      if (result !== false) {
+        setMessage('Saved.');
+        reload();
+      }
+    } catch (failure) {
+      setMessage(
+        failure.response?.data?.error || failure.message || 'Unable to save. Please retry.',
+      );
+    } finally {
+      setBusy(false);
     }
-  }, [productId, fetchProductById]);
-  
-  const handleAddToCart = () => {
-    if (currentProduct) {
-      addToCart(currentProduct, 1);
-      navigation.navigate('Cart');
-    }
-  };
-  
-  if (isLoading || !currentProduct) {
-  
-    return (
-      <SafeAreaView style={[styles.safeArea, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={colors['forest-green']} />
-      </SafeAreaView>
-    );
   }
-
-  const product = currentProduct;
-  
   return (
-    <SafeAreaView style={styles.safeArea}>
-      {/* Top AppBar */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors['on-surface-variant']} />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: '#fcf9f8',
+      }}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          padding: 24,
+          gap: 16,
+          paddingBottom: 60,
+        }}
+      >
+        <TouchableOpacity style={button} onPress={() => navigation.goBack()}>
+          <Text>Back</Text>
         </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>TrueHand</Text>
-        
-        <View style={styles.headerRight}>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Search')}>
-            <Ionicons name="search" size={24} color={colors['on-surface-variant']} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton} onPress={() => navigation.navigate('Cart')}>
-            <Ionicons name="bag-handle-outline" size={24} color={colors['on-surface-variant']} />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
-        <ScrollView 
-          horizontal 
-          pagingEnabled 
-          showsHorizontalScrollIndicator={false}
-          style={styles.imageScrollContainer}
-        >
-          <Image 
-            source={{ uri: product.imageUrl || 'https://via.placeholder.com/400x500' }}
-            style={styles.mainImage}
-          />
-        </ScrollView>
-
-        {/* Product Details */}
-        <View style={styles.detailsContainer}>
-          <Text style={styles.productTitle}>{product.name}</Text>
-          <TouchableOpacity>
-            <Text style={styles.artisanName}>{product.seller?.shopName || 'Unknown Artisan'}</Text>
-          </TouchableOpacity>
-          <Text style={styles.price}>${product.price}</Text>
-
-          <View style={styles.badgesRow}>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Hand-thrown Ceramic</Text>
-            </View>
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>Made in Italy</Text>
-            </View>
-          </View>
-
-          <Text style={styles.description}>
-            {product.description}
-          </Text>
-
-          <View style={styles.actionsContainer}>
-            <TouchableOpacity style={styles.primaryButton} onPress={handleAddToCart} disabled={isLoading}>
-              <Text style={styles.primaryButtonText}>{isLoading ? 'Loading...' : 'Add to Collection'}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryButton}>
-              <Ionicons name="heart-outline" size={18} color={colors.charcoal} />
-              <Text style={styles.secondaryButtonText}>Save for Later</Text>
+        {loading && <ActivityIndicator accessibilityLabel="Loading product" />}
+        {error && (
+          <View>
+            <Text accessibilityRole="alert">{error}</Text>
+            <TouchableOpacity style={button} onPress={reload}>
+              <Text>Retry</Text>
             </TouchableOpacity>
           </View>
-
-          <View style={styles.shippingInfo}>
-            <Ionicons name="cube-outline" size={16} color={colors['on-surface-variant']} />
-            <Text style={styles.shippingText}>Ships worldwide from Studio Arancia.</Text>
-          </View>
-
-          <TouchableOpacity 
-            style={styles.reviewsButton} 
-            onPress={() => navigation.navigate('RatingsReviews', { productId: product.id })}
-          >
-            <View style={styles.reviewsHeader}>
-              <Text style={styles.reviewsButtonText}>Collector Reviews</Text>
-              <Ionicons name="chevron-forward" size={20} color={colors.charcoal} />
-            </View>
-            <View style={styles.starsRow}>
-              <Ionicons name="star" size={16} color={colors.terracotta} />
-              <Ionicons name="star" size={16} color={colors.terracotta} />
-              <Ionicons name="star" size={16} color={colors.terracotta} />
-              <Ionicons name="star" size={16} color={colors.terracotta} />
-              <Ionicons name="star-half" size={16} color={colors.terracotta} />
-              <Text style={styles.ratingScore}>4.8 (124)</Text>
-            </View>
-          </TouchableOpacity>
-        </View>
-
-        {/* Deep Dive Sections */}
-        <View style={styles.deepDiveContainer}>
-          
-          {/* Material & Craft */}
-          <View style={styles.infoCard}>
-            <View style={styles.cardHeader}>
-              <Ionicons name="color-palette-outline" size={20} color={colors['forest-green']} />
-              <Text style={styles.cardTitle}>Material & Craft</Text>
-            </View>
-            
-            <View style={styles.bulletItem}>
-              <Ionicons name="ellipse" size={6} color={colors.outline} style={styles.bulletIcon} />
-              <Text style={styles.bulletText}>Crafted from high-fire speckled stoneware clay, chosen for its durability and earthy texture.</Text>
-            </View>
-            <View style={styles.bulletItem}>
-              <Ionicons name="ellipse" size={6} color={colors.outline} style={styles.bulletIcon} />
-              <Text style={styles.bulletText}>Fired at 1200°C to achieve full vitrification, ensuring the piece is water-tight and food safe.</Text>
-            </View>
-            <View style={styles.bulletItem}>
-              <Ionicons name="ellipse" size={6} color={colors.outline} style={styles.bulletIcon} />
-              <Text style={styles.bulletText}>Finished with an in-house formulated ash glaze that interacts uniquely with the kiln's atmosphere.</Text>
-            </View>
-          </View>
-
-          {/* Maker's Note */}
-          <View style={styles.infoCard}>
-            <View style={styles.cardHeader}>
-              <Ionicons name="brush-outline" size={20} color={colors['forest-green']} />
-              <Text style={styles.cardTitle}>Maker's Note</Text>
-            </View>
-            <View style={styles.quoteBlock}>
-              <Text style={styles.quoteText}>
-                "I wanted to create a form that feels grounding to hold. The slight asymmetry is intentional—a reminder of the human hands that shaped the clay on the wheel, standing in contrast to the perfect uniformity of mass production."
-              </Text>
-            </View>
-            <Text style={styles.quoteAuthor}>— Elena Ricci, Studio Arancia</Text>
-          </View>
-
-        </View>
-
+        )}
+        {!!message && <Text accessibilityRole="alert">{message}</Text>}
+        {product && (
+          <>
+            {variant?.imageUrl && (
+              <Image
+                source={{
+                  uri: variant.imageUrl,
+                }}
+                accessibilityLabel={variantLabel(variant)}
+                style={{
+                  height: 300,
+                  width: '100%',
+                  resizeMode: 'contain',
+                }}
+              />
+            )}
+            {gallery.map((image, index) => (
+              <Image
+                key={image.id ?? index}
+                source={{
+                  uri: image.imageUrl,
+                }}
+                accessibilityLabel={image.caption || product.name}
+                style={{
+                  height: 300,
+                  width: '100%',
+                  resizeMode: 'contain',
+                }}
+              />
+            ))}
+            {!gallery.length && !variant?.imageUrl && <Text>No product images provided.</Text>}
+            <Text
+              style={{
+                fontSize: 30,
+                color: '#163428',
+              }}
+            >
+              {product.name}
+            </Text>
+            <Text>{product.category}</Text>
+            <Text>Sold by {product.sellerName}</Text>
+            <Text>
+              {formatValue(Number(product.price) + Number(variant?.additionalPrice || 0), 'money')}
+            </Text>
+            <Text>
+              Rating: {product.averageRating ?? 0} / 5 ({product.reviewCount ?? 0} reviews)
+            </Text>
+            <Text>{product.description}</Text>
+            {!!product.variants?.length && (
+              <>
+                <Text>Product option</Text>
+                {product.variants.map((item) => (
+                  <TouchableOpacity
+                    accessibilityRole="radio"
+                    accessibilityState={{
+                      selected: variantId === item.id,
+                    }}
+                    style={[
+                      button,
+                      variantId === item.id && {
+                        backgroundColor: '#e4ebe5',
+                      },
+                    ]}
+                    key={item.id}
+                    onPress={() => {
+                      setVariantId(item.id);
+                      setQuantity('1');
+                    }}
+                  >
+                    <Text>
+                      {variantLabel(item)} ? {item.stockQuantity} in stock
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
+            <Text>Stock: {stock ?? 0}</Text>
+            <Text>Quantity</Text>
+            <TextInput
+              accessibilityLabel="Quantity"
+              style={input}
+              keyboardType="number-pad"
+              value={quantity}
+              onChangeText={setQuantity}
+            />
+            <TouchableOpacity
+              style={button}
+              disabled={
+                busy ||
+                !product.isAvailable ||
+                stock < Number(quantity) ||
+                Number(quantity) < 1 ||
+                !Number.isInteger(Number(quantity))
+              }
+              onPress={() =>
+                mutate(() => addToCart(selectedProduct(product, variant), Number(quantity)))
+              }
+            >
+              <Text>Add to cart</Text>
+            </TouchableOpacity>
+            {user ? (
+              <>
+                <TouchableOpacity
+                  disabled={busy}
+                  style={button}
+                  onPress={() =>
+                    mutate(() => api.post(`/wishlist/user/${user.id}/product/${product.id}`))
+                  }
+                >
+                  <Text>Save to wishlist</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  disabled={busy}
+                  style={button}
+                  onPress={() => mutate(() => api.post(`/account/lists/compare/${product.id}`))}
+                >
+                  <Text>Add to comparison</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  disabled={busy}
+                  style={button}
+                  onPress={() => mutate(() => api.post(`/account/lists/saved/${product.id}`))}
+                >
+                  <Text>Save for later</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <TouchableOpacity style={button} onPress={() => navigation.navigate('Login')}>
+                <Text>Sign in to save products, ask questions, or review</Text>
+              </TouchableOpacity>
+            )}
+            <Text
+              style={{
+                fontSize: 24,
+              }}
+            >
+              Product questions
+            </Text>
+            {!questions.length && <Text>No questions yet.</Text>}
+            {questions.map((item) => (
+              <View key={item.id} style={input}>
+                <Text>{item.content}</Text>
+                <Text>{item.answer || 'Awaiting a seller response.'}</Text>
+              </View>
+            ))}
+            {user && (
+              <>
+                <Text>Question</Text>
+                <TextInput
+                  style={input}
+                  accessibilityLabel="Question"
+                  multiline
+                  maxLength={2000}
+                  value={question}
+                  onChangeText={setQuestion}
+                />
+                <TouchableOpacity
+                  style={button}
+                  disabled={busy || !question.trim()}
+                  onPress={() =>
+                    mutate(async () => {
+                      await api.post(`/questions/product/${product.id}/user/${user.id}`, {
+                        content: question,
+                      });
+                      setQuestion('');
+                    })
+                  }
+                >
+                  <Text>Ask question</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            <Text
+              style={{
+                fontSize: 24,
+              }}
+            >
+              Product reviews
+            </Text>
+            {!reviews.length && <Text>No reviews yet.</Text>}
+            {reviews.map((item) => (
+              <View key={item.id} style={input}>
+                <Text>{item.userName}</Text>
+                <Text>{item.rating} / 5</Text>
+                <Text>{item.comment}</Text>
+              </View>
+            ))}
+            {user && (
+              <>
+                <Text>Rating</Text>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    gap: 8,
+                  }}
+                >
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <TouchableOpacity
+                      key={value}
+                      style={[
+                        button,
+                        rating === value && {
+                          backgroundColor: '#e4ebe5',
+                        },
+                      ]}
+                      accessibilityState={{
+                        selected: rating === value,
+                      }}
+                      onPress={() => setRating(value)}
+                    >
+                      <Text>{value}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text>Review</Text>
+                <TextInput
+                  style={input}
+                  accessibilityLabel="Review"
+                  multiline
+                  maxLength={5000}
+                  value={comment}
+                  onChangeText={setComment}
+                />
+                <Text>Reviews require a completed purchase.</Text>
+                <TouchableOpacity
+                  style={button}
+                  disabled={busy || !comment.trim()}
+                  onPress={() =>
+                    mutate(async () => {
+                      await api.post('/reviews', {
+                        productId: product.id,
+                        rating,
+                        comment,
+                      });
+                      setComment('');
+                    })
+                  }
+                >
+                  <Text>Submit review</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            <Text
+              style={{
+                fontSize: 24,
+              }}
+            >
+              Related products
+            </Text>
+            {!recommendations.length && <Text>No related products available.</Text>}
+            {recommendations.map((item) => (
+              <TouchableOpacity
+                style={button}
+                key={item.id}
+                onPress={() =>
+                  navigation.push('ProductDetail', {
+                    productId: item.id,
+                    id: item.id,
+                  })
+                }
+              >
+                <Text>
+                  {item.name} ? {formatValue(item.price, 'money')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors['surface-linen'],
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.marginMobile,
-    height: 64,
-    backgroundColor: 'rgba(252, 249, 248, 0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(193, 200, 195, 0.3)',
-    zIndex: 10,
-  },
-  iconButton: {
-    padding: spacing.stackSm,
-  },
-  headerTitle: {
-    ...typography.headlineLgMobile,
-    color: colors['forest-green'],
-    fontSize: 24, // Slightly smaller to fit with 2 right icons
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  content: {
-    paddingBottom: spacing.sectionGap,
-  },
-  imageScrollContainer: {
-    width: width,
-    height: width * 1.25, // 4:5 aspect ratio
-    backgroundColor: colors['surface-variant'],
-  },
-  mainImage: {
-    width: width,
-    height: width * 1.25,
-    resizeMode: 'cover',
-  },
-  detailsContainer: {
-    paddingHorizontal: spacing.marginMobile,
-    paddingTop: spacing.stackLg,
-  },
-  productTitle: {
-    ...typography.displayLg,
-    fontSize: 32, // smaller for mobile detail
-    lineHeight: 36,
-    color: colors.charcoal,
-    marginBottom: spacing.stackSm,
-  },
-  artisanName: {
-    ...typography.bodyMd,
-    color: colors['on-surface-variant'],
-    textDecorationLine: 'underline',
-  },
-  price: {
-    ...typography.labelMd,
-    color: colors.charcoal,
-    fontSize: 18,
-    marginTop: spacing.stackSm,
-  },
-  badgesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.stackSm,
-    marginVertical: spacing.stackLg,
-  },
-  badge: {
-    backgroundColor: colors['surface-variant'],
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  badgeText: {
-    ...typography.labelSm,
-    color: colors.charcoal,
-  },
-  description: {
-    ...typography.bodyMd,
-    color: colors['on-surface-variant'],
-    lineHeight: 24,
-    marginBottom: spacing.stackLg,
-  },
-  actionsContainer: {
-    gap: spacing.stackMd,
-    marginBottom: spacing.stackLg,
-  },
-  primaryButton: {
-    backgroundColor: colors['forest-green'],
-    paddingVertical: 16,
-    borderRadius: 4,
-    alignItems: 'center',
-  },
-  primaryButtonText: {
-    ...typography.labelMd,
-    color: colors['on-primary'],
-  },
-  secondaryButton: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
-    borderWidth: 1,
-    borderColor: colors.outline,
-    paddingVertical: 16,
-    borderRadius: 4,
-  },
-  secondaryButtonText: {
-    ...typography.labelMd,
-    color: colors.charcoal,
-  },
-  shippingInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingTop: spacing.stackLg,
-    borderTopWidth: 1,
-    borderTopColor: colors['surface-variant'],
-  },
-  shippingText: {
-    ...typography.labelSm,
-    color: colors['on-surface-variant'],
-  },
-  reviewsButton: {
-    marginTop: spacing.stackLg,
-    paddingTop: spacing.stackLg,
-    borderTopWidth: 1,
-    borderTopColor: colors['surface-variant'],
-  },
-  reviewsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  reviewsButtonText: {
-    ...typography.headlineMd,
-    color: colors.charcoal,
-  },
-  starsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  ratingScore: {
-    ...typography.labelMd,
-    color: colors.charcoal,
-    marginLeft: 4,
-  },
-  deepDiveContainer: {
-    paddingHorizontal: spacing.marginMobile,
-    marginTop: spacing.sectionGap,
-    gap: spacing.stackLg,
-  },
-  infoCard: {
-    backgroundColor: colors['surface-container-low'],
-    padding: spacing.gutter,
-    borderRadius: 12,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: spacing.stackMd,
-  },
-  cardTitle: {
-    ...typography.headlineMd,
-    color: colors.charcoal,
-  },
-  bulletItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 8,
-    marginBottom: spacing.stackSm,
-  },
-  bulletIcon: {
-    marginTop: 8, // align with first line of text
-  },
-  bulletText: {
-    ...typography.bodyMd,
-    color: colors['on-surface-variant'],
-    flex: 1,
-  },
-  quoteBlock: {
-    borderLeftWidth: 2,
-    borderLeftColor: 'rgba(22, 52, 40, 0.3)', // forest-green/30
-    paddingLeft: 16,
-    marginBottom: 8,
-  },
-  quoteText: {
-    ...typography.bodyLg,
-    color: colors['on-surface-variant'],
-    fontStyle: 'italic',
-  },
-  quoteAuthor: {
-    ...typography.labelMd,
-    color: colors.charcoal,
-  },
-});

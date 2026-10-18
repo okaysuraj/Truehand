@@ -1,0 +1,5369 @@
+{
+  "trending": {
+    "title": "Trending products",
+    "endpoint": "/products/trending",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": true
+  },
+  "flash-sale": {
+    "title": "Flash sale",
+    "endpoint": "/products/flash-sale",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": true,
+    "pagination": true
+  },
+  "catalog": {
+    "title": "Products",
+    "endpoint": "/products/filter",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": true,
+    "search": true
+  },
+  "recent": {
+    "title": "Recently viewed",
+    "endpoint": "/products/recently-viewed/{userId}",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": false
+  },
+  "saved": {
+    "title": "Saved for later",
+    "endpoint": "/account/lists/saved",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": false,
+    "form": {
+      "title": "Add product",
+      "method": "post",
+      "endpoint": "/account/lists/saved/{productId}",
+      "fields": [
+        {
+          "key": "productId",
+          "label": "Product",
+          "type": "select",
+          "source": "/products?size=100",
+          "optionLabel": "name"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Remove",
+        "method": "delete",
+        "endpoint": "/account/lists/saved/{id}"
+      }
+    ]
+  },
+  "compare": {
+    "title": "Compare products",
+    "endpoint": "/account/lists/compare",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": false,
+    "form": {
+      "title": "Add product",
+      "method": "post",
+      "endpoint": "/account/lists/compare/{productId}",
+      "fields": [
+        {
+          "key": "productId",
+          "label": "Product",
+          "type": "select",
+          "source": "/products?size=100",
+          "optionLabel": "name"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Remove",
+        "method": "delete",
+        "endpoint": "/account/lists/compare/{id}"
+      }
+    ]
+  },
+  "collection-products": {
+    "title": "Collection products",
+    "endpoint": "/account/collections/{collectionId}/products",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": false,
+    "context": "collectionId"
+  },
+  "alerts": {
+    "title": "Product alerts",
+    "endpoint": "/account/alerts",
+    "columns": [
+      {
+        "key": "productName",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "type",
+        "label": "Alert type",
+        "format": "text"
+      },
+      {
+        "key": "threshold",
+        "label": "Target price",
+        "format": "money"
+      },
+      {
+        "key": "active",
+        "label": "Active",
+        "format": "boolean"
+      }
+    ],
+    "form": {
+      "title": "Create alert",
+      "method": "post",
+      "endpoint": "/account/alerts",
+      "fields": [
+        {
+          "key": "productId",
+          "label": "Product",
+          "type": "select",
+          "source": "/products?size=100",
+          "optionLabel": "name"
+        },
+        {
+          "key": "type",
+          "label": "Alert type",
+          "type": "select",
+          "options": [
+            {
+              "value": "PRICE",
+              "label": "Price drop"
+            },
+            {
+              "value": "STOCK",
+              "label": "Back in stock"
+            }
+          ]
+        },
+        {
+          "key": "threshold",
+          "label": "Target price in INR (price alerts)",
+          "type": "money",
+          "optional": true
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Delete alert",
+        "method": "delete",
+        "endpoint": "/account/alerts/{id}"
+      }
+    ],
+    "description": "Matching database prices or saleable stock trigger an in-app notice once per saved alert. Save the alert again to rearm it. Email and push also require the corresponding notification preferences; push requires a registered device."
+  },
+  "collections": {
+    "title": "Wishlist collections",
+    "endpoint": "/account/collections",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Collection",
+        "format": "text"
+      },
+      {
+        "key": "productCount",
+        "label": "Products",
+        "format": "number"
+      }
+    ],
+    "form": {
+      "title": "Create collection",
+      "method": "post",
+      "endpoint": "/account/collections",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Collection name",
+          "maxLength": 100
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Delete collection",
+        "method": "delete",
+        "endpoint": "/account/collections/{id}"
+      }
+    ],
+    "detail": {
+      "web": "/wishlist-collections/{id}",
+      "mobile": "WishlistCollectionScreen",
+      "param": "collectionId"
+    }
+  },
+  "reviews": {
+    "title": "Ratings and reviews",
+    "endpoint": "/reviews/product/{productId}",
+    "columns": [
+      {
+        "key": "userName",
+        "label": "Customer",
+        "format": "text"
+      },
+      {
+        "key": "rating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "comment",
+        "label": "Review",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Reviewed",
+        "format": "date"
+      }
+    ],
+    "public": true,
+    "context": "productId",
+    "form": {
+      "title": "Review your purchase",
+      "method": "post",
+      "endpoint": "/reviews",
+      "body": {
+        "productId": "{productId}"
+      },
+      "fields": [
+        {
+          "key": "rating",
+          "label": "Rating (1 to 5)",
+          "type": "integer",
+          "min": 1,
+          "max": 5
+        },
+        {
+          "key": "comment",
+          "label": "Review",
+          "type": "multiline",
+          "maxLength": 5000
+        }
+      ]
+    }
+  },
+  "questions": {
+    "title": "Product questions",
+    "endpoint": "/questions/product/{productId}",
+    "columns": [
+      {
+        "key": "userName",
+        "label": "Customer",
+        "format": "text"
+      },
+      {
+        "key": "content",
+        "label": "Question",
+        "format": "text"
+      },
+      {
+        "key": "answer",
+        "label": "Artisan answer",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Asked",
+        "format": "date"
+      }
+    ],
+    "public": true,
+    "context": "productId",
+    "form": {
+      "title": "Ask a question",
+      "method": "post",
+      "endpoint": "/questions/product/{productId}/user/{userId}",
+      "fields": [
+        {
+          "key": "content",
+          "label": "Question",
+          "type": "multiline",
+          "maxLength": 5000
+        }
+      ]
+    }
+  },
+  "gallery": {
+    "title": "Product gallery",
+    "endpoint": "/products/{productId}/gallery",
+    "columns": [
+      {
+        "key": "imageUrl",
+        "label": "Image",
+        "format": "image"
+      }
+    ],
+    "public": true,
+    "context": "productId"
+  },
+  "categories": {
+    "title": "Categories",
+    "endpoint": "/categories",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      }
+    ],
+    "public": true,
+    "kind": "categories"
+  },
+  "artisans": {
+    "title": "Artisans",
+    "endpoint": "/community/artisans",
+    "columns": [
+      {
+        "key": "businessName",
+        "label": "Business",
+        "format": "text"
+      },
+      {
+        "key": "firstName",
+        "label": "Artisan",
+        "format": "text"
+      },
+      {
+        "key": "bio",
+        "label": "Biography",
+        "format": "text"
+      },
+      {
+        "key": "shopDescription",
+        "label": "Shop",
+        "format": "text"
+      }
+    ],
+    "public": true,
+    "detail": {
+      "web": "/artisan/{id}",
+      "mobile": "ArtisanProfile",
+      "param": "sellerId"
+    },
+    "pagination": true
+  },
+  "commissions": {
+    "title": "Custom commissions",
+    "endpoint": "/community/commissions",
+    "columns": [
+      {
+        "key": "subject",
+        "label": "Request",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "sellerName",
+        "label": "Artisan",
+        "format": "text"
+      },
+      {
+        "key": "customerName",
+        "label": "Customer",
+        "format": "text"
+      },
+      {
+        "key": "budget",
+        "label": "Budget",
+        "format": "money"
+      },
+      {
+        "key": "quotedAmount",
+        "label": "Quote",
+        "format": "money"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      }
+    ],
+    "form": {
+      "title": "Request a custom piece",
+      "method": "post",
+      "endpoint": "/community/commissions",
+      "fields": [
+        {
+          "key": "sellerId",
+          "label": "Artisan",
+          "type": "select",
+          "source": "/community/artisans",
+          "optionLabel": "businessName"
+        },
+        {
+          "key": "subject",
+          "label": "Subject",
+          "maxLength": 200
+        },
+        {
+          "key": "description",
+          "label": "Requirements",
+          "type": "multiline",
+          "maxLength": 10000
+        },
+        {
+          "key": "budget",
+          "label": "Budget in INR",
+          "type": "money"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Accept quote",
+        "method": "put",
+        "endpoint": "/community/commissions/{id}",
+        "body": {
+          "status": "ACCEPTED"
+        },
+        "when": {
+          "status": "QUOTED"
+        },
+        "ownerField": "userId"
+      },
+      {
+        "label": "Decline",
+        "method": "put",
+        "endpoint": "/community/commissions/{id}",
+        "body": {
+          "status": "DECLINED"
+        },
+        "when": {
+          "status": "QUOTED"
+        },
+        "ownerField": "userId"
+      },
+      {
+        "label": "Cancel request",
+        "method": "put",
+        "endpoint": "/community/commissions/{id}",
+        "body": {
+          "status": "CANCELED"
+        },
+        "when": {
+          "status": "REQUESTED"
+        },
+        "ownerField": "userId"
+      },
+      {
+        "label": "Send quote",
+        "method": "put",
+        "endpoint": "/community/commissions/{id}",
+        "body": {
+          "status": "QUOTED"
+        },
+        "fields": [
+          {
+            "key": "quotedAmount",
+            "label": "Quote in INR",
+            "type": "money"
+          }
+        ],
+        "when": {
+          "status": "REQUESTED"
+        },
+        "ownerField": "sellerId"
+      }
+    ]
+  },
+  "banners": {
+    "title": "Banner management",
+    "endpoint": "/admin/banners",
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Image",
+        "format": "image"
+      },
+      {
+        "key": "targetPath",
+        "label": "Destination",
+        "format": "text"
+      },
+      {
+        "key": "active",
+        "label": "Active",
+        "format": "boolean"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "form": {
+      "title": "Create banner",
+      "method": "post",
+      "endpoint": "/admin/banners",
+      "fields": [
+        {
+          "key": "title",
+          "label": "Title",
+          "maxLength": 200
+        },
+        {
+          "key": "imageUrl",
+          "label": "Image URL",
+          "type": "url"
+        },
+        {
+          "key": "targetPath",
+          "label": "Link within Truehand",
+          "maxLength": 500
+        },
+        {
+          "key": "active",
+          "label": "Publish banner",
+          "type": "boolean"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Delete",
+        "method": "delete",
+        "endpoint": "/admin/banners/{id}"
+      }
+    ]
+  },
+  "admin-artisans": {
+    "title": "Artisan management",
+    "endpoint": "/admin/artisans",
+    "columns": [
+      {
+        "key": "firstName",
+        "label": "First name",
+        "format": "text"
+      },
+      {
+        "key": "lastName",
+        "label": "Last name",
+        "format": "text"
+      },
+      {
+        "key": "businessName",
+        "label": "Business",
+        "format": "text"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "format": "text"
+      },
+      {
+        "key": "kycStatus",
+        "label": "KYC status",
+        "format": "text"
+      },
+      {
+        "key": "isActive",
+        "label": "Account active",
+        "format": "boolean"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "actions": [
+      {
+        "label": "Approve KYC",
+        "method": "put",
+        "endpoint": "/admin/artisans/{id}/approve"
+      },
+      {
+        "label": "Reject KYC",
+        "method": "put",
+        "endpoint": "/admin/artisans/{id}/reject"
+      },
+      {
+        "label": "Suspend account",
+        "method": "put",
+        "endpoint": "/admin/artisans/{id}/suspend"
+      },
+      {
+        "label": "Restore account",
+        "method": "put",
+        "endpoint": "/admin/artisans/{id}/restore"
+      }
+    ],
+    "pagination": true
+  },
+  "admin-delivery": {
+    "title": "Delivery partner management",
+    "endpoint": "/admin/delivery-agents",
+    "columns": [
+      {
+        "key": "firstName",
+        "label": "First name",
+        "format": "text"
+      },
+      {
+        "key": "lastName",
+        "label": "Last name",
+        "format": "text"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "format": "text"
+      },
+      {
+        "key": "kycStatus",
+        "label": "KYC status",
+        "format": "text"
+      },
+      {
+        "key": "isActive",
+        "label": "Account active",
+        "format": "boolean"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "actions": [
+      {
+        "label": "Approve KYC",
+        "method": "put",
+        "endpoint": "/admin/delivery-agents/{id}/approve"
+      },
+      {
+        "label": "Reject KYC",
+        "method": "put",
+        "endpoint": "/admin/delivery-agents/{id}/reject"
+      },
+      {
+        "label": "Suspend account",
+        "method": "put",
+        "endpoint": "/admin/delivery-agents/{id}/suspend"
+      },
+      {
+        "label": "Restore account",
+        "method": "put",
+        "endpoint": "/admin/delivery-agents/{id}/restore"
+      }
+    ],
+    "pagination": true
+  },
+  "disputes": {
+    "title": "Disputes and return requests",
+    "endpoint": "/admin/disputes",
+    "columns": [
+      {
+        "key": "requestId",
+        "label": "Request",
+        "format": "text"
+      },
+      {
+        "key": "subject",
+        "label": "Subject",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "type",
+        "label": "Type",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "orderId",
+        "label": "Order",
+        "format": "number"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "actions": [
+      {
+        "label": "Resolve request",
+        "method": "post",
+        "endpoint": "/admin/disputes/{id}/resolve",
+        "fields": [
+          {
+            "key": "resolution",
+            "label": "Resolution",
+            "type": "multiline"
+          }
+        ],
+        "when": {
+          "status": "OPEN"
+        }
+      }
+    ],
+    "pagination": true
+  },
+  "fraud": {
+    "title": "Suspicious activity",
+    "endpoint": "/admin/fraud-alerts",
+    "columns": [
+      {
+        "key": "activityType",
+        "label": "Activity",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Recorded",
+        "format": "date"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "actions": [
+      {
+        "label": "Resolve",
+        "method": "post",
+        "endpoint": "/admin/advanced/suspicious-activity/{id}/resolve",
+        "when": {
+          "status": "PENDING"
+        }
+      }
+    ],
+    "pagination": true
+  },
+  "commission-rates": {
+    "title": "Category commission rates",
+    "endpoint": "/admin/commission-settings",
+    "columns": [
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "percentage",
+        "label": "Commission percentage",
+        "format": "number"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "form": {
+      "title": "Set commission rate",
+      "method": "put",
+      "endpoint": "/admin/commission-settings",
+      "fields": [
+        {
+          "key": "categoryId",
+          "label": "Category",
+          "type": "select",
+          "source": "/categories",
+          "optionLabel": "name"
+        },
+        {
+          "key": "percentage",
+          "label": "Percentage",
+          "type": "number",
+          "min": 0,
+          "max": 100
+        }
+      ]
+    }
+  },
+  "audit": {
+    "title": "Administrator activity",
+    "endpoint": "/admin/audit-events",
+    "columns": [
+      {
+        "key": "action",
+        "label": "Action",
+        "format": "text"
+      },
+      {
+        "key": "resourceType",
+        "label": "Resource",
+        "format": "text"
+      },
+      {
+        "key": "resourceId",
+        "label": "Reference",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Recorded",
+        "format": "date"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "pagination": true
+  },
+  "inventory-alerts": {
+    "title": "Low stock inventory",
+    "endpoint": "/seller/inventory-alerts",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      }
+    ],
+    "roles": ["SELLER", "ADMIN"],
+    "pagination": true
+  },
+  "campaigns": {
+    "title": "Campaigns",
+    "endpoint": "/admin/advanced/campaigns",
+    "columns": [
+      {
+        "key": "campaignName",
+        "label": "Campaign",
+        "format": "text"
+      },
+      {
+        "key": "targetAudience",
+        "label": "Audience",
+        "format": "text"
+      },
+      {
+        "key": "emailBody",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "sentCount",
+        "label": "Provider accepted",
+        "format": "number"
+      },
+      {
+        "key": "queuedCount",
+        "label": "Total queued",
+        "format": "number"
+      },
+      {
+        "key": "failedCount",
+        "label": "Failed",
+        "format": "number"
+      }
+    ],
+    "roles": ["ADMIN"],
+    "form": {
+      "title": "Create campaign draft",
+      "method": "post",
+      "endpoint": "/admin/advanced/campaigns",
+      "fields": [
+        {
+          "key": "campaignName",
+          "label": "Campaign name"
+        },
+        {
+          "key": "targetAudience",
+          "label": "Audience",
+          "type": "select",
+          "options": [
+            {
+              "value": "ALL_USERS",
+              "label": "All subscribed users"
+            },
+            {
+              "value": "SELLERS",
+              "label": "Subscribed sellers"
+            }
+          ]
+        },
+        {
+          "key": "emailBody",
+          "label": "Email content",
+          "type": "multiline"
+        }
+      ]
+    },
+    "description": "Queue email only for active users who opted in to promotions. Counts reflect recorded provider acceptance, not inbox delivery.",
+    "actions": [
+      {
+        "label": "Queue opted-in campaign emails",
+        "endpoint": "/admin/advanced/campaigns/{id}/queue",
+        "when": {
+          "status": "DRAFT"
+        }
+      }
+    ]
+  },
+  "coupons": {
+    "title": "Manage promo codes",
+    "endpoint": "/promo/all",
+    "columns": [
+      {
+        "key": "code",
+        "label": "Code",
+        "format": "text"
+      },
+      {
+        "key": "discountPercentage",
+        "label": "Discount percentage",
+        "format": "number"
+      },
+      {
+        "key": "maxDiscountAmount",
+        "label": "Maximum discount",
+        "format": "money"
+      },
+      {
+        "key": "validUntil",
+        "label": "Expires",
+        "format": "date"
+      },
+      {
+        "key": "isActive",
+        "label": "Active",
+        "format": "boolean"
+      },
+      {
+        "key": "sellerId",
+        "label": "Seller scope (blank means platform)",
+        "format": "number"
+      },
+      {
+        "key": "minimumSubtotal",
+        "label": "Minimum eligible subtotal",
+        "format": "money"
+      },
+      {
+        "key": "maximumUses",
+        "label": "Maximum uses",
+        "format": "number"
+      },
+      {
+        "key": "maximumUsesPerCustomer",
+        "label": "Uses per customer",
+        "format": "number"
+      }
+    ],
+    "roles": ["SELLER", "ADMIN"],
+    "form": {
+      "title": "Create promo code",
+      "method": "post",
+      "endpoint": "/promo",
+      "fields": [
+        {
+          "key": "code",
+          "label": "Code",
+          "maxLength": 50
+        },
+        {
+          "key": "discountPercentage",
+          "label": "Discount percentage",
+          "type": "number",
+          "min": 0.01,
+          "max": 100
+        },
+        {
+          "key": "maxDiscountAmount",
+          "label": "Maximum discount in INR",
+          "type": "money"
+        },
+        {
+          "key": "validUntil",
+          "label": "Expiration (UTC)",
+          "type": "datetime"
+        },
+        {
+          "key": "minimumSubtotal",
+          "label": "Minimum eligible subtotal in INR",
+          "type": "money",
+          "min": 0
+        },
+        {
+          "key": "maximumUses",
+          "label": "Maximum uses",
+          "type": "integer",
+          "min": 1
+        },
+        {
+          "key": "maximumUsesPerCustomer",
+          "label": "Maximum uses per customer",
+          "type": "integer",
+          "min": 1
+        },
+        {
+          "key": "validFrom",
+          "label": "Starts (UTC, optional)",
+          "type": "datetime",
+          "optional": true
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Deactivate",
+        "method": "delete",
+        "endpoint": "/promo/{id}"
+      }
+    ],
+    "description": "Seller codes apply only to that seller’s products. Administrator codes apply to the whole order. Reservations count toward limits; cancellation releases a reservation and completed refunds keep the usage consumed."
+  },
+  "seller-questions": {
+    "title": "Customer questions",
+    "endpoint": "/questions/seller/{userId}",
+    "columns": [
+      {
+        "key": "productId",
+        "label": "Product",
+        "format": "number"
+      },
+      {
+        "key": "content",
+        "label": "Question",
+        "format": "text"
+      },
+      {
+        "key": "answer",
+        "label": "Answer",
+        "format": "text"
+      }
+    ],
+    "roles": ["SELLER", "ADMIN"],
+    "actions": [
+      {
+        "label": "Answer",
+        "method": "put",
+        "endpoint": "/questions/{id}/answer/seller/{userId}",
+        "fields": [
+          {
+            "key": "answer",
+            "label": "Answer",
+            "type": "multiline"
+          }
+        ]
+      }
+    ]
+  },
+  "variants": {
+    "title": "Product variants",
+    "endpoint": "/products/{productId}/variants",
+    "context": "productId",
+    "contextSource": "/products/seller/{userId}",
+    "contextLabel": "name",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "sku",
+        "label": "SKU",
+        "format": "text"
+      },
+      {
+        "key": "size",
+        "label": "Size",
+        "format": "text"
+      },
+      {
+        "key": "color",
+        "label": "Color",
+        "format": "text"
+      },
+      {
+        "key": "additionalPrice",
+        "label": "Additional price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      }
+    ],
+    "form": {
+      "title": "Add variant",
+      "endpoint": "/products/{productId}/variants",
+      "fields": [
+        {
+          "key": "sku",
+          "label": "SKU",
+          "type": "text",
+          "maxLength": 100
+        },
+        {
+          "key": "size",
+          "label": "Size",
+          "type": "text",
+          "optional": true
+        },
+        {
+          "key": "color",
+          "label": "Color",
+          "type": "text",
+          "optional": true
+        },
+        {
+          "key": "additionalPrice",
+          "label": "Additional price",
+          "type": "money",
+          "min": 0
+        },
+        {
+          "key": "stockQuantity",
+          "label": "Stock",
+          "type": "integer",
+          "min": 0
+        },
+        {
+          "key": "imageUrl",
+          "label": "Variant image URL",
+          "type": "url",
+          "optional": true
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Edit variant",
+        "endpoint": "/products/{productId}/variants/{id}",
+        "method": "put",
+        "fields": [
+          {
+            "key": "sku",
+            "label": "SKU",
+            "type": "text",
+            "maxLength": 100
+          },
+          {
+            "key": "size",
+            "label": "Size",
+            "type": "text",
+            "optional": true
+          },
+          {
+            "key": "color",
+            "label": "Color",
+            "type": "text",
+            "optional": true
+          },
+          {
+            "key": "additionalPrice",
+            "label": "Additional price",
+            "type": "money",
+            "min": 0
+          },
+          {
+            "key": "stockQuantity",
+            "label": "Stock",
+            "type": "integer",
+            "min": 0
+          },
+          {
+            "key": "imageUrl",
+            "label": "Variant image URL",
+            "type": "url",
+            "optional": true
+          }
+        ]
+      },
+      {
+        "label": "Retire variant",
+        "endpoint": "/products/{productId}/variants/{id}",
+        "method": "delete"
+      }
+    ]
+  },
+  "refunds": {
+    "title": "Refund requests",
+    "endpoint": "/account/refunds",
+    "columns": [
+      {
+        "key": "orderId",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "reason",
+        "label": "Reason",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Refund amount",
+        "format": "money"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "providerReference",
+        "label": "Payment provider reference",
+        "format": "text"
+      },
+      {
+        "key": "reviewNote",
+        "label": "Review note",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Request a refund",
+      "endpoint": "/orders/{orderId}/refund-request",
+      "fields": [
+        {
+          "key": "orderId",
+          "label": "Order",
+          "type": "select",
+          "source": "/orders",
+          "optionLabel": "orderNumber"
+        },
+        {
+          "key": "reason",
+          "label": "Reason",
+          "type": "multiline",
+          "maxLength": 2000
+        }
+      ]
+    }
+  },
+  "admin-refunds": {
+    "title": "Refund approval",
+    "endpoint": "/admin/refunds",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "orderId",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "reason",
+        "label": "Reason",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Refund amount",
+        "format": "money"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "providerReference",
+        "label": "Payment provider reference",
+        "format": "text"
+      },
+      {
+        "key": "reviewNote",
+        "label": "Review note",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Issue full refund",
+        "endpoint": "/admin/refunds/{id}/approve",
+        "method": "post",
+        "when": {
+          "status": "REQUESTED"
+        }
+      },
+      {
+        "label": "Reject refund",
+        "endpoint": "/admin/refunds/{id}/reject",
+        "method": "post",
+        "fields": [
+          {
+            "key": "note",
+            "label": "Review note",
+            "type": "multiline"
+          }
+        ],
+        "when": {
+          "status": "REQUESTED"
+        }
+      },
+      {
+        "label": "Refresh provider status",
+        "endpoint": "/admin/refunds/{id}/refresh",
+        "method": "post",
+        "when": {
+          "status": "PROCESSING"
+        }
+      }
+    ]
+  },
+  "revenue": {
+    "title": "Platform revenue",
+    "endpoint": "/admin/revenue",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Revenue",
+        "format": "money"
+      },
+      {
+        "key": "createdAt",
+        "label": "Recorded",
+        "format": "date"
+      }
+    ]
+  },
+  "financial-journals": {
+    "title": "Financial journals",
+    "endpoint": "/admin/financial-journals",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "eventKey",
+        "label": "Event",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Journal amount",
+        "format": "money"
+      },
+      {
+        "key": "createdAt",
+        "label": "Recorded",
+        "format": "date"
+      }
+    ]
+  },
+  "bank-verifications": {
+    "title": "Bank verification",
+    "endpoint": "/admin/bank-verifications",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "userId",
+        "label": "Account owner",
+        "format": "text"
+      },
+      {
+        "key": "bankName",
+        "label": "Bank",
+        "format": "text"
+      },
+      {
+        "key": "accountName",
+        "label": "Account name",
+        "format": "text"
+      },
+      {
+        "key": "lastFour",
+        "label": "Last four digits",
+        "format": "text"
+      },
+      {
+        "key": "routingNumber",
+        "label": "IFSC",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "verificationReference",
+        "label": "Verification reference",
+        "format": "text"
+      }
+    ],
+    "actions": [
+      {
+        "label": "View account details",
+        "endpoint": "/admin/bank-verifications/{id}/details",
+        "method": "post",
+        "resultColumns": [
+          {
+            "key": "bankName",
+            "label": "Bank",
+            "format": "text"
+          },
+          {
+            "key": "accountName",
+            "label": "Account name",
+            "format": "text"
+          },
+          {
+            "key": "accountNumber",
+            "label": "Account number",
+            "format": "text"
+          },
+          {
+            "key": "ifsc",
+            "label": "IFSC",
+            "format": "text"
+          }
+        ]
+      },
+      {
+        "label": "Record verification",
+        "endpoint": "/admin/bank-verifications/{id}/verify",
+        "method": "post",
+        "fields": [
+          {
+            "key": "reference",
+            "label": "Bank verification reference",
+            "type": "text",
+            "maxLength": 100
+          }
+        ]
+      }
+    ]
+  },
+  "admin-payouts": {
+    "title": "Payout management",
+    "endpoint": "/admin/payouts",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "sellerName",
+        "label": "Account owner",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Amount",
+        "format": "money"
+      },
+      {
+        "key": "bankAccount",
+        "label": "Bank account",
+        "format": "text"
+      },
+      {
+        "key": "bankAccountId",
+        "label": "Bank record ID",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "transferReference",
+        "label": "Bank transfer reference",
+        "format": "text"
+      },
+      {
+        "key": "settledAt",
+        "label": "Settled",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Approve payout",
+        "endpoint": "/admin/payouts/{id}/approve",
+        "method": "put",
+        "when": {
+          "status": "PENDING"
+        }
+      },
+      {
+        "label": "Reject payout",
+        "endpoint": "/admin/payouts/{id}/reject",
+        "method": "put",
+        "when": {
+          "status": "PENDING"
+        }
+      },
+      {
+        "label": "Record bank transfer",
+        "endpoint": "/admin/payouts/{id}/settle",
+        "method": "post",
+        "fields": [
+          {
+            "key": "reference",
+            "label": "Bank transfer reference",
+            "type": "text",
+            "maxLength": 100
+          },
+          {
+            "key": "receiptUrl",
+            "label": "Transfer receipt URL",
+            "type": "url"
+          }
+        ],
+        "when": {
+          "status": "APPROVED"
+        }
+      }
+    ],
+    "pagination": true
+  },
+  "fulfillments": {
+    "title": "Order fulfillment",
+    "endpoint": "/seller/fulfillments",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Fulfillment status",
+        "format": "text"
+      },
+      {
+        "key": "deliveryAddress",
+        "label": "Delivery address",
+        "format": "text"
+      },
+      {
+        "key": "shippedAt",
+        "label": "Shipped",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Start processing",
+        "endpoint": "/seller/{sellerId}/orders/{orderNumber}/status",
+        "method": "put",
+        "body": {
+          "status": "PROCESSING"
+        },
+        "when": {
+          "status": "CONFIRMED",
+          "paymentStatus": "PAID"
+        }
+      },
+      {
+        "label": "Mark shipped",
+        "endpoint": "/seller/{sellerId}/orders/{orderNumber}/status",
+        "method": "put",
+        "body": {
+          "status": "SHIPPED"
+        },
+        "when": {
+          "status": "PROCESSING",
+          "paymentStatus": "PAID"
+        }
+      }
+    ],
+    "pagination": true
+  },
+  "fulfillment-checks": {
+    "title": "Packaging quality checks",
+    "endpoint": "/seller/fulfillments/{fulfillmentId}/checks",
+    "context": "fulfillmentId",
+    "contextSource": "/seller/fulfillments",
+    "contextLabel": "orderNumber",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "checkKey",
+        "label": "Check",
+        "format": "text"
+      },
+      {
+        "key": "checkedAt",
+        "label": "Checked",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Save check",
+      "endpoint": "/seller/fulfillments/{fulfillmentId}/checks/{checkKey}",
+      "method": "put",
+      "fields": [
+        {
+          "key": "checkKey",
+          "label": "Check",
+          "type": "select",
+          "options": [
+            {
+              "value": "PRODUCT",
+              "label": "Product inspected"
+            },
+            {
+              "value": "PACKAGING",
+              "label": "Packaging inspected"
+            },
+            {
+              "value": "ADDRESS",
+              "label": "Address checked"
+            },
+            {
+              "value": "LABEL",
+              "label": "Label checked"
+            }
+          ]
+        },
+        {
+          "key": "checked",
+          "label": "Completed",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  "orders": {
+    "title": "Your orders",
+    "endpoint": "/orders",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "totalAmount",
+        "label": "Total",
+        "format": "money"
+      },
+      {
+        "key": "status",
+        "label": "Order status",
+        "format": "text"
+      },
+      {
+        "key": "paymentStatus",
+        "label": "Payment status",
+        "format": "text"
+      },
+      {
+        "key": "deliveryAddress",
+        "label": "Delivery address",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Placed",
+        "format": "date"
+      },
+      {
+        "key": "orderItems",
+        "label": "Purchased items",
+        "format": "order-items"
+      }
+    ],
+    "detail": {
+      "web": "/order/{id}",
+      "mobile": "OrderDetail",
+      "param": "id"
+    },
+    "actions": [
+      {
+        "label": "Cancel unpaid checkout",
+        "endpoint": "/payment/orders/{id}/cancel",
+        "when": {
+          "paymentStatus": "PENDING",
+          "status": "PENDING"
+        }
+      },
+      {
+        "label": "Request refund",
+        "endpoint": "/orders/{id}/refund-request",
+        "when": {
+          "paymentStatus": "PAID"
+        },
+        "fields": [
+          {
+            "key": "reason",
+            "label": "Refund reason",
+            "type": "multiline",
+            "maxLength": 2000
+          }
+        ]
+      },
+      {
+        "label": "Request physical return",
+        "endpoint": "/orders/{id}/returns",
+        "when": {
+          "status": "DELIVERED"
+        },
+        "fields": [
+          {
+            "key": "reason",
+            "label": "Return reason",
+            "type": "multiline",
+            "maxLength": 2000
+          },
+          {
+            "key": "method",
+            "label": "Requested return method",
+            "maxLength": 100
+          },
+          {
+            "key": "comments",
+            "label": "Additional comments",
+            "type": "multiline",
+            "maxLength": 2000,
+            "optional": true
+          }
+        ]
+      }
+    ],
+    "pagination": true
+  },
+  "delivery-tasks": {
+    "title": "Assigned deliveries",
+    "endpoint": "/deliveries/partner/{userId}",
+    "roles": ["DELIVERY", "ADMIN"],
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Delivery status",
+        "format": "text"
+      },
+      {
+        "key": "order.deliveryAddress",
+        "label": "Delivery address",
+        "format": "text"
+      },
+      {
+        "key": "estimatedDeliveryTime",
+        "label": "Estimated delivery",
+        "format": "date"
+      }
+    ],
+    "detail": {
+      "web": "/tracking/{orderId}",
+      "mobile": "Tracking",
+      "param": "orderId",
+      "idField": "orderId"
+    },
+    "actions": [
+      {
+        "label": "Start delivery",
+        "endpoint": "/deliveries/{orderId}/start",
+        "when": {
+          "status": "ASSIGNED"
+        }
+      },
+      {
+        "label": "Send handover code",
+        "endpoint": "/deliveries/{orderId}/handover-code",
+        "when": {
+          "status": "IN_TRANSIT"
+        }
+      },
+      {
+        "label": "Verify handover code",
+        "endpoint": "/deliveries/{orderId}/verify-otp",
+        "when": {
+          "status": "IN_TRANSIT"
+        },
+        "fields": [
+          {
+            "key": "otp",
+            "label": "Customer handover code",
+            "maxLength": 6
+          }
+        ]
+      },
+      {
+        "label": "Complete delivery",
+        "endpoint": "/deliveries/{orderId}/complete",
+        "when": {
+          "status": "IN_TRANSIT"
+        }
+      }
+    ]
+  },
+  "delivery-queue": {
+    "title": "Delivery assignment",
+    "endpoint": "/admin/delivery-queue",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "orderStatus",
+        "label": "Order status",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Delivery status",
+        "format": "text"
+      },
+      {
+        "key": "partnerName",
+        "label": "Assigned partner",
+        "format": "text"
+      },
+      {
+        "key": "deliveryAddress",
+        "label": "Address",
+        "format": "text"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Assign delivery partner",
+        "endpoint": "/deliveries/{orderId}/assign/{agentId}",
+        "method": "post",
+        "fields": [
+          {
+            "key": "agentId",
+            "label": "Delivery partner",
+            "type": "select",
+            "source": "/admin/delivery-agents/available",
+            "optionLabel": "name"
+          }
+        ]
+      }
+    ],
+    "detail": {
+      "web": "/tracking/{orderId}",
+      "mobile": "Tracking",
+      "param": "orderId",
+      "idField": "orderId"
+    }
+  },
+  "live-fleet": {
+    "title": "Live fleet reports",
+    "endpoint": "/admin/live-fleet",
+    "roles": ["ADMIN"],
+    "kind": "locations",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Delivery partner",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "latitude",
+        "label": "Latitude",
+        "format": "text"
+      },
+      {
+        "key": "longitude",
+        "label": "Longitude",
+        "format": "text"
+      },
+      {
+        "key": "lastPingAt",
+        "label": "Last GPS report",
+        "format": "date"
+      }
+    ]
+  },
+  "delivery-chat": {
+    "title": "Delivery conversation",
+    "endpoint": "/deliveries/{orderId}/messages",
+    "context": "orderId",
+    "contextSource": "/deliveries/accessible",
+    "contextLabel": "orderNumber",
+    "columns": [
+      {
+        "key": "authorName",
+        "label": "From",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Message",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Sent",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Send message",
+      "endpoint": "/deliveries/{orderId}/messages",
+      "fields": [
+        {
+          "key": "body",
+          "label": "Message",
+          "type": "multiline",
+          "maxLength": 2000
+        }
+      ]
+    }
+  },
+  "delivery-evidence": {
+    "title": "Proof of delivery",
+    "endpoint": "/deliveries/{orderId}/evidence",
+    "context": "orderId",
+    "contextSource": "/deliveries/accessible",
+    "contextLabel": "orderNumber",
+    "roles": ["DELIVERY", "ADMIN"],
+    "columns": [
+      {
+        "key": "imageUrl",
+        "label": "Delivery photograph",
+        "format": "image"
+      },
+      {
+        "key": "recipientName",
+        "label": "Recipient",
+        "format": "text"
+      },
+      {
+        "key": "notes",
+        "label": "Notes",
+        "format": "text"
+      },
+      {
+        "key": "capturedAt",
+        "label": "Recorded",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Save delivery evidence",
+      "endpoint": "/deliveries/{orderId}/evidence",
+      "fields": [
+        {
+          "key": "imageUrl",
+          "label": "Delivery photograph",
+          "type": "image"
+        },
+        {
+          "key": "recipientName",
+          "label": "Recipient name",
+          "type": "text",
+          "maxLength": 100
+        },
+        {
+          "key": "notes",
+          "label": "Notes",
+          "type": "multiline",
+          "optional": true
+        }
+      ]
+    }
+  },
+  "shipping-label": {
+    "title": "TrueHand delivery label",
+    "endpoint": "/seller/fulfillments/{fulfillmentId}/label",
+    "context": "fulfillmentId",
+    "contextSource": "/seller/fulfillments",
+    "contextLabel": "orderNumber",
+    "roles": ["SELLER", "ADMIN"],
+    "kind": "label",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "id",
+        "label": "Fulfillment",
+        "format": "text"
+      },
+      {
+        "key": "recipient",
+        "label": "Recipient",
+        "format": "text"
+      },
+      {
+        "key": "deliveryAddress",
+        "label": "Address",
+        "format": "text"
+      },
+      {
+        "key": "items",
+        "label": "Packed items",
+        "format": "text"
+      },
+      {
+        "key": "specialInstructions",
+        "label": "Instructions",
+        "format": "text"
+      }
+    ]
+  },
+  "delivery-routes": {
+    "title": "Delivery route planning",
+    "endpoint": "/delivery/routes",
+    "roles": ["DELIVERY"],
+    "columns": [
+      {
+        "key": "id",
+        "label": "Route",
+        "format": "text"
+      },
+      {
+        "key": "straightLineDistanceMeters",
+        "label": "Straight-line distance in metres",
+        "format": "text"
+      },
+      {
+        "key": "coordinates",
+        "label": "Route coordinates",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Planned",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Plan assigned deliveries",
+      "endpoint": "/delivery/route-optimization",
+      "fields": [
+        {
+          "key": "originLatitude",
+          "label": "Starting latitude",
+          "type": "number",
+          "min": -90,
+          "max": 90
+        },
+        {
+          "key": "originLongitude",
+          "label": "Starting longitude",
+          "type": "number",
+          "min": -180,
+          "max": 180
+        }
+      ]
+    }
+  },
+  "admin-metrics": {
+    "title": "Marketplace analytics",
+    "endpoint": "/admin/metrics",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "totalUsers",
+        "label": "Registered users",
+        "format": "number"
+      },
+      {
+        "key": "totalOrders",
+        "label": "Orders",
+        "format": "number"
+      },
+      {
+        "key": "pendingSellers",
+        "label": "Seller verifications pending",
+        "format": "number"
+      },
+      {
+        "key": "pendingDelivery",
+        "label": "Delivery verifications pending",
+        "format": "number"
+      },
+      {
+        "key": "totalRevenue",
+        "label": "Paid order value",
+        "format": "money"
+      },
+      {
+        "key": "revenueMonths",
+        "label": "Recorded months",
+        "format": "text"
+      },
+      {
+        "key": "revenueTrend",
+        "label": "Paid order value by month",
+        "format": "text"
+      },
+      {
+        "key": "topProducts",
+        "label": "Top purchased products",
+        "format": "text"
+      }
+    ]
+  },
+  "admin-categories": {
+    "title": "Category management",
+    "endpoint": "/categories",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "name",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Category image",
+        "format": "image"
+      }
+    ],
+    "form": {
+      "title": "Create category",
+      "endpoint": "/categories",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Category name",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "multiline",
+          "optional": true
+        },
+        {
+          "key": "imageUrl",
+          "label": "Category image",
+          "type": "image",
+          "optional": true
+        },
+        {
+          "key": "parentId",
+          "label": "Parent category",
+          "type": "select",
+          "source": "/categories",
+          "optionLabel": "name",
+          "optional": true
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Edit category",
+        "endpoint": "/categories/{id}",
+        "method": "put",
+        "fields": [
+          {
+            "key": "name",
+            "label": "Category name",
+            "type": "text"
+          },
+          {
+            "key": "description",
+            "label": "Description",
+            "type": "multiline",
+            "optional": true
+          },
+          {
+            "key": "imageUrl",
+            "label": "Category image",
+            "type": "image",
+            "optional": true
+          }
+        ]
+      },
+      {
+        "label": "Delete category",
+        "endpoint": "/categories/{id}",
+        "method": "delete"
+      }
+    ]
+  },
+  "seller-products": {
+    "title": "Your catalog",
+    "endpoint": "/products/seller/{userId}",
+    "roles": ["SELLER", "ADMIN"],
+    "kind": "products",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Create product for moderation",
+      "endpoint": "/products",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Product name",
+          "maxLength": 255
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "multiline",
+          "maxLength": 10000
+        },
+        {
+          "key": "category",
+          "label": "Category",
+          "type": "select",
+          "source": "/categories",
+          "optionValue": "name",
+          "optionLabel": "name",
+          "numeric": false
+        },
+        {
+          "key": "price",
+          "label": "Base price in INR",
+          "prefillKey": "originalPrice",
+          "type": "money",
+          "min": 0.01
+        },
+        {
+          "key": "stockQuantity",
+          "label": "Stock (for products without variants)",
+          "type": "integer",
+          "min": 0
+        },
+        {
+          "key": "imageUrl",
+          "label": "Product photograph",
+          "type": "image",
+          "optional": true
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Edit product",
+        "endpoint": "/products/{id}",
+        "method": "put",
+        "fields": [
+          {
+            "key": "name",
+            "label": "Product name",
+            "maxLength": 255
+          },
+          {
+            "key": "description",
+            "label": "Description",
+            "type": "multiline",
+            "maxLength": 10000
+          },
+          {
+            "key": "category",
+            "label": "Category",
+            "type": "select",
+            "source": "/categories",
+            "optionValue": "name",
+            "optionLabel": "name",
+            "numeric": false
+          },
+          {
+            "key": "price",
+            "label": "Base price in INR",
+            "prefillKey": "originalPrice",
+            "type": "money",
+            "min": 0.01
+          },
+          {
+            "key": "stockQuantity",
+            "label": "Stock (for products without variants)",
+            "type": "integer",
+            "min": 0,
+            "omitWhen": {
+              "hasVariants": true
+            }
+          },
+          {
+            "key": "imageUrl",
+            "label": "Product photograph",
+            "type": "image",
+            "optional": true
+          }
+        ]
+      },
+      {
+        "label": "Withdraw product",
+        "endpoint": "/products/{id}",
+        "method": "delete"
+      }
+    ],
+    "pagination": true,
+    "detail": {
+      "web": "/features/product-editor?productId={id}",
+      "mobile": "EditListing",
+      "param": "productId"
+    }
+  },
+  "seller-storefront": {
+    "title": "Storefront settings",
+    "endpoint": "/sellers/{userId}/storefront",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "shopDescription",
+        "label": "Shop description",
+        "format": "text"
+      },
+      {
+        "key": "bannerImageUrl",
+        "label": "Banner",
+        "format": "image"
+      },
+      {
+        "key": "brandColorHex",
+        "label": "Brand color",
+        "format": "text"
+      }
+    ],
+    "form": {
+      "title": "Save storefront",
+      "method": "put",
+      "endpoint": "/sellers/{userId}/storefront",
+      "fields": [
+        {
+          "key": "shopDescription",
+          "label": "Shop description",
+          "type": "multiline"
+        },
+        {
+          "key": "bannerImageUrl",
+          "label": "Banner image",
+          "type": "image",
+          "optional": true
+        },
+        {
+          "key": "brandColorHex",
+          "label": "Brand color",
+          "type": "text"
+        }
+      ]
+    }
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "endpoint": "/wishlist/user/{userId}",
+    "kind": "products",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Remove from wishlist",
+        "endpoint": "/wishlist/user/{userId}/product/{id}",
+        "method": "delete"
+      }
+    ]
+  },
+  "purchased-products": {
+    "title": "Buy again",
+    "endpoint": "/account/purchased-products",
+    "kind": "products",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ]
+  },
+  "wallet-transactions": {
+    "title": "Wallet transactions",
+    "endpoint": "/wallet/{userId}/transactions",
+    "columns": [
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "type",
+        "label": "Type",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Amount",
+        "format": "money"
+      },
+      {
+        "key": "createdAt",
+        "label": "Recorded",
+        "format": "date"
+      }
+    ]
+  },
+  "delivery-availability": {
+    "title": "Delivery availability",
+    "endpoint": "/delivery-personnel/{userId}/kyc",
+    "roles": ["DELIVERY", "ADMIN"],
+    "columns": [
+      {
+        "key": "vehicleType",
+        "label": "Vehicle type",
+        "format": "text"
+      },
+      {
+        "key": "kycStatus",
+        "label": "Verification status",
+        "format": "text"
+      },
+      {
+        "key": "isAvailable",
+        "label": "Available",
+        "format": "boolean"
+      }
+    ],
+    "form": {
+      "title": "Update availability",
+      "method": "put",
+      "endpoint": "/delivery-personnel/{userId}/availability",
+      "fields": [
+        {
+          "key": "isAvailable",
+          "label": "Available for assignments",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  "social-feed": {
+    "title": "Community posts",
+    "endpoint": "/social/feed",
+    "public": true,
+    "columns": [
+      {
+        "key": "artisan.firstName",
+        "label": "Artisan",
+        "format": "text"
+      },
+      {
+        "key": "content",
+        "label": "Post",
+        "format": "text"
+      },
+      {
+        "key": "mediaUrl",
+        "label": "Image",
+        "format": "image"
+      },
+      {
+        "key": "likesCount",
+        "label": "Likes",
+        "format": "number"
+      },
+      {
+        "key": "createdAt",
+        "label": "Posted",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Create post",
+      "endpoint": "/social/feed",
+      "roles": ["SELLER", "ADMIN"],
+      "fields": [
+        {
+          "key": "content",
+          "label": "Post",
+          "type": "multiline"
+        },
+        {
+          "key": "mediaUrl",
+          "label": "Post image",
+          "type": "image",
+          "optional": true
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Like post",
+        "endpoint": "/social/posts/{id}/like",
+        "method": "post"
+      },
+      {
+        "label": "Unlike post",
+        "endpoint": "/social/posts/{id}/like",
+        "method": "delete"
+      }
+    ]
+  },
+  "admin-content": {
+    "title": "Published content management",
+    "endpoint": "/admin/content",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "slug",
+        "label": "Page",
+        "format": "text"
+      },
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Publishing status",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Save content page",
+      "endpoint": "/admin/content",
+      "fields": [
+        {
+          "key": "slug",
+          "label": "Page slug",
+          "type": "text",
+          "maxLength": 100
+        },
+        {
+          "key": "title",
+          "label": "Title",
+          "type": "text",
+          "maxLength": 200
+        },
+        {
+          "key": "body",
+          "label": "Content",
+          "type": "multiline",
+          "maxLength": 100000
+        },
+        {
+          "key": "status",
+          "label": "Publishing status",
+          "type": "select",
+          "options": [
+            {
+              "value": "DRAFT",
+              "label": "Draft"
+            },
+            {
+              "value": "PUBLISHED",
+              "label": "Published"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "welcome": {
+    "title": "Welcome to TrueHand",
+    "endpoint": "/community/content/welcome",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "faq": {
+    "title": "Frequently asked questions",
+    "endpoint": "/community/content/faq",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "help": {
+    "title": "Help center",
+    "endpoint": "/community/content/help",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "authentic-craft": {
+    "title": "About TrueHand",
+    "endpoint": "/community/content/authentic-craft",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "privacy": {
+    "title": "Privacy policy",
+    "endpoint": "/community/content/privacy",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "terms": {
+    "title": "Terms of service",
+    "endpoint": "/community/content/terms",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "returns-policy": {
+    "title": "Returns policy",
+    "endpoint": "/community/content/returns-policy",
+    "public": true,
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Content",
+        "format": "text"
+      },
+      {
+        "key": "version",
+        "label": "Version",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "seller-studio": {
+    "title": "Studio pickup details",
+    "endpoint": "/seller/studio",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "streetAddress",
+        "label": "Street address",
+        "format": "text"
+      },
+      {
+        "key": "city",
+        "label": "City",
+        "format": "text"
+      },
+      {
+        "key": "state",
+        "label": "State",
+        "format": "text"
+      },
+      {
+        "key": "postalCode",
+        "label": "PIN code",
+        "format": "text"
+      },
+      {
+        "key": "pickupInstructions",
+        "label": "Pickup instructions",
+        "format": "text"
+      }
+    ],
+    "form": {
+      "title": "Save studio details",
+      "endpoint": "/seller/studio",
+      "fields": [
+        {
+          "key": "streetAddress",
+          "label": "Street address",
+          "type": "text"
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "type": "text"
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "type": "text"
+        },
+        {
+          "key": "postalCode",
+          "label": "PIN code",
+          "type": "text"
+        },
+        {
+          "key": "pickupInstructions",
+          "label": "Pickup instructions",
+          "type": "multiline",
+          "optional": true
+        }
+      ]
+    }
+  },
+  "subscription-plans": {
+    "title": "Prepaid seller subscription plans",
+    "endpoint": "/sellers/plans",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "name",
+        "label": "Plan",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Benefits",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "durationDays",
+        "label": "Duration in days",
+        "format": "text"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Create secure checkout",
+        "endpoint": "/sellers/{userId}/subscribe",
+        "method": "post",
+        "body": {
+          "planId": "{id}",
+          "checkoutKey": "{requestKey}"
+        },
+        "checkout": true
+      }
+    ]
+  },
+  "seller-subscription": {
+    "title": "Your seller subscription",
+    "endpoint": "/sellers/{userId}/subscription",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "planName",
+        "label": "Plan",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "expiresAt",
+        "label": "Expires",
+        "format": "date"
+      }
+    ]
+  },
+  "admin-subscription-plans": {
+    "title": "Seller subscription plan management",
+    "endpoint": "/admin/subscription-plans",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "name",
+        "label": "Plan",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Benefits",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "durationDays",
+        "label": "Duration in days",
+        "format": "text"
+      },
+      {
+        "key": "active",
+        "label": "Available",
+        "format": "boolean"
+      }
+    ],
+    "form": {
+      "title": "Create subscription plan",
+      "endpoint": "/admin/subscription-plans",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Plan name",
+          "type": "text"
+        },
+        {
+          "key": "description",
+          "label": "Benefits",
+          "type": "multiline"
+        },
+        {
+          "key": "amount",
+          "label": "Price",
+          "type": "money"
+        },
+        {
+          "key": "durationDays",
+          "label": "Duration in days",
+          "type": "integer",
+          "min": 1,
+          "max": 366
+        },
+        {
+          "key": "active",
+          "label": "Available for purchase",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  "sponsored-products": {
+    "title": "Sponsored products",
+    "endpoint": "/products/sponsored",
+    "public": true,
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Product image",
+        "format": "image"
+      },
+      {
+        "key": "price",
+        "label": "Base price",
+        "format": "money"
+      },
+      {
+        "key": "endsAt",
+        "label": "Campaign ends",
+        "format": "date"
+      }
+    ],
+    "detail": {
+      "web": "/product/{id}",
+      "mobile": "ProductDetail",
+      "param": "productId"
+    }
+  },
+  "admin-product-campaigns": {
+    "title": "Sponsored product campaigns",
+    "endpoint": "/admin/product-campaigns",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "paymentReference",
+        "label": "Verified campaign payment reference",
+        "format": "text"
+      },
+      {
+        "key": "startsAt",
+        "label": "Starts",
+        "format": "date"
+      },
+      {
+        "key": "endsAt",
+        "label": "Ends",
+        "format": "date"
+      },
+      {
+        "key": "active",
+        "label": "Active",
+        "format": "boolean"
+      }
+    ],
+    "form": {
+      "title": "Record sponsored campaign",
+      "endpoint": "/admin/product-campaigns",
+      "fields": [
+        {
+          "key": "productId",
+          "label": "Product",
+          "type": "select",
+          "source": "/products?size=100",
+          "optionLabel": "name"
+        },
+        {
+          "key": "startsAt",
+          "label": "Starts at (UTC)",
+          "type": "datetime"
+        },
+        {
+          "key": "endsAt",
+          "label": "Ends at (UTC)",
+          "type": "datetime"
+        },
+        {
+          "key": "paymentReference",
+          "label": "Verified payment reference",
+          "type": "text"
+        },
+        {
+          "key": "active",
+          "label": "Active",
+          "type": "boolean"
+        }
+      ]
+    }
+  },
+  "admin-orders": {
+    "title": "Marketplace orders",
+    "endpoint": "/admin/orders",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "totalAmount",
+        "label": "Total",
+        "format": "money"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "paymentStatus",
+        "label": "Payment status",
+        "format": "text"
+      },
+      {
+        "key": "deliveryAddress",
+        "label": "Address",
+        "format": "text"
+      },
+      {
+        "key": "orderItems",
+        "label": "Purchased items",
+        "format": "order-items"
+      }
+    ],
+    "detail": {
+      "web": "/tracking/{id}",
+      "mobile": "Tracking",
+      "param": "orderId"
+    },
+    "pagination": true
+  },
+  "support": {
+    "title": "Support requests",
+    "endpoint": "/support",
+    "columns": [
+      {
+        "key": "requestId",
+        "label": "Reference",
+        "format": "text"
+      },
+      {
+        "key": "subject",
+        "label": "Subject",
+        "format": "text"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "type",
+        "label": "Type",
+        "format": "text"
+      },
+      {
+        "key": "date",
+        "label": "Created",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Submit support request",
+      "endpoint": "/support",
+      "fields": [
+        {
+          "key": "subject",
+          "label": "Subject",
+          "maxLength": 200
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "multiline",
+          "maxLength": 10000
+        },
+        {
+          "key": "type",
+          "label": "Request type",
+          "type": "select",
+          "options": [
+            {
+              "value": "GENERAL",
+              "label": "GENERAL"
+            },
+            {
+              "value": "ORDER",
+              "label": "ORDER"
+            },
+            {
+              "value": "DISPUTE",
+              "label": "DISPUTE"
+            },
+            {
+              "value": "ACCOUNT",
+              "label": "ACCOUNT"
+            }
+          ]
+        },
+        {
+          "key": "orderId",
+          "label": "Order (if applicable)",
+          "type": "select",
+          "source": "/orders",
+          "optionLabel": "orderNumber",
+          "optional": true
+        }
+      ]
+    },
+    "detail": {
+      "web": "/features/support-conversation?supportId={id}",
+      "mobile": "Feature",
+      "param": "supportId",
+      "feature": "support-conversation"
+    }
+  },
+  "support-conversation": {
+    "title": "Support conversation",
+    "endpoint": "/support/{supportId}/messages",
+    "context": "supportId",
+    "contextSource": "/support",
+    "contextLabel": "subject",
+    "columns": [
+      {
+        "key": "firstName",
+        "label": "Author",
+        "format": "text"
+      },
+      {
+        "key": "role",
+        "label": "Role",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Message",
+        "format": "text"
+      },
+      {
+        "key": "attachmentUrl",
+        "label": "Attachment",
+        "format": "image"
+      },
+      {
+        "key": "createdAt",
+        "label": "Sent",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Send message",
+      "endpoint": "/support/{supportId}/messages",
+      "fields": [
+        {
+          "key": "body",
+          "label": "Message",
+          "type": "multiline",
+          "maxLength": 10000
+        },
+        {
+          "key": "attachmentUrl",
+          "label": "Photograph (optional)",
+          "type": "image",
+          "optional": true
+        }
+      ]
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "endpoint": "/notifications",
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Message",
+        "format": "text"
+      },
+      {
+        "key": "type",
+        "label": "Type",
+        "format": "text"
+      },
+      {
+        "key": "read",
+        "label": "Read",
+        "format": "boolean"
+      },
+      {
+        "key": "createdAt",
+        "label": "Received",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Mark as read",
+        "endpoint": "/notifications/{id}/read",
+        "when": {
+          "read": false
+        }
+      }
+    ],
+    "detail": {
+      "web": "/notifications/{id}",
+      "mobile": "NotificationDetail",
+      "param": "notificationId"
+    },
+    "pagination": true
+  },
+  "notification-detail": {
+    "title": "Notification",
+    "endpoint": "/notifications/{notificationId}",
+    "context": "notificationId",
+    "contextSource": "/notifications",
+    "contextLabel": "title",
+    "columns": [
+      {
+        "key": "title",
+        "label": "Title",
+        "format": "text"
+      },
+      {
+        "key": "body",
+        "label": "Message",
+        "format": "text"
+      },
+      {
+        "key": "type",
+        "label": "Type",
+        "format": "text"
+      },
+      {
+        "key": "read",
+        "label": "Read",
+        "format": "boolean"
+      },
+      {
+        "key": "createdAt",
+        "label": "Received",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Mark as read",
+        "endpoint": "/notifications/{id}/read",
+        "when": {
+          "read": false
+        }
+      }
+    ]
+  },
+  "admin-product-approvals": {
+    "title": "Product approvals",
+    "endpoint": "/admin/products/pending",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "description",
+        "label": "Description",
+        "format": "text"
+      },
+      {
+        "key": "sellerName",
+        "label": "Seller",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Image",
+        "format": "image"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Approve product",
+        "method": "put",
+        "endpoint": "/admin/products/{id}/approve",
+        "body": {
+          "status": "APPROVED"
+        }
+      },
+      {
+        "label": "Reject product",
+        "method": "put",
+        "endpoint": "/admin/products/{id}/approve",
+        "body": {
+          "status": "REJECTED"
+        }
+      }
+    ],
+    "pagination": true
+  },
+  "artisan-profile": {
+    "title": "Artisan profile",
+    "public": true,
+    "endpoint": "/community/artisans/{sellerId}",
+    "context": "sellerId",
+    "contextSource": "/community/artisans",
+    "contextLabel": "businessName",
+    "columns": [
+      {
+        "key": "businessName",
+        "label": "Business",
+        "format": "text"
+      },
+      {
+        "key": "firstName",
+        "label": "Artisan",
+        "format": "text"
+      },
+      {
+        "key": "bio",
+        "label": "Biography",
+        "format": "text"
+      },
+      {
+        "key": "shopDescription",
+        "label": "Shop",
+        "format": "text"
+      },
+      {
+        "key": "bannerImageUrl",
+        "label": "Shop image",
+        "format": "image"
+      }
+    ],
+    "detail": {
+      "web": "/features/artisan-products?sellerId={id}",
+      "mobile": "Feature",
+      "param": "sellerId",
+      "feature": "artisan-products"
+    }
+  },
+  "artisan-products": {
+    "title": "Artisan products",
+    "endpoint": "/products/seller/{sellerId}",
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "category",
+        "label": "Category",
+        "format": "text"
+      },
+      {
+        "key": "price",
+        "label": "Price",
+        "format": "money"
+      },
+      {
+        "key": "stockQuantity",
+        "label": "Stock",
+        "format": "number"
+      },
+      {
+        "key": "averageRating",
+        "label": "Rating",
+        "format": "number"
+      },
+      {
+        "key": "saleEndsAt",
+        "label": "Sale ends",
+        "format": "date"
+      }
+    ],
+    "kind": "products",
+    "public": true,
+    "search": false,
+    "context": "sellerId",
+    "contextSource": "/community/artisans",
+    "contextLabel": "businessName",
+    "pagination": true
+  },
+  "delivery-performance": {
+    "title": "Delivery performance",
+    "roles": ["DELIVERY"],
+    "endpoint": "/delivery/performance",
+    "columns": [
+      {
+        "key": "assignedTotal",
+        "label": "Assigned deliveries",
+        "format": "number"
+      },
+      {
+        "key": "delivered",
+        "label": "Completed deliveries",
+        "format": "number"
+      },
+      {
+        "key": "inTransit",
+        "label": "In transit",
+        "format": "number"
+      },
+      {
+        "key": "awaitingPickup",
+        "label": "Awaiting pickup",
+        "format": "number"
+      },
+      {
+        "key": "deliveredLastMonth",
+        "label": "Completed in last 30 days",
+        "format": "number"
+      },
+      {
+        "key": "deliveriesWithEstimate",
+        "label": "Completed deliveries with an estimate",
+        "format": "number"
+      },
+      {
+        "key": "deliveredByEstimate",
+        "label": "Delivered by recorded estimate",
+        "format": "number"
+      }
+    ]
+  },
+  "delivery-profile": {
+    "title": "Delivery partner profile",
+    "roles": ["DELIVERY"],
+    "endpoint": "/delivery-personnel/{userId}/kyc",
+    "columns": [
+      {
+        "key": "vehicleType",
+        "label": "Vehicle type",
+        "format": "text"
+      },
+      {
+        "key": "vehicleRegistrationNumber",
+        "label": "Vehicle registration",
+        "format": "text"
+      },
+      {
+        "key": "kycStatus",
+        "label": "Verification status",
+        "format": "text"
+      },
+      {
+        "key": "rejectionReason",
+        "label": "Review note",
+        "format": "text"
+      },
+      {
+        "key": "isAvailable",
+        "label": "Available",
+        "format": "boolean"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Become available",
+        "method": "put",
+        "endpoint": "/delivery-personnel/{userId}/availability",
+        "body": {
+          "isAvailable": true
+        },
+        "when": {
+          "kycStatus": "APPROVED",
+          "isAvailable": false
+        }
+      },
+      {
+        "label": "Go offline",
+        "method": "put",
+        "endpoint": "/delivery-personnel/{userId}/availability",
+        "body": {
+          "isAvailable": false
+        },
+        "when": {
+          "isAvailable": true
+        }
+      }
+    ]
+  },
+  "delivery-exceptions": {
+    "title": "Delivery exception reports",
+    "roles": ["DELIVERY"],
+    "endpoint": "/delivery/exceptions",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "reason",
+        "label": "Reason",
+        "format": "text"
+      },
+      {
+        "key": "details",
+        "label": "Details",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "resolution",
+        "label": "Resolution",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Photograph",
+        "format": "image"
+      },
+      {
+        "key": "createdAt",
+        "label": "Reported",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Report delivery exception",
+      "endpoint": "/delivery/exceptions",
+      "fields": [
+        {
+          "key": "orderId",
+          "label": "Assigned order",
+          "type": "select",
+          "source": "/deliveries/partner/{userId}",
+          "optionLabel": "orderNumber",
+          "optionValue": "orderId"
+        },
+        {
+          "key": "reason",
+          "label": "Reason",
+          "type": "select",
+          "options": [
+            {
+              "value": "RECIPIENT_UNAVAILABLE",
+              "label": "RECIPIENT UNAVAILABLE"
+            },
+            {
+              "value": "INCORRECT_ADDRESS",
+              "label": "INCORRECT ADDRESS"
+            },
+            {
+              "value": "ACCESS_BLOCKED",
+              "label": "ACCESS BLOCKED"
+            },
+            {
+              "value": "DAMAGED_ITEM",
+              "label": "DAMAGED ITEM"
+            },
+            {
+              "value": "VEHICLE_ISSUE",
+              "label": "VEHICLE ISSUE"
+            },
+            {
+              "value": "OTHER",
+              "label": "OTHER"
+            }
+          ]
+        },
+        {
+          "key": "details",
+          "label": "Details",
+          "type": "multiline",
+          "maxLength": 2000
+        },
+        {
+          "key": "imageUrl",
+          "label": "Photograph (optional)",
+          "type": "image",
+          "optional": true
+        }
+      ]
+    }
+  },
+  "admin-delivery-exceptions": {
+    "title": "Delivery exception review",
+    "roles": ["ADMIN"],
+    "endpoint": "/admin/delivery-exceptions",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "reason",
+        "label": "Reason",
+        "format": "text"
+      },
+      {
+        "key": "details",
+        "label": "Details",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "resolution",
+        "label": "Resolution",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Photograph",
+        "format": "image"
+      },
+      {
+        "key": "createdAt",
+        "label": "Reported",
+        "format": "date"
+      },
+      {
+        "key": "partnerName",
+        "label": "Reported by",
+        "format": "text"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Resolve report",
+        "endpoint": "/admin/delivery-exceptions/{id}/resolve",
+        "when": {
+          "status": "OPEN"
+        },
+        "fields": [
+          {
+            "key": "resolution",
+            "label": "Resolution",
+            "type": "multiline",
+            "maxLength": 2000
+          }
+        ]
+      }
+    ]
+  },
+  "offers": {
+    "title": "Available offers",
+    "endpoint": "/promo/all",
+    "roles": ["CUSTOMER"],
+    "description": "These are active offers configured by the platform or sellers. Seller offers apply to eligible items from that seller. Apply a code at checkout to check its actual discount. Reservations count toward usage limits; completed refunds do not restore a used offer.",
+    "columns": [
+      {
+        "key": "code",
+        "label": "Code",
+        "format": "text"
+      },
+      {
+        "key": "discountPercentage",
+        "label": "Discount percentage",
+        "format": "number"
+      },
+      {
+        "key": "maxDiscountAmount",
+        "label": "Maximum discount",
+        "format": "money"
+      },
+      {
+        "key": "minimumSubtotal",
+        "label": "Minimum eligible subtotal",
+        "format": "money"
+      },
+      {
+        "key": "sellerId",
+        "label": "Seller scope (blank means platform)",
+        "format": "number"
+      },
+      {
+        "key": "validUntil",
+        "label": "Expires",
+        "format": "date"
+      }
+    ]
+  },
+  "admin-users": {
+    "title": "Registered users",
+    "endpoint": "/users",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "id",
+        "label": "User ID",
+        "format": "number"
+      },
+      {
+        "key": "firstName",
+        "label": "First name",
+        "format": "text"
+      },
+      {
+        "key": "lastName",
+        "label": "Last name",
+        "format": "text"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "format": "text"
+      },
+      {
+        "key": "role",
+        "label": "Role",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Registered",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Block account",
+        "method": "put",
+        "endpoint": "/users/{id}/status",
+        "body": {
+          "status": "BLOCKED"
+        },
+        "when": {
+          "isActive": true
+        },
+        "excludeRoles": ["ADMIN"]
+      },
+      {
+        "label": "Restore account",
+        "method": "put",
+        "endpoint": "/users/{id}/status",
+        "body": {
+          "status": "ACTIVE"
+        },
+        "when": {
+          "isActive": false
+        },
+        "excludeRoles": ["ADMIN"]
+      }
+    ],
+    "pagination": true
+  },
+  "admin-user": {
+    "title": "User details",
+    "endpoint": "/users/{id}",
+    "roles": ["ADMIN"],
+    "columns": [
+      {
+        "key": "id",
+        "label": "User ID",
+        "format": "number"
+      },
+      {
+        "key": "firstName",
+        "label": "First name",
+        "format": "text"
+      },
+      {
+        "key": "lastName",
+        "label": "Last name",
+        "format": "text"
+      },
+      {
+        "key": "email",
+        "label": "Email",
+        "format": "text"
+      },
+      {
+        "key": "role",
+        "label": "Role",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Registered",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Block account",
+        "method": "put",
+        "endpoint": "/users/{id}/status",
+        "body": {
+          "status": "BLOCKED"
+        },
+        "when": {
+          "isActive": true
+        },
+        "excludeRoles": ["ADMIN"]
+      },
+      {
+        "label": "Restore account",
+        "method": "put",
+        "endpoint": "/users/{id}/status",
+        "body": {
+          "status": "ACTIVE"
+        },
+        "when": {
+          "isActive": false
+        },
+        "excludeRoles": ["ADMIN"]
+      }
+    ],
+    "contextSource": "/users",
+    "contextLabel": "email",
+    "context": "id"
+  },
+  "delivery-kyc": {
+    "title": "Delivery partner verification",
+    "roles": ["DELIVERY", "ADMIN"],
+    "endpoint": "/delivery-personnel/{userId}/kyc",
+    "description": "Submit your actual vehicle and license details for review. Approval and availability are recorded by the backend.",
+    "columns": [
+      {
+        "key": "vehicleType",
+        "label": "Vehicle type",
+        "format": "text"
+      },
+      {
+        "key": "vehicleRegistrationNumber",
+        "label": "Registration",
+        "format": "text"
+      },
+      {
+        "key": "drivingLicenseNumber",
+        "label": "Driving license",
+        "format": "text"
+      },
+      {
+        "key": "kycStatus",
+        "label": "Verification status",
+        "format": "text"
+      },
+      {
+        "key": "rejectionReason",
+        "label": "Review note",
+        "format": "text"
+      },
+      {
+        "key": "isAvailable",
+        "label": "Available",
+        "format": "boolean"
+      }
+    ],
+    "form": {
+      "title": "Submit vehicle verification",
+      "endpoint": "/delivery-personnel/{userId}/kyc",
+      "fields": [
+        {
+          "key": "vehicleType",
+          "label": "Vehicle type",
+          "type": "select",
+          "options": [
+            {
+              "value": "BIKE",
+              "label": "BIKE"
+            },
+            {
+              "value": "SCOOTER",
+              "label": "SCOOTER"
+            },
+            {
+              "value": "VAN",
+              "label": "VAN"
+            },
+            {
+              "value": "CAR",
+              "label": "CAR"
+            }
+          ]
+        },
+        {
+          "key": "vehicleRegistrationNumber",
+          "label": "Vehicle registration",
+          "maxLength": 100
+        },
+        {
+          "key": "drivingLicenseNumber",
+          "label": "Driving license",
+          "maxLength": 100
+        }
+      ]
+    }
+  },
+  "seller-verification": {
+    "title": "Seller verification",
+    "roles": ["SELLER", "ADMIN"],
+    "endpoint": "/seller/{userId}/kyc",
+    "columns": [
+      {
+        "key": "businessName",
+        "label": "Business name",
+        "format": "text"
+      },
+      {
+        "key": "kycStatus",
+        "label": "Verification status",
+        "format": "text"
+      },
+      {
+        "key": "rejectionReason",
+        "label": "Review note",
+        "format": "text"
+      },
+      {
+        "key": "panNumber",
+        "label": "Masked PAN",
+        "format": "text"
+      },
+      {
+        "key": "gstNumber",
+        "label": "GST registration",
+        "format": "text"
+      },
+      {
+        "key": "bankAccountNumber",
+        "label": "Masked bank account",
+        "format": "text"
+      },
+      {
+        "key": "ifscCode",
+        "label": "IFSC",
+        "format": "text"
+      }
+    ],
+    "form": {
+      "title": "Submit seller verification",
+      "endpoint": "/seller/{userId}/kyc",
+      "fields": [
+        {
+          "key": "businessName",
+          "label": "Business name",
+          "maxLength": 255
+        },
+        {
+          "key": "panNumber",
+          "label": "PAN",
+          "maxLength": 10
+        },
+        {
+          "key": "gstNumber",
+          "label": "GST registration (if registered)",
+          "maxLength": 15,
+          "optional": true
+        },
+        {
+          "key": "bankAccountNumber",
+          "label": "Bank account number",
+          "maxLength": 34
+        },
+        {
+          "key": "ifscCode",
+          "label": "IFSC",
+          "maxLength": 11
+        }
+      ]
+    }
+  },
+  "seller-availability": {
+    "title": "Storefront availability",
+    "roles": ["SELLER", "ADMIN"],
+    "endpoint": "/seller/{userId}/availability",
+    "columns": [
+      {
+        "key": "acceptingOrders",
+        "label": "Accepting new orders",
+        "format": "boolean"
+      },
+      {
+        "key": "acceptingCommissions",
+        "label": "Accepting new commissions",
+        "format": "boolean"
+      },
+      {
+        "key": "availabilityNotice",
+        "label": "Notice",
+        "format": "text"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Save availability",
+      "endpoint": "/seller/{userId}/availability",
+      "method": "put",
+      "prefill": true,
+      "fields": [
+        {
+          "key": "acceptingOrders",
+          "label": "Accept new orders",
+          "type": "boolean"
+        },
+        {
+          "key": "acceptingCommissions",
+          "label": "Accept new commissions",
+          "type": "boolean"
+        },
+        {
+          "key": "availabilityNotice",
+          "label": "Availability notice",
+          "type": "multiline",
+          "maxLength": 2000,
+          "optional": true
+        }
+      ]
+    }
+  },
+  "delivery-partner": {
+    "title": "Your delivery partner",
+    "endpoint": "/deliveries/{orderId}",
+    "contextSource": "/deliveries/accessible",
+    "contextLabel": "orderNumber",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Delivery status",
+        "format": "text"
+      },
+      {
+        "key": "deliveryBoy.firstName",
+        "label": "Partner first name",
+        "format": "text"
+      },
+      {
+        "key": "deliveryBoy.lastName",
+        "label": "Partner last name",
+        "format": "text"
+      },
+      {
+        "key": "estimatedDeliveryTime",
+        "label": "Recorded delivery estimate",
+        "format": "date"
+      }
+    ],
+    "context": "orderId"
+  },
+  "wallet": {
+    "title": "Wallet balance",
+    "endpoint": "/wallet/{userId}",
+    "columns": [
+      {
+        "key": "balance",
+        "label": "Available balance",
+        "format": "money"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "bank-accounts": {
+    "title": "Bank accounts",
+    "endpoint": "/wallet/banks",
+    "columns": [
+      {
+        "key": "bankName",
+        "label": "Bank",
+        "format": "text"
+      },
+      {
+        "key": "accountName",
+        "label": "Account holder",
+        "format": "text"
+      },
+      {
+        "key": "lastFour",
+        "label": "Last four digits",
+        "format": "text"
+      },
+      {
+        "key": "routingNumber",
+        "label": "IFSC",
+        "format": "text"
+      },
+      {
+        "key": "accountType",
+        "label": "Account type",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Verification status",
+        "format": "text"
+      }
+    ],
+    "form": {
+      "title": "Add bank account",
+      "endpoint": "/wallet/banks",
+      "fields": [
+        {
+          "key": "bankName",
+          "label": "Bank",
+          "maxLength": 255
+        },
+        {
+          "key": "accountName",
+          "label": "Account holder",
+          "maxLength": 255
+        },
+        {
+          "key": "accountNumber",
+          "label": "Account number",
+          "maxLength": 34
+        },
+        {
+          "key": "routingNumber",
+          "label": "IFSC",
+          "maxLength": 11
+        },
+        {
+          "key": "accountType",
+          "label": "Account type",
+          "type": "select",
+          "options": [
+            {
+              "value": "SAVINGS",
+              "label": "SAVINGS"
+            },
+            {
+              "value": "CURRENT",
+              "label": "CURRENT"
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "addresses": {
+    "title": "Saved addresses",
+    "endpoint": "/addresses/user/{userId}",
+    "columns": [
+      {
+        "key": "label",
+        "label": "Label"
+      },
+      {
+        "key": "streetAddress",
+        "label": "Street address"
+      },
+      {
+        "key": "city",
+        "label": "City"
+      },
+      {
+        "key": "state",
+        "label": "State"
+      },
+      {
+        "key": "postalCode",
+        "label": "PIN code"
+      },
+      {
+        "key": "country",
+        "label": "Country"
+      },
+      {
+        "key": "latitude",
+        "label": "Latitude"
+      },
+      {
+        "key": "longitude",
+        "label": "Longitude"
+      },
+      {
+        "key": "isDefault",
+        "label": "Default",
+        "format": "boolean"
+      }
+    ],
+    "form": {
+      "title": "Add address",
+      "endpoint": "/addresses/user/{userId}",
+      "body": {
+        "country": "India"
+      },
+      "fields": [
+        {
+          "key": "label",
+          "label": "Label",
+          "maxLength": 100
+        },
+        {
+          "key": "streetAddress",
+          "label": "Street address",
+          "maxLength": 500
+        },
+        {
+          "key": "city",
+          "label": "City",
+          "maxLength": 100
+        },
+        {
+          "key": "state",
+          "label": "State",
+          "maxLength": 100
+        },
+        {
+          "key": "postalCode",
+          "label": "PIN code",
+          "maxLength": 6
+        },
+        {
+          "key": "latitude",
+          "label": "Latitude (optional)",
+          "type": "number",
+          "min": -90,
+          "max": 90,
+          "optional": true
+        },
+        {
+          "key": "longitude",
+          "label": "Longitude (optional)",
+          "type": "number",
+          "min": -180,
+          "max": 180,
+          "optional": true
+        },
+        {
+          "key": "isDefault",
+          "label": "Default address",
+          "type": "boolean"
+        }
+      ]
+    },
+    "actions": [
+      {
+        "label": "Delete address",
+        "method": "delete",
+        "endpoint": "/addresses/{id}/user/{userId}"
+      }
+    ]
+  },
+  "admin-tax-documents": {
+    "title": "Registered GST invoices",
+    "endpoint": "/admin/tax-documents",
+    "roles": ["ADMIN"],
+    "description": "Amounts are recorded from actual invoices issued by sellers. TrueHand does not generate tax rates or infer a filing position. Reconcile these records with the issued documents.",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "invoiceNumber",
+        "label": "Invoice",
+        "format": "text"
+      },
+      {
+        "key": "invoiceDate",
+        "label": "Invoice date",
+        "format": "text"
+      },
+      {
+        "key": "supplierGstin",
+        "label": "Supplier GST registration",
+        "format": "text"
+      },
+      {
+        "key": "taxableAmount",
+        "label": "Taxable amount",
+        "format": "money"
+      },
+      {
+        "key": "igst",
+        "label": "IGST",
+        "format": "money"
+      },
+      {
+        "key": "cgst",
+        "label": "CGST",
+        "format": "money"
+      },
+      {
+        "key": "sgst",
+        "label": "SGST",
+        "format": "money"
+      },
+      {
+        "key": "totalAmount",
+        "label": "Invoice total",
+        "format": "money"
+      },
+      {
+        "key": "documentUrl",
+        "label": "Issued invoice",
+        "format": "link"
+      }
+    ]
+  },
+  "seller-tax-documents": {
+    "title": "Issued GST invoices",
+    "endpoint": "/seller/tax-documents",
+    "roles": ["SELLER"],
+    "description": "Register an actual issued invoice for a paid order. Enter the amounts from that document and the GST registration on your saved business profile.",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "invoiceNumber",
+        "label": "Invoice",
+        "format": "text"
+      },
+      {
+        "key": "invoiceDate",
+        "label": "Invoice date",
+        "format": "text"
+      },
+      {
+        "key": "supplierGstin",
+        "label": "Supplier GST registration",
+        "format": "text"
+      },
+      {
+        "key": "taxableAmount",
+        "label": "Taxable amount",
+        "format": "money"
+      },
+      {
+        "key": "igst",
+        "label": "IGST",
+        "format": "money"
+      },
+      {
+        "key": "cgst",
+        "label": "CGST",
+        "format": "money"
+      },
+      {
+        "key": "sgst",
+        "label": "SGST",
+        "format": "money"
+      },
+      {
+        "key": "totalAmount",
+        "label": "Invoice total",
+        "format": "money"
+      },
+      {
+        "key": "documentUrl",
+        "label": "Issued invoice",
+        "format": "link"
+      }
+    ],
+    "form": {
+      "title": "Register issued invoice",
+      "endpoint": "/seller/tax-documents",
+      "fields": [
+        {
+          "key": "orderId",
+          "label": "Paid order",
+          "type": "select",
+          "source": "/seller/invoice-orders",
+          "optionLabel": "orderNumber"
+        },
+        {
+          "key": "invoiceNumber",
+          "label": "Issued invoice number",
+          "maxLength": 100
+        },
+        {
+          "key": "invoiceDate",
+          "label": "Invoice date (YYYY-MM-DD)",
+          "type": "date"
+        },
+        {
+          "key": "supplierGstin",
+          "label": "Supplier GST registration",
+          "maxLength": 15
+        },
+        {
+          "key": "taxableAmount",
+          "label": "Taxable amount in INR",
+          "type": "money",
+          "min": 0
+        },
+        {
+          "key": "igst",
+          "label": "IGST in INR",
+          "type": "money",
+          "min": 0
+        },
+        {
+          "key": "cgst",
+          "label": "CGST in INR",
+          "type": "money",
+          "min": 0
+        },
+        {
+          "key": "sgst",
+          "label": "SGST in INR",
+          "type": "money",
+          "min": 0
+        },
+        {
+          "key": "documentUrl",
+          "label": "HTTPS URL of issued invoice",
+          "type": "url",
+          "maxLength": 2000
+        }
+      ]
+    }
+  },
+  "order-tax-documents": {
+    "title": "Your issued invoices",
+    "endpoint": "/orders/{orderId}/tax-documents",
+    "contextSource": "/orders",
+    "contextLabel": "orderNumber",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "invoiceNumber",
+        "label": "Invoice",
+        "format": "text"
+      },
+      {
+        "key": "invoiceDate",
+        "label": "Invoice date",
+        "format": "text"
+      },
+      {
+        "key": "supplierGstin",
+        "label": "Supplier GST registration",
+        "format": "text"
+      },
+      {
+        "key": "taxableAmount",
+        "label": "Taxable amount",
+        "format": "money"
+      },
+      {
+        "key": "igst",
+        "label": "IGST",
+        "format": "money"
+      },
+      {
+        "key": "cgst",
+        "label": "CGST",
+        "format": "money"
+      },
+      {
+        "key": "sgst",
+        "label": "SGST",
+        "format": "money"
+      },
+      {
+        "key": "totalAmount",
+        "label": "Invoice total",
+        "format": "money"
+      },
+      {
+        "key": "documentUrl",
+        "label": "Issued invoice",
+        "format": "link"
+      }
+    ],
+    "context": "orderId"
+  },
+  "return-receipts": {
+    "title": "Physical return receipts",
+    "endpoint": "/seller/return-receipts",
+    "roles": ["SELLER", "ADMIN"],
+    "description": "Record goods actually received. Restocked items increase inventory once. Damaged and quarantined items remain outside saleable stock.",
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "productName",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "quantity",
+        "label": "Received quantity",
+        "format": "number"
+      },
+      {
+        "key": "disposition",
+        "label": "Disposition",
+        "format": "text"
+      },
+      {
+        "key": "receiptReference",
+        "label": "Receipt reference",
+        "format": "text"
+      },
+      {
+        "key": "conditionNotes",
+        "label": "Condition notes",
+        "format": "text"
+      },
+      {
+        "key": "imageUrl",
+        "label": "Evidence",
+        "format": "image"
+      },
+      {
+        "key": "receivedAt",
+        "label": "Received",
+        "format": "date"
+      }
+    ],
+    "form": {
+      "title": "Record physical return",
+      "endpoint": "/seller/return-receipts",
+      "fields": [
+        {
+          "key": "orderItemId",
+          "label": "Returned order item",
+          "type": "select",
+          "source": "/seller/return-items",
+          "optionLabel": "productName"
+        },
+        {
+          "key": "quantity",
+          "label": "Quantity received",
+          "type": "integer",
+          "min": 1
+        },
+        {
+          "key": "disposition",
+          "label": "Disposition",
+          "type": "select",
+          "options": [
+            {
+              "value": "RESTOCKED",
+              "label": "RESTOCKED"
+            },
+            {
+              "value": "DAMAGED",
+              "label": "DAMAGED"
+            },
+            {
+              "value": "QUARANTINED",
+              "label": "QUARANTINED"
+            }
+          ]
+        },
+        {
+          "key": "receiptReference",
+          "label": "Actual receipt reference",
+          "maxLength": 100
+        },
+        {
+          "key": "conditionNotes",
+          "label": "Condition on receipt",
+          "type": "multiline",
+          "maxLength": 2000
+        },
+        {
+          "key": "imageUrl",
+          "label": "Return photograph",
+          "type": "image",
+          "optional": true
+        }
+      ]
+    }
+  },
+  "seller-analytics": {
+    "title": "Seller sales",
+    "roles": ["SELLER", "ADMIN"],
+    "endpoint": "/seller/{userId}/stats",
+    "columns": [
+      {
+        "key": "totalRevenue",
+        "label": "Paid item sales after discounts",
+        "format": "money"
+      },
+      {
+        "key": "activeOrders",
+        "label": "Active paid orders",
+        "format": "number"
+      },
+      {
+        "key": "totalProducts",
+        "label": "Catalog products",
+        "format": "number"
+      }
+    ]
+  },
+  "notification-devices": {
+    "title": "Notification devices",
+    "endpoint": "/notifications/devices",
+    "description": "Only devices registered to your account appear here. Revoking a device stops queued push jobs for it.",
+    "columns": [
+      {
+        "key": "platform",
+        "label": "Platform"
+      },
+      {
+        "key": "provider",
+        "label": "Provider"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Registered",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Disable device notifications",
+        "method": "delete",
+        "endpoint": "/notifications/devices/{id}"
+      }
+    ]
+  },
+  "notification-dispatches": {
+    "title": "Notification delivery attempts",
+    "endpoint": "/notifications/dispatches",
+    "description": "Provider accepted means the mail or push provider accepted a message. It does not confirm that you received or read it.",
+    "columns": [
+      {
+        "key": "channel",
+        "label": "Channel"
+      },
+      {
+        "key": "status",
+        "label": "Dispatch status"
+      },
+      {
+        "key": "attempts",
+        "label": "Attempts",
+        "format": "number"
+      },
+      {
+        "key": "providerReference",
+        "label": "Provider reference"
+      },
+      {
+        "key": "lastError",
+        "label": "Last error"
+      },
+      {
+        "key": "createdAt",
+        "label": "Queued",
+        "format": "date"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "admin-notification-dispatches": {
+    "title": "Notification delivery queue",
+    "roles": ["ADMIN"],
+    "endpoint": "/admin/notification-dispatches",
+    "description": "Provider accepted means the mail or push provider accepted a message. It does not confirm that you received or read it.",
+    "columns": [
+      {
+        "key": "userId",
+        "label": "Account"
+      },
+      {
+        "key": "channel",
+        "label": "Channel"
+      },
+      {
+        "key": "status",
+        "label": "Dispatch status"
+      },
+      {
+        "key": "attempts",
+        "label": "Attempts",
+        "format": "number"
+      },
+      {
+        "key": "providerReference",
+        "label": "Provider reference"
+      },
+      {
+        "key": "lastError",
+        "label": "Last error"
+      },
+      {
+        "key": "createdAt",
+        "label": "Queued",
+        "format": "date"
+      },
+      {
+        "key": "updatedAt",
+        "label": "Updated",
+        "format": "date"
+      }
+    ]
+  },
+  "subscription-purchases": {
+    "title": "Seller subscription purchases",
+    "endpoint": "/sellers/{userId}/subscription-purchases",
+    "roles": ["SELLER", "ADMIN"],
+    "description": "Actual prepaid purchases. Refresh a payment to recover its provider status if the payment confirmation was interrupted. No automatic renewal.",
+    "columns": [
+      {
+        "key": "planName",
+        "label": "Plan",
+        "format": "text"
+      },
+      {
+        "key": "amount",
+        "label": "Amount",
+        "format": "money"
+      },
+      {
+        "key": "durationDays",
+        "label": "Duration in days",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      },
+      {
+        "key": "createdAt",
+        "label": "Created",
+        "format": "date"
+      },
+      {
+        "key": "paidAt",
+        "label": "Paid",
+        "format": "date"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Refresh payment status",
+        "endpoint": "/sellers/{userId}/subscription-purchases/{id}/refresh",
+        "method": "post",
+        "body": {}
+      }
+    ]
+  },
+  "product-editor": {
+    "title": "Edit product",
+    "description": "Changes to product content require moderation. Manage SKU quantities through product variants.",
+    "endpoint": "/products/{productId}",
+    "context": "productId",
+    "contextSource": "/products/seller/{userId}",
+    "contextLabel": "name",
+    "roles": ["SELLER", "ADMIN"],
+    "columns": [
+      {
+        "key": "name",
+        "label": "Product",
+        "format": "text"
+      },
+      {
+        "key": "status",
+        "label": "Status",
+        "format": "text"
+      }
+    ],
+    "form": {
+      "title": "Save product",
+      "endpoint": "/products/{productId}",
+      "method": "put",
+      "prefill": true,
+      "ownerField": "sellerId",
+      "fields": [
+        {
+          "key": "name",
+          "label": "Product name",
+          "maxLength": 255
+        },
+        {
+          "key": "description",
+          "label": "Description",
+          "type": "multiline",
+          "maxLength": 10000
+        },
+        {
+          "key": "category",
+          "label": "Category",
+          "type": "select",
+          "source": "/categories",
+          "optionValue": "name",
+          "optionLabel": "name",
+          "numeric": false
+        },
+        {
+          "key": "price",
+          "label": "Base price in INR",
+          "prefillKey": "originalPrice",
+          "type": "money",
+          "min": 0.01
+        },
+        {
+          "key": "stockQuantity",
+          "label": "Stock (for products without variants)",
+          "type": "integer",
+          "min": 0,
+          "omitWhen": {
+            "hasVariants": true
+          }
+        },
+        {
+          "key": "imageUrl",
+          "label": "Product photograph",
+          "type": "image",
+          "optional": true
+        }
+      ],
+      "allowAdminOwnership": true
+    }
+  },
+  "seller-orders": {
+    "title": "Seller orders",
+    "endpoint": "/seller/{userId}/orders",
+    "roles": ["SELLER", "ADMIN"],
+    "pagination": true,
+    "columns": [
+      {
+        "key": "orderNumber",
+        "label": "Order",
+        "format": "text"
+      },
+      {
+        "key": "productName",
+        "label": "Purchased product",
+        "format": "text"
+      },
+      {
+        "key": "variantSku",
+        "label": "Purchased SKU",
+        "format": "text"
+      },
+      {
+        "key": "variantDescription",
+        "label": "Purchased options",
+        "format": "text"
+      },
+      {
+        "key": "quantity",
+        "label": "Quantity",
+        "format": "number"
+      },
+      {
+        "key": "priceAtPurchase",
+        "label": "Unit price",
+        "format": "money"
+      },
+      {
+        "key": "deliveryAddress",
+        "label": "Delivery address at purchase",
+        "format": "text"
+      },
+      {
+        "key": "orderDate",
+        "label": "Placed",
+        "format": "date"
+      },
+      {
+        "key": "orderStatus",
+        "label": "Fulfillment status",
+        "format": "text"
+      },
+      {
+        "key": "paymentStatus",
+        "label": "Payment status",
+        "format": "text"
+      }
+    ],
+    "actions": [
+      {
+        "label": "Start processing",
+        "endpoint": "/seller/{userId}/orders/{orderNumber}/status",
+        "method": "put",
+        "body": {
+          "status": "PROCESSING"
+        },
+        "when": {
+          "orderStatus": "CONFIRMED",
+          "paymentStatus": "PAID"
+        }
+      },
+      {
+        "label": "Mark shipped",
+        "endpoint": "/seller/{userId}/orders/{orderNumber}/status",
+        "method": "put",
+        "body": {
+          "status": "SHIPPED"
+        },
+        "when": {
+          "orderStatus": "PROCESSING",
+          "paymentStatus": "PAID"
+        }
+      }
+    ]
+  }
+}

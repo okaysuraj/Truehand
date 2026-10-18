@@ -1,19 +1,23 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "addresses")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Address {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -38,20 +42,25 @@ public class Address {
     private String postalCode;
 
     private String country;
+    private String fullName;
+    private String phone;
+    private java.math.BigDecimal latitude;
+    private java.math.BigDecimal longitude;
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean isDefault;
 
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
-    
+
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();

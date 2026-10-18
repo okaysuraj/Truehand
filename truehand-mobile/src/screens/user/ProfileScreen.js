@@ -1,197 +1,109 @@
-import api from '../../services/api';
+import React, { useCallback, useState } from 'react';
+import { Text, ScrollView, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';;
+import { useFocusEffect } from '@react-navigation/native';
 import { useAuthStore } from '../../store/useAuthStore';
-import { Ionicons } from '@expo/vector-icons';
-import { colors, typography, spacing } from '../../theme/theme';
-
+import api from '../../services/api';
+import { colors } from '../../theme/theme';
 export default function ProfileScreen({ navigation }) {
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (err) {
-      // Ignore logout error
-    }
-  };
-
-  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : 'Julian Thorne';
-  const role = user ? 'Member' : 'Master Ceramicist & Collector';
-  
-
+  const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
+  const [profile, setProfile] = useState(null);
+  const [error, setError] = useState('');
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      setProfile(null);
+      setError('');
+      if (!user) return;
+      api
+        .get('/users/me')
+        .then(({ data }) => {
+          if (active) setProfile(data);
+        })
+        .catch((err) => {
+          if (active) setError(err.response?.data?.error || 'Unable to load profile.');
+        });
+      return () => {
+        active = false;
+      };
+    }, [user?.id]),
+  );
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors['forest-green']} />
-        </TouchableOpacity>
-        <Text style={styles.brand}>Artisan Profile</Text>
-        <TouchableOpacity style={styles.iconButton}>
-          <Ionicons name="settings-outline" size={24} color={colors['forest-green']} />
-        </TouchableOpacity>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
-        <View style={styles.profileHeader}>
-          <View style={styles.avatarContainer}>
-            <Image 
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSp22LO2WIyz_K097Vaz9ZUjT0HGApGIqC-E34VmusA8yWFqC8kyP3lz-bO1y0I0nZQwV-jDbZKVOE_22t-dl8OF8vzAb0jBdOweZ05R70f9q0K-3_B-SByawp5tsNGXbCtfiGLDxUi-MQk_-fIt2oTZgDwrwydtP85_TeTdkkFn2DjAjKQxinNLLMbMUZHUTnZZW5Bza9S3qkew5eq_eD9EcUuIlCwh3uJbY7A_Hl1fTy8wZxcTYbUA' }} 
-              style={styles.avatar} 
-            />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors['surface-linen'],
+      }}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          padding: 24,
+          gap: 20,
+        }}
+      >
+        <Text
+          style={{
+            fontFamily: 'EBGaramond_500Medium',
+            fontSize: 32,
+            color: colors['forest-green'],
+          }}
+        >
+          Your account
+        </Text>
+        {!!error && <Text accessibilityRole="alert">{error}</Text>}
+        {profile && (
+          <View
+            style={{
+              gap: 12,
+            }}
+          >
+            <Text>{[profile.firstName, profile.lastName].filter(Boolean).join(' ')}</Text>
+            <Text>{profile.email}</Text>
+            <Text>{profile.phone}</Text>
+            <Text>{profile.bio}</Text>
+            <Text>Account type: {profile.role}</Text>
+            <Text>Member since: {new Date(profile.createdAt).toLocaleDateString()}</Text>
           </View>
-          <Text style={styles.name}>{fullName}</Text>
-          <Text style={styles.role}>{role}</Text>
-        </View>
-
-        <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="person-outline" size={24} color={colors['clay-outline']} />
-              <Text style={styles.menuText}>Personal Info</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
+        )}
+        {user ? (
+          <>
+            {[
+              ['EditProfile', 'Edit profile'],
+              ['Orders', 'Your orders'],
+              ['ManageAddresses', 'Saved addresses'],
+              ['Wishlist', 'Wishlist'],
+              ['NotificationsList', 'Notifications'],
+            ].map(([to, label]) => (
+              <TouchableOpacity key={to} onPress={() => navigation.navigate(to)}>
+                <Text>{label}</Text>
+              </TouchableOpacity>
+            ))}
+            {user.role === 'SELLER' && (
+              <TouchableOpacity onPress={() => navigation.navigate('SellerDashboard')}>
+                <Text>Seller dashboard</Text>
+              </TouchableOpacity>
+            )}
+            {user.role === 'DELIVERY' && (
+              <TouchableOpacity onPress={() => navigation.navigate('DeliveryDashboard')}>
+                <Text>Delivery dashboard</Text>
+              </TouchableOpacity>
+            )}
+            {user.role === 'ADMIN' && (
+              <TouchableOpacity onPress={() => navigation.navigate('AdminDashboard')}>
+                <Text>Admin dashboard</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity onPress={logout}>
+              <Text>Sign out</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text>Sign in</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Orders')}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="bag-outline" size={24} color={colors['clay-outline']} />
-              <Text style={styles.menuText}>My Orders</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="wallet-outline" size={24} color={colors['clay-outline']} />
-              <Text style={styles.menuText}>Digital Wallet</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.menuItem} onPress={() => {}}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="heart-outline" size={24} color={colors['clay-outline']} />
-              <Text style={styles.menuText}>Saved Collections</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
-          </TouchableOpacity>
-          
-          <TouchableOpacity style={[styles.menuItem, { marginTop: spacing.stackMd }]} onPress={() => {}}>
-            <View style={styles.menuItemLeft}>
-              <Ionicons name="help-circle-outline" size={24} color={colors['clay-outline']} />
-              <Text style={styles.menuText}>Help Center</Text>
-            </View>
-            <Ionicons name="chevron-forward" size={24} color={colors['outline-variant']} />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Sign Out</Text>
-        </TouchableOpacity>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors['surface-linen'],
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.marginMobile,
-    height: 64,
-    backgroundColor: 'rgba(252, 249, 248, 0.8)',
-  },
-  brand: {
-    ...typography.headlineMd,
-    color: colors['forest-green'],
-    fontWeight: 'bold',
-  },
-  iconButton: {
-    padding: spacing.stackSm,
-  },
-  contentContainer: {
-    paddingHorizontal: spacing.marginMobile,
-    paddingBottom: spacing.sectionGap,
-    alignItems: 'center',
-  },
-  profileHeader: {
-    alignItems: 'center',
-    marginTop: spacing.stackLg,
-    marginBottom: spacing.sectionGap,
-  },
-  avatarContainer: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    overflow: 'hidden',
-    marginBottom: spacing.stackMd,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  avatar: {
-    width: '100%',
-    height: '100%',
-  },
-  name: {
-    ...typography.headlineLgMobile,
-    color: colors['forest-green'],
-    marginBottom: spacing.stackSm,
-  },
-  role: {
-    ...typography.bodyLg,
-    color: colors['on-surface-variant'],
-  },
-  menuContainer: {
-    width: '100%',
-    maxWidth: 600,
-    gap: spacing.base,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors['surface-container-lowest'],
-    padding: spacing.stackMd,
-    borderRadius: 12,
-    shadowColor: colors['forest-green'],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 8,
-    elevation: 2,
-    marginBottom: spacing.stackSm,
-  },
-  menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.stackMd,
-  },
-  menuText: {
-    ...typography.bodyMd,
-    color: colors.charcoal,
-  },
-  logoutButton: {
-    marginTop: spacing.stackLg,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    backgroundColor: colors['surface-container-lowest'],
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors['clay-outline'],
-    alignItems: 'center',
-  },
-  logoutText: {
-    ...typography.labelMd,
-    color: colors.charcoal,
-  },
-});

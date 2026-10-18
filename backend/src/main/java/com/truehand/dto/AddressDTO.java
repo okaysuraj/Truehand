@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AddressDTO {
+
     private Integer id;
     private String label;
     private String streetAddress;
@@ -17,5 +18,9 @@ public class AddressDTO {
     private String state;
     private String postalCode;
     private String country;
+    private String fullName;
+    private String phone;
+    private java.math.BigDecimal latitude;
+    private java.math.BigDecimal longitude;
     private Boolean isDefault;
 }

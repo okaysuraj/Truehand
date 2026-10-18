@@ -2,16 +2,15 @@ package com.truehand.controller;
 
 import com.truehand.dto.ProductDTO;
 import com.truehand.service.WishlistService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
+@org.springframework.security.access.prepost.PreAuthorize("@accessPolicy.isOwner(#userId)")
 @RequestMapping("/api/wishlist")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class WishlistController {
 
     private final WishlistService wishlistService;
@@ -22,13 +21,19 @@ public class WishlistController {
     }
 
     @PostMapping("/user/{userId}/product/{productId}")
-    public ResponseEntity<Void> addProductToWishlist(@PathVariable Integer userId, @PathVariable Integer productId) {
+    public ResponseEntity<Void> addProductToWishlist(
+        @PathVariable Integer userId,
+        @PathVariable Integer productId
+    ) {
         wishlistService.addProductToWishlist(userId, productId);
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/user/{userId}/product/{productId}")
-    public ResponseEntity<Void> removeProductFromWishlist(@PathVariable Integer userId, @PathVariable Integer productId) {
+    public ResponseEntity<Void> removeProductFromWishlist(
+        @PathVariable Integer userId,
+        @PathVariable Integer productId
+    ) {
         wishlistService.removeProductFromWishlist(userId, productId);
         return ResponseEntity.ok().build();
     }

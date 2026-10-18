@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TrackingMessage {
+
     private String action;
     private Integer orderId;
     private String data;
+    private String token;
 }

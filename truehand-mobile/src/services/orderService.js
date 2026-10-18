@@ -11,9 +11,9 @@ export const orderService = {
     return response.data; // Expected format: OrderDTO
   },
 
-  getUserOrders: async () => {
-    const response = await api.get('/orders');
-    return response.data; // Expected format: List<OrderDTO>
+  getUserOrders: async (page = 0) => {
+    const response = await api.get('/orders', { params: { page, size: 20, paged: true } });
+    return response.data;
   },
 
   cancelOrder: async (id, reason) => {
@@ -31,5 +31,5 @@ export const orderService = {
     // payload = { subject, description }
     const response = await api.post(`/orders/${id}/issues`, payload);
     return response.data;
-  }
+  },
 };

@@ -1,13 +1,17 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
+import lombok.Data;
 
 @Entity
 @Table(name = "artisan_posts")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 public class ArtisanPost {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -18,12 +22,13 @@ public class ArtisanPost {
 
     @Column(columnDefinition = "TEXT")
     private String content;
+
     private String mediaUrl;
-    
+
     private Integer likesCount = 0;
-    
+
     private LocalDateTime createdAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

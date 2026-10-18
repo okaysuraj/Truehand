@@ -7,5 +7,7 @@ RUN mvn -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
+RUN groupadd --system truehand && useradd --system --gid truehand --no-create-home truehand
+USER truehand:truehand
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+ENTRYPOINT ["java","-Duser.timezone=UTC","-jar","/app/app.jar"]

@@ -1,13 +1,17 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
+import lombok.Data;
 
 @Entity
 @Table(name = "seller_subscriptions")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 public class SellerSubscription {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -19,9 +23,9 @@ public class SellerSubscription {
     private String planName; // BASIC, PREMIUM, PRO
     private LocalDateTime expiresAt;
     private String status; // ACTIVE, EXPIRED, CANCELLED
-    
+
     private LocalDateTime createdAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

@@ -7,39 +7,41 @@ import com.truehand.model.User;
 import com.truehand.repository.ProductRepository;
 import com.truehand.repository.QuestionRepository;
 import com.truehand.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
+
     private final QuestionRepository questionRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
     public List<QuestionDTO> getProductQuestions(Integer productId) {
-        return questionRepository.findByProductIdOrderByCreatedAtDesc(productId)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
+        return questionRepository
+            .findByProductIdOrderByCreatedAtDesc(productId)
+            .stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
     }
 
     public List<QuestionDTO> getSellerQuestions(Integer sellerId) {
-        return questionRepository.findByProductSellerIdOrderByCreatedAtDesc(sellerId)
-                .stream().map(this::mapToDTO).collect(Collectors.toList());
+        return questionRepository
+            .findByProductSellerIdOrderByCreatedAtDesc(sellerId)
+            .stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
     }
 
     public QuestionDTO askQuestion(Integer userId, Integer productId, String content) {
         User user = userRepository.findById(userId).orElseThrow();
         Product product = productRepository.findById(productId).orElseThrow();
-        
-        Question question = Question.builder()
-                .user(user)
-                .product(product)
-                .content(content)
-                .build();
-                
+
+        Question question = Question.builder().user(user).product(product).content(content).build();
+
         return mapToDTO(questionRepository.save(question));
     }
 
@@ -47,7 +49,10 @@ public class QuestionService {
         Question question = questionRepository.findById(questionId).orElseThrow();
         // verify seller owns the product
         if (!question.getProduct().getSeller().getId().equals(sellerId)) {
-            throw new RuntimeException("Unauthorized");
+            throw new org.springframework.web.server.ResponseStatusException(
+                org.springframework.http.HttpStatus.FORBIDDEN,
+                "Unauthorized"
+            );
         }
         question.setAnswer(answer);
         return mapToDTO(questionRepository.save(question));
@@ -55,13 +60,13 @@ public class QuestionService {
 
     private QuestionDTO mapToDTO(Question question) {
         return QuestionDTO.builder()
-                .id(question.getId())
-                .productId(question.getProduct().getId())
-                .userId(question.getUser().getId())
-                .userName(question.getUser().getFirstName() + " " + question.getUser().getLastName())
-                .content(question.getContent())
-                .answer(question.getAnswer())
-                .createdAt(question.getCreatedAt())
-                .build();
+            .id(question.getId())
+            .productId(question.getProduct().getId())
+            .userId(question.getUser().getId())
+            .userName(question.getUser().getFirstName() + " " + question.getUser().getLastName())
+            .content(question.getContent())
+            .answer(question.getAnswer())
+            .createdAt(question.getCreatedAt())
+            .build();
     }
 }

@@ -1,10 +1,21 @@
 import api from '../../services/api';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';;
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { useAuthStore } from '../../store/useAuthStore';
 import { colors, typography, spacing } from '../../theme/theme';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function RegisterScreen({ navigation }) {
   const register = useAuthStore((state) => state.register);
@@ -38,22 +49,23 @@ export default function RegisterScreen({ navigation }) {
         lastName,
         email: form.email,
         password: form.password,
-        role: 'CUSTOMER'
+        role: 'CUSTOMER',
       });
-      Alert.alert('Success', 'Verification email sent. Please verify your email before logging in.', [
-        { text: 'OK', onPress: () => navigation.navigate('Login') }
-      ]);
+      Alert.alert(
+        'Success',
+        'Verification email sent. Please verify your email before logging in.',
+        [{ text: 'OK', onPress: () => navigation.navigate('Login') }],
+      );
     } catch (err) {
       Alert.alert('Registration Failed', err.message || 'An error occurred during registration.');
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}
       >
@@ -61,29 +73,31 @@ export default function RegisterScreen({ navigation }) {
           <View style={styles.card}>
             <View style={styles.header}>
               <Text style={styles.title}>Create Your Account</Text>
-              <Text style={styles.subtitle}>Join the TrueHand collective and explore authentic craftsmanship.</Text>
+              <Text style={styles.subtitle}>
+                Join the TrueHand collective and explore authentic craftsmanship.
+              </Text>
             </View>
-            
+
             <View style={styles.form}>
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Full Name</Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   placeholder="Jane Doe"
                   placeholderTextColor={colors.outline}
                   value={form.fullName}
-                  onChangeText={(val) => setForm({...form, fullName: val})}
+                  onChangeText={(val) => setForm({ ...form, fullName: val })}
                 />
               </View>
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email Address</Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   placeholder="jane@example.com"
                   placeholderTextColor={colors.outline}
                   value={form.email}
-                  onChangeText={(val) => setForm({...form, email: val})}
+                  onChangeText={(val) => setForm({ ...form, email: val })}
                   autoCapitalize="none"
                   keyboardType="email-address"
                 />
@@ -92,38 +106,59 @@ export default function RegisterScreen({ navigation }) {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Password</Text>
                 <View style={styles.passwordContainer}>
-                  <TextInput 
+                  <TextInput
                     style={[styles.input, { flex: 1, borderBottomWidth: 0 }]}
                     placeholder="••••••••"
                     placeholderTextColor={colors.outline}
                     value={form.password}
-                    onChangeText={(val) => setForm({...form, password: val})}
+                    onChangeText={(val) => setForm({ ...form, password: val })}
                     secureTextEntry={!showPassword}
                   />
-                  <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                    <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={colors.outline} />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeIcon}
+                  >
+                    <Ionicons
+                      name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                      size={20}
+                      color={colors.outline}
+                    />
                   </TouchableOpacity>
                 </View>
                 <View style={styles.inputBorder} />
               </View>
 
               <View style={styles.termsContainer}>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.checkbox, termsAccepted && styles.checkboxChecked]}
                   onPress={() => setTermsAccepted(!termsAccepted)}
                 >
-                  {termsAccepted && <Ionicons name="checkmark" size={14} color={colors['on-primary']} />}
+                  {termsAccepted && (
+                    <Ionicons name="checkmark" size={14} color={colors['on-primary']} />
+                  )}
                 </TouchableOpacity>
                 <Text style={styles.termsText}>
-                  I agree to the <Text style={styles.link}>Terms & Conditions</Text> and <Text style={styles.link}>Privacy Policy</Text>.
+                  I agree to the{' '}
+                  <Text
+                    accessibilityRole="link"
+                    onPress={() => navigation.navigate('Feature', { feature: 'terms' })}
+                    style={styles.link}
+                  >
+                    Terms & Conditions
+                  </Text>{' '}
+                  and{' '}
+                  <Text
+                    accessibilityRole="link"
+                    onPress={() => navigation.navigate('Feature', { feature: 'privacy' })}
+                    style={styles.link}
+                  >
+                    Privacy Policy
+                  </Text>
+                  .
                 </Text>
               </View>
 
-              <TouchableOpacity 
-                style={styles.button} 
-                onPress={handleRegister}
-                disabled={loading}
-              >
+              <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
                 {loading ? (
                   <ActivityIndicator color={colors['on-primary']} />
                 ) : (

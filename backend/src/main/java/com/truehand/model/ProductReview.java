@@ -1,13 +1,17 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import java.time.LocalDateTime;
+import lombok.Data;
 
 @Entity
 @Table(name = "product_reviews")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 public class ProductReview {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -15,7 +19,7 @@ public class ProductReview {
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
-    
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -23,9 +27,9 @@ public class ProductReview {
     private Integer rating;
     private String reviewText;
     private String imageUrl;
-    
+
     private LocalDateTime createdAt;
-    
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

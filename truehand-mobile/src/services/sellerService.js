@@ -12,7 +12,7 @@ export const sellerService = {
     const response = await api.get(`/seller/${sellerId}/stats`);
     return response.data;
   },
-  
+
   // Get seller orders
   getSellerOrders: async (sellerId) => {
     const response = await api.get(`/seller/${sellerId}/orders`);
@@ -23,5 +23,5 @@ export const sellerService = {
   getSellerProfile: async (sellerId) => {
     const response = await api.get(`/seller/${sellerId}/kyc`);
     return response.data;
-  }
+  },
 };

@@ -8,6 +8,7 @@ const TransactionHistoryScreen = ({ navigation }) => {
   const [wallet, setWallet] = useState(null);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -20,14 +21,15 @@ const TransactionHistoryScreen = ({ navigation }) => {
   const fetchWalletData = async () => {
     try {
       setLoading(true);
+      setError('');
       const [walletRes, txRes] = await Promise.all([
         api.get(`/wallet/${user.id}`),
-        api.get(`/wallet/${user.id}/transactions`)
+        api.get(`/wallet/${user.id}/transactions`),
       ]);
       setWallet(walletRes.data);
       setTransactions(txRes.data || []);
     } catch (err) {
-      console.error(err);
+      setError(err.response?.data?.error || 'Unable to load transactions. Please retry.');
     } finally {
       setLoading(false);
     }
@@ -46,7 +48,8 @@ const TransactionHistoryScreen = ({ navigation }) => {
       <ScrollView contentContainerStyle={styles.content}>
         <Text style={styles.headerTitle}>Wallet & Transactions</Text>
         <Text style={styles.headerSubtitle}>Manage your funds and history</Text>
-        
+        {!!error && <Text accessibilityRole="alert">{error}</Text>}
+
         {wallet && (
           <View style={styles.balanceCard}>
             <Text style={styles.balanceLabel}>Available Balance</Text>
@@ -61,15 +64,18 @@ const TransactionHistoryScreen = ({ navigation }) => {
             <Text style={styles.emptyText}>No transactions found.</Text>
           </View>
         ) : (
-          transactions.map(tx => (
+          transactions.map((tx) => (
             <View key={tx.id} style={styles.txCard}>
               <View style={styles.txInfo}>
                 <Text style={styles.txDesc}>{tx.description}</Text>
                 <Text style={styles.txDate}>
-                  {new Date(tx.createdAt).toLocaleDateString()} {new Date(tx.createdAt).toLocaleTimeString()}
+                  {new Date(tx.createdAt).toLocaleDateString()}{' '}
+                  {new Date(tx.createdAt).toLocaleTimeString()}
                 </Text>
               </View>
-              <Text style={[styles.txAmount, tx.type === 'CREDIT' ? styles.txCredit : styles.txDebit]}>
+              <Text
+                style={[styles.txAmount, tx.type === 'CREDIT' ? styles.txCredit : styles.txDebit]}
+              >
                 {tx.type === 'CREDIT' ? '+' : '-'}₹{tx.amount.toFixed(2)}
               </Text>
             </View>

@@ -1,6 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TextInput, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  TextInput,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
 import api from '../../services/api';
+import { authService } from '../../services/authService';
 
 const ForgotPasswordScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
@@ -12,8 +22,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
     setLoading(true);
     setMessage('');
     try {
-      const res = await api.post('/auth/password/forgot', { email });
-      setMessage(`Recovery email sent! (Token: ${res.data.token})`);
+      await authService.forgotPassword({ email });
+      setMessage('Recovery email sent. Open the link in your email to reset your password.');
     } catch (err) {
       Alert.alert('Error', err.response?.data || 'Failed to send recovery email.');
     } finally {
@@ -25,7 +35,9 @@ const ForgotPasswordScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Forgot Password</Text>
-        <Text style={styles.subtitle}>Enter your email address to receive a password reset link.</Text>
+        <Text style={styles.subtitle}>
+          Enter your email address to receive a password reset link.
+        </Text>
 
         {message ? (
           <View style={styles.messageBox}>
@@ -45,8 +57,8 @@ const ForgotPasswordScreen = ({ navigation }) => {
           />
         </View>
 
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
+        <TouchableOpacity
+          style={[styles.button, loading && styles.buttonDisabled]}
           onPress={handleSend}
           disabled={loading || !email}
         >

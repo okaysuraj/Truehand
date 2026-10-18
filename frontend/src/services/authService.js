@@ -1,5 +1,17 @@
+import { requireAuthIdentity, serializeAuthOperations } from '../../../shared/auth-operations';
 import api from './api';
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from 'firebase/auth';
+import { unregisterPush } from './pushRegistration';
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  updateProfile,
+  sendPasswordResetEmail,
+  confirmPasswordReset,
+  applyActionCode,
+} from 'firebase/auth';
 import { auth } from '../config/firebase';
 
 const mapFirebaseAuthError = (error) => {
@@ -23,26 +35,40 @@ const mapFirebaseAuthError = (error) => {
 };
 
 export const authService = {
+  restoreSession: async () => {
+    await auth.authStateReady();
+    if (!auth.currentUser || !auth.currentUser.emailVerified) {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      return null;
+    }
+    const identity = auth.currentUser;
+    const idToken = await identity.getIdToken();
+    const role = localStorage.getItem('pendingRole') || 'CUSTOMER';
+    requireAuthIdentity(auth, identity);
+    const { data } = await api.post('/auth/firebase-login', { idToken, role });
+    requireAuthIdentity(auth, identity);
+    const user = { ...data, id: data.userId, firebaseUid: identity.uid };
+    localStorage.setItem('user', JSON.stringify(user));
+    localStorage.setItem('token', idToken);
+    requireAuthIdentity(auth, identity);
+    return user;
+  },
   register: async (data) => {
     try {
-      await api.post('/auth/register', {
-        email: data.email,
-        password: data.password,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: data.role
-      });
       const cred = await createUserWithEmailAndPassword(auth, data.email, data.password);
       const fullName = [data.firstName, data.lastName].filter(Boolean).join(' ').trim();
       if (fullName) {
         await updateProfile(cred.user, { displayName: fullName });
       }
       await sendEmailVerification(cred.user);
+      localStorage.setItem('pendingRole', data.role || 'CUSTOMER');
+      await signOut(auth);
       return {
         data: {
           message: 'Verification email sent. Please verify your email before logging in.',
-          email: cred.user.email
-        }
+          email: cred.user.email,
+        },
       };
     } catch (error) {
       throw new Error(mapFirebaseAuthError(error));
@@ -56,20 +82,54 @@ export const authService = {
         throw new Error('Please verify your email before logging in.');
       }
       const idToken = await cred.user.getIdToken();
-      const backendRes = await api.post('/auth/firebase-login', { idToken });
+      const role = data.role || localStorage.getItem('pendingRole') || 'CUSTOMER';
+      requireAuthIdentity(auth, cred.user);
+      const backendRes = await api.post('/auth/firebase-login', { idToken, role });
+      requireAuthIdentity(auth, cred.user);
+      backendRes.data = {
+        ...backendRes.data,
+        id: backendRes.data.userId,
+        firebaseUid: cred.user.uid,
+      };
+      localStorage.removeItem('pendingRole');
+      requireAuthIdentity(auth, cred.user);
       return backendRes;
     } catch (error) {
       throw new Error(mapFirebaseAuthError(error));
     }
   },
+  isCurrentSession: (user) => !!user && auth.currentUser?.uid === user.firebaseUid,
   getCurrentUser: () => {
     const u = localStorage.getItem('user');
-    return u ? JSON.parse(u) : null;
+    try {
+      const data = u ? JSON.parse(u) : null;
+      return data ? { ...data, id: data.id ?? data.userId } : null;
+    } catch {
+      return null;
+    }
+  },
+  forgotPassword: async ({ email }) => {
+    await sendPasswordResetEmail(auth, email);
+    return { data: { message: 'Password reset instructions sent.' } };
+  },
+  resetPassword: async ({ token, oobCode, password }) => {
+    await confirmPasswordReset(auth, oobCode || token, password);
+    return { data: { message: 'Password reset completed.' } };
+  },
+  verifyEmail: async (code) => {
+    await applyActionCode(auth, code);
+    return { data: { message: 'Email verified.' } };
   },
   logout: async () => {
+    const identity = auth.currentUser;
+    await unregisterPush();
+    requireAuthIdentity(auth, identity);
     await signOut(auth);
+    if (auth.currentUser) return;
     localStorage.removeItem('token');
     localStorage.removeItem('user');
   },
-  observeAuth: (callback) => onAuthStateChanged(auth, callback)
+  observeAuth: (callback) => onAuthStateChanged(auth, callback),
 };
+
+serializeAuthOperations(authService);

@@ -1,28 +1,27 @@
 package com.truehand.controller;
 
 import com.truehand.service.CloudinaryService;
+import java.util.Collections;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Collections;
-
 @RestController
 @RequestMapping("/api/media")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class MediaController {
 
-    private final CloudinaryService cloudinaryService;
+    private final com.truehand.service.IndexedMediaService media;
 
     @PostMapping("/upload")
     public ResponseEntity<?> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            String url = cloudinaryService.uploadImage(file);
-            return ResponseEntity.ok(Collections.singletonMap("url", url));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Failed to upload image: " + e.getMessage());
+            return ResponseEntity.ok(media.upload(file));
+        } catch (java.io.IOException e) {
+            return ResponseEntity.status(502).body(
+                java.util.Map.of("error", "Image upload failed. Please retry.")
+            );
         }
     }
 }

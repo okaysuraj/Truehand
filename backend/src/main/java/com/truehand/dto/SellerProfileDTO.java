@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class SellerProfileDTO {
+
     private String businessName;
     private String panNumber;
     private String gstNumber;

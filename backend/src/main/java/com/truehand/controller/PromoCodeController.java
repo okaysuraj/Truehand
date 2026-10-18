@@ -1,26 +1,39 @@
 package com.truehand.controller;
 
-import com.truehand.model.PromoCode;
-import com.truehand.repository.PromoCodeRepository;
+import com.truehand.service.PromoService;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/promo")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class PromoCodeController {
 
-    private final PromoCodeRepository promoCodeRepository;
+    private final PromoService promos;
 
     @GetMapping("/validate")
-    public ResponseEntity<?> validatePromoCode(@RequestParam String code) {
-        return promoCodeRepository.findByCodeAndIsActiveTrue(code.toUpperCase())
-                .filter(promo -> promo.getValidUntil().isAfter(LocalDateTime.now()))
-                .map(promo -> ResponseEntity.ok(promo))
-                .orElseGet(() -> ResponseEntity.badRequest().body((PromoCode) null)); // Using cast to appease generics or return simple error
+    public Object validate(@RequestParam String code) {
+        return promos.validate(code);
+    }
+
+    @PostMapping("/quote")
+    public Object quote(@RequestBody Map<String, Object> body) {
+        return promos.quote(body);
+    }
+
+    @GetMapping("/all")
+    public Object list() {
+        return promos.list();
+    }
+
+    @PostMapping
+    public Object create(@RequestBody Map<String, Object> body) {
+        return promos.create(body);
+    }
+
+    @DeleteMapping("/{id}")
+    public Object deactivate(@PathVariable Integer id) {
+        return promos.deactivate(id);
     }
 }

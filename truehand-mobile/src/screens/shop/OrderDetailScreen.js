@@ -1,315 +1,171 @@
-import api from '../../services/api';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';;
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import { colors, typography, spacing } from '../../theme/theme';
+import {
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  View,
+  Image,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 import { useOrderStore } from '../../store/useOrderStore';
-
-export default function OrderDetailScreen() {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const orderId = route.params?.id || route.params?.orderId;
-  const orders = useOrderStore(state => state.orders);
-  
-  const order = orders.find(o => o.id === orderId) || null;
-
-  if (!order) {
-  
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <Text style={{ textAlign: 'center', marginTop: 20 }}>Order not found.</Text>
-      </SafeAreaView>
-    );
-  }
-
+import { useAuthStore } from '../../store/useAuthStore';
+import api from '../../services/api';
+import { colors } from '../../theme/theme';
+import { createOrderDetailHook } from '../../../../shared/order-detail';
+import { formatValue } from '../../../../shared/feature-contract';
+const useOrderDetail = createOrderDetailHook(React, api);
+export default function OrderDetailScreen({ navigation, route }) {
+  const id = route?.params?.id || route?.params?.orderId;
+  const userId = useAuthStore((state) => state.user?.id);
+  const focused = useIsFocused();
+  const detail = useOrderDetail(id, userId, focused);
+  const order = detail.order;
+  const cancel = () =>
+    Alert.alert('Cancel this unpaid order?', 'Reserved stock will be released.', [
+      {
+        text: 'Keep order',
+        style: 'cancel',
+      },
+      {
+        text: 'Cancel order',
+        onPress: detail.cancel,
+      },
+    ]);
+  const resume = () => {
+    const current = detail.resumeOrder();
+    if (!current) return;
+    useOrderStore.setState({
+      currentOrder: current,
+      checkoutData: {
+        address: {
+          id: current.addressId,
+          streetAddress: current.deliveryAddress,
+        },
+        resume: true,
+      },
+    });
+    navigation.navigate('OrderSummary');
+  };
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.iconButton} onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color={colors['forest-green']} />
+    <SafeAreaView
+      style={{
+        flex: 1,
+        backgroundColor: colors['surface-linen'],
+      }}
+    >
+      <ScrollView
+        contentContainerStyle={{
+          padding: 24,
+          gap: 20,
+        }}
+      >
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Text>Back</Text>
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Order #{order.orderNumber ? order.orderNumber.substring(0, 6).toUpperCase() : order.id.toString().substring(0, 6).toUpperCase()}</Text>
-        <View style={styles.headerSpacer} />
-      </View>
-
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
-        {/* Status Banner */}
-        <View style={styles.card}>
-          <View style={styles.statusHeader}>
-            <Ionicons name="car" size={24} color={colors['forest-green']} />
-            <Text style={styles.statusTitle}>{order.status}</Text>
+        <Text
+          style={{
+            fontFamily: 'EBGaramond_500Medium',
+            fontSize: 32,
+            color: colors['forest-green'],
+          }}
+        >
+          Order details
+        </Text>
+        {detail.loading && <ActivityIndicator />}
+        {!!detail.error && (
+          <View>
+            <Text accessibilityRole="alert">{detail.error}</Text>
+            <TouchableOpacity onPress={detail.retry}>
+              <Text>Retry</Text>
+            </TouchableOpacity>
           </View>
-          <Text style={styles.statusDesc}>Estimated delivery 3-5 business days</Text>
-          <Text style={styles.statusMeta}>Tracking updates available soon.</Text>
-          <TouchableOpacity style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>Track Package</Text>
-            <Ionicons name="open-outline" size={18} color={colors['on-primary']} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Items Ordered */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Items Ordered</Text>
-          <View style={styles.divider} />
-          
-          {order.orderItems?.map((item, index) => (
-            <React.Fragment key={item.id}>
-              <View style={[styles.itemRow, index === order.orderItems.length - 1 && { borderBottomWidth: 0, paddingBottom: 0, marginBottom: 0 }]}>
-                <View style={styles.imageContainer}>
-                  <Image 
-                    source={{ uri: item.productImageUrl || 'https://via.placeholder.com/80' }}
-                    style={styles.itemImage}
+        )}
+        {order && (
+          <>
+            <Text>{order.orderNumber}</Text>
+            <Text>Placed: {formatValue(order.createdAt, 'date')}</Text>
+            <Text>Status: {order.status}</Text>
+            <Text>Payment: {order.paymentStatus}</Text>
+            <Text>Delivery address: {order.deliveryAddress}</Text>
+            {order.orderItems?.map((item) => (
+              <View
+                key={item.id}
+                style={{
+                  borderBottomWidth: 1,
+                  borderColor: colors.outline,
+                  paddingVertical: 16,
+                  gap: 12,
+                }}
+              >
+                {!!item.imageUrl && (
+                  <Image
+                    style={{
+                      width: 96,
+                      height: 96,
+                    }}
+                    source={{
+                      uri: item.imageUrl,
+                    }}
+                    accessibilityLabel={item.productName}
                   />
-                </View>
-                <View style={styles.itemDetails}>
-                  <View style={styles.itemHeaderRow}>
-                    <Text style={styles.itemName}>{item.productName || 'Artisan Goods'}</Text>
-                    <Text style={styles.itemPrice}>${item.price}</Text>
-                  </View>
-                  <Text style={styles.itemQty}>Qty: {item.quantity}</Text>
-                </View>
+                )}
+                <Text>{item.productName}</Text>
+                {!!item.variantSku && <Text>Purchased SKU: {item.variantSku}</Text>}
+                {!!item.variantDescription && (
+                  <Text>Purchased options: {item.variantDescription}</Text>
+                )}
+                <Text>
+                  {item.quantity} x {formatValue(item.priceAtPurchase, 'money')}
+                </Text>
+                {Number(item.discountAmount) > 0 && (
+                  <Text>Line discount: {formatValue(item.discountAmount, 'money')}</Text>
+                )}
               </View>
-              {index < order.orderItems.length - 1 && <View style={[styles.divider, { marginVertical: 0 }]} />}
-            </React.Fragment>
-          ))}
-        </View>
-
-        {/* Order Details (Date, Payment, Address) */}
-        <View style={styles.card}>
-          <View style={styles.detailBlock}>
-            <Text style={styles.detailLabel}>ORDER DATE</Text>
-            <Text style={styles.detailValue}>{new Date(order.createdAt).toLocaleDateString()}</Text>
-          </View>
-          <View style={styles.divider} />
-          
-          <View style={styles.detailBlock}>
-            <Text style={styles.detailLabel}>SHIPPING ADDRESS</Text>
-            <Text style={styles.detailValue}>
-              {order.shippingAddress || '123 Maker Street\nPortland, OR 97204'}
+            ))}
+            <Text>Total: {formatValue(order.totalAmount, 'money')}</Text>
+            <Text>
+              Estimated delivery:{' '}
+              {order.delivery?.estimatedDeliveryTime
+                ? formatValue(order.delivery.estimatedDeliveryTime, 'date')
+                : 'Awaiting a delivery estimate'}
             </Text>
-          </View>
-          <View style={styles.divider} />
-
-          <View style={styles.detailBlock}>
-            <Text style={styles.detailLabel}>PAYMENT METHOD</Text>
-            <View style={styles.paymentMethodRow}>
-              <Ionicons name="card-outline" size={20} color={colors.outline} />
-              <Text style={styles.detailValue}>Paid</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* Cost Breakdown */}
-        <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Summary</Text>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>${order.totalAmount.toFixed(2)}</Text>
-          </View>
-          <View style={styles.summaryRow}>
-            <Text style={styles.summaryLabel}>Shipping & Tax</Text>
-            <Text style={styles.summaryValue}>Included</Text>
-          </View>
-          <View style={styles.divider} />
-          <View style={[styles.summaryRow, { marginTop: 8 }]}>
-            <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>${order.totalAmount.toFixed(2)}</Text>
-          </View>
-        </View>
-
-        <TouchableOpacity style={styles.downloadButton}>
-          <Ionicons name="receipt-outline" size={18} color={colors['forest-green']} />
-          <Text style={styles.downloadButtonText}>Download Invoice</Text>
-        </TouchableOpacity>
-
+            {detail.canResume && (
+              <>
+                <TouchableOpacity disabled={detail.busy} onPress={resume}>
+                  <Text>Complete payment</Text>
+                </TouchableOpacity>
+                <TouchableOpacity disabled={detail.busy} onPress={cancel}>
+                  <Text>Cancel unpaid order</Text>
+                </TouchableOpacity>
+              </>
+            )}
+            {order.paymentStatus === 'PAID' && (
+              <TouchableOpacity
+                onPress={() =>
+                  navigation.navigate('Tracking', {
+                    id: order.id,
+                  })
+                }
+              >
+                <Text>Delivery tracking</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('Feature', {
+                  feature: 'order-tax-documents',
+                  orderId: order.id,
+                })
+              }
+            >
+              <Text>Issued invoices</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors['surface-linen'],
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.marginMobile,
-    height: 64,
-    backgroundColor: 'rgba(252, 249, 248, 0.9)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(193, 200, 195, 0.3)',
-  },
-  iconButton: {
-    padding: spacing.stackSm,
-    marginLeft: -spacing.stackSm,
-  },
-  headerTitle: {
-    ...typography.headlineMd,
-    color: colors['forest-green'],
-  },
-  headerSpacer: {
-    width: 40,
-  },
-  content: {
-    paddingHorizontal: spacing.marginMobile,
-    paddingTop: spacing.stackLg,
-    paddingBottom: spacing.sectionGap,
-  },
-  card: {
-    backgroundColor: colors['surface-container-lowest'],
-    borderRadius: 12,
-    padding: spacing.gutter,
-    marginBottom: spacing.stackLg,
-    borderWidth: 1,
-    borderColor: 'rgba(193, 200, 195, 0.2)',
-    shadowColor: colors['forest-green'],
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  statusHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  statusTitle: {
-    ...typography.labelMd,
-    color: colors['forest-green'],
-  },
-  statusDesc: {
-    ...typography.bodyMd,
-    color: colors['on-surface-variant'],
-  },
-  statusMeta: {
-    ...typography.labelSm,
-    color: colors.outline,
-    marginTop: 8,
-    marginBottom: 16,
-  },
-  primaryButton: {
-    backgroundColor: colors['forest-green'],
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-    borderRadius: 8,
-  },
-  primaryButtonText: {
-    ...typography.labelMd,
-    color: colors['on-primary'],
-  },
-  sectionTitle: {
-    ...typography.headlineMd,
-    color: colors['forest-green'],
-    marginBottom: 8,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: colors['surface-container-highest'],
-    marginVertical: spacing.stackMd,
-  },
-  itemRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 16,
-    paddingVertical: 8,
-  },
-  imageContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 8,
-    backgroundColor: colors['surface-container'],
-    overflow: 'hidden',
-  },
-  itemImage: {
-    width: '100%',
-    height: '100%',
-  },
-  itemDetails: {
-    flex: 1,
-    gap: 4,
-  },
-  itemHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-  },
-  itemName: {
-    ...typography.bodyMd,
-    color: colors.charcoal,
-    flex: 1,
-    paddingRight: 8,
-  },
-  itemPrice: {
-    ...typography.labelMd,
-    color: colors.charcoal,
-  },
-  itemVariant: {
-    ...typography.labelSm,
-    color: colors.outline,
-  },
-  itemQty: {
-    ...typography.labelSm,
-    color: colors['on-surface-variant'],
-    marginTop: 4,
-  },
-  detailBlock: {
-    gap: 4,
-  },
-  detailLabel: {
-    ...typography.labelSm,
-    color: colors.outline,
-    letterSpacing: 0.5,
-  },
-  detailValue: {
-    ...typography.bodyMd,
-    color: colors.charcoal,
-  },
-  paymentMethodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  summaryLabel: {
-    ...typography.bodyMd,
-    color: colors['on-surface-variant'],
-  },
-  summaryValue: {
-    ...typography.bodyMd,
-    color: colors.charcoal,
-  },
-  totalLabel: {
-    ...typography.labelMd,
-    color: colors['forest-green'],
-  },
-  totalValue: {
-    ...typography.headlineMd,
-    color: colors['forest-green'],
-  },
-  downloadButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 12,
-  },
-  downloadButtonText: {
-    ...typography.labelMd,
-    color: colors['forest-green'],
-  },
-});

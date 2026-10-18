@@ -2,16 +2,15 @@ package com.truehand.controller;
 
 import com.truehand.dto.AddressDTO;
 import com.truehand.service.AddressService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
+@org.springframework.security.access.prepost.PreAuthorize("@accessPolicy.isOwner(#userId)")
 @RequestMapping("/api/addresses")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class AddressController {
 
     private final AddressService addressService;
@@ -22,17 +21,27 @@ public class AddressController {
     }
 
     @PostMapping("/user/{userId}")
-    public ResponseEntity<AddressDTO> addAddress(@PathVariable Integer userId, @RequestBody AddressDTO dto) {
+    public ResponseEntity<AddressDTO> addAddress(
+        @PathVariable Integer userId,
+        @RequestBody AddressDTO dto
+    ) {
         return ResponseEntity.ok(addressService.addAddress(userId, dto));
     }
 
     @PutMapping("/{addressId}/user/{userId}")
-    public ResponseEntity<AddressDTO> updateAddress(@PathVariable Integer userId, @PathVariable Integer addressId, @RequestBody AddressDTO dto) {
+    public ResponseEntity<AddressDTO> updateAddress(
+        @PathVariable Integer userId,
+        @PathVariable Integer addressId,
+        @RequestBody AddressDTO dto
+    ) {
         return ResponseEntity.ok(addressService.updateAddress(userId, addressId, dto));
     }
 
     @DeleteMapping("/{addressId}/user/{userId}")
-    public ResponseEntity<Void> deleteAddress(@PathVariable Integer userId, @PathVariable Integer addressId) {
+    public ResponseEntity<Void> deleteAddress(
+        @PathVariable Integer userId,
+        @PathVariable Integer addressId
+    ) {
         addressService.deleteAddress(userId, addressId);
         return ResponseEntity.ok().build();
     }

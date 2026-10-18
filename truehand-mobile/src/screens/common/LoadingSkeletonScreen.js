@@ -2,14 +2,11 @@ import api from '../../services/api';
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { colors, spacing } from '../../theme/theme';
-
 const { width } = Dimensions.get('window');
-
 const Skeleton = ({ width, height, style, delay = 0 }) => {
   const opacity = useRef(new Animated.Value(0.5)).current;
-
   useEffect(() => {
     Animated.loop(
       Animated.sequence([
@@ -17,42 +14,52 @@ const Skeleton = ({ width, height, style, delay = 0 }) => {
           toValue: 1,
           duration: 1000,
           useNativeDriver: true,
-          delay: delay,
+          delay,
         }),
         Animated.timing(opacity, {
           toValue: 0.5,
           duration: 1000,
           useNativeDriver: true,
         }),
-      ])
+      ]),
     ).start();
   }, [opacity, delay]);
-  
-
   return (
-    <Animated.View 
+    <Animated.View
       style={[
-        styles.skeleton, 
-        { width, height, opacity }, 
-        style
-      ]} 
+        styles.skeleton,
+        {
+          width,
+          height,
+          opacity,
+        },
+        style,
+      ]}
     />
   );
 };
-
 export default function LoadingSkeletonScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Ionicons name="menu" size={28} color={colors['forest-green']} style={styles.iconPlaceholder} />
+        <Ionicons
+          name="menu"
+          size={28}
+          color={colors['forest-green']}
+          style={styles.iconPlaceholder}
+        />
         <View style={styles.headerTitlePlaceholder}>
           <Skeleton width={120} height={20} />
         </View>
-        <Ionicons name="bag-outline" size={24} color={colors['forest-green']} style={styles.iconPlaceholder} />
+        <Ionicons
+          name="bag-outline"
+          size={24}
+          color={colors['forest-green']}
+          style={styles.iconPlaceholder}
+        />
       </View>
 
       <ScrollView contentContainerStyle={styles.content}>
-        
         {/* Category Header Skeleton */}
         <View style={styles.categoryHeader}>
           <Skeleton width={200} height={32} style={styles.marginBottom} />
@@ -72,10 +79,10 @@ export default function LoadingSkeletonScreen() {
         <View style={styles.grid}>
           {[1, 2, 3, 4].map((item, index) => (
             <View key={item} style={styles.gridItem}>
-              <Skeleton 
-                width="100%" 
-                height={(width / 2 - spacing.marginMobile * 1.5) * 1.33} 
-                style={styles.gridImage} 
+              <Skeleton
+                width="100%"
+                height={(width / 2 - spacing.marginMobile * 1.5) * 1.33}
+                style={styles.gridImage}
                 delay={index * 200}
               />
               <Skeleton width="80%" height={16} style={styles.gridTitle} delay={index * 200} />
@@ -83,12 +90,10 @@ export default function LoadingSkeletonScreen() {
             </View>
           ))}
         </View>
-
       </ScrollView>
     </SafeAreaView>
   );
 }
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
@@ -133,7 +138,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: spacing.stackLg,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(193, 200, 195, 0.2)', // outline-variant/20
+    borderBottomColor: 'rgba(193, 200, 195, 0.2)',
+    // outline-variant/20
     paddingBottom: spacing.stackSm,
   },
   filterLeft: {
@@ -160,5 +166,5 @@ const styles = StyleSheet.create({
   },
   gridTitle: {
     marginBottom: spacing.stackSm,
-  }
+  },
 });

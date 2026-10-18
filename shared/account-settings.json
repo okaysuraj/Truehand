@@ -1,0 +1,44 @@
+{
+  "title": "Account settings",
+  "regionTitle": "Language and region",
+  "securityTitle": "Account security",
+  "region": {
+    "language": "English",
+    "country": "India",
+    "currency": "INR",
+    "timeZone": "Asia/Kolkata"
+  },
+  "notificationTitle": "Notification preferences",
+  "notificationCategories": {
+    "orderUpdates": "Order updates",
+    "promotions": "Promotions and price alerts",
+    "messages": "Messages",
+    "newArrivals": "New products and stock alerts"
+  },
+  "securityActions": {
+    "reset": "Send password reset email",
+    "verify": "Send email verification"
+  },
+  "links": [
+    {
+      "label": "Support requests",
+      "feature": "support"
+    },
+    {
+      "label": "My notifications",
+      "feature": "notifications"
+    },
+    {
+      "label": "Help centre",
+      "feature": "help"
+    },
+    {
+      "label": "Notification devices",
+      "feature": "notification-devices"
+    },
+    {
+      "label": "Notification delivery attempts",
+      "feature": "notification-dispatches"
+    }
+  ]
+}

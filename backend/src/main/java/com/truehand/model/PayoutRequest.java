@@ -1,17 +1,21 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import lombok.*;
 
 @Entity
 @Table(name = "payout_requests")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PayoutRequest {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,4 +35,13 @@ public class PayoutRequest {
     private LocalDateTime requestedAt;
 
     private String bankAccount;
+    private Integer bankAccountId;
+
+    @Column(unique = true)
+    private String requestKey;
+
+    private String transferReference;
+    private String transferReceiptUrl;
+    private Integer settledBy;
+    private LocalDateTime settledAt;
 }

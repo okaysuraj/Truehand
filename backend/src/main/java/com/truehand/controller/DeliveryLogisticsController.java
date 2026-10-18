@@ -1,35 +1,56 @@
 package com.truehand.controller;
 
-import com.truehand.model.FleetVehicle;
 import com.truehand.model.DeliveryRoute;
+import com.truehand.model.FleetVehicle;
 import com.truehand.model.User;
-import com.truehand.repository.FleetVehicleRepository;
 import com.truehand.repository.DeliveryRouteRepository;
+import com.truehand.repository.FleetVehicleRepository;
 import com.truehand.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Map;
-import java.util.List;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/delivery")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class DeliveryLogisticsController {
+
     private final FleetVehicleRepository fleetRepository;
     private final DeliveryRouteRepository routeRepository;
     private final UserRepository userRepository;
+    private final com.truehand.repository.DeliveryRepository deliveries;
+    private final com.truehand.security.AccessPolicy accessPolicy;
+    private final com.truehand.service.DeliveryHandoverService handover;
+    private final com.truehand.service.DeliveryRoutingService routing;
 
     @GetMapping("/fleet")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<FleetVehicle>> getActiveFleet() {
         // For admin monitoring
         return ResponseEntity.ok(fleetRepository.findAll());
     }
 
     @PostMapping("/fleet/{agentId}/ping")
-    public ResponseEntity<?> pingLocation(@PathVariable Integer agentId, @RequestBody Map<String, Double> location) {
+    @org.springframework.security.access.prepost.PreAuthorize(
+        "hasAnyRole('DELIVERY','ADMIN') and @accessPolicy.isOwner(#agentId)"
+    )
+    public ResponseEntity<?> pingLocation(
+        @PathVariable Integer agentId,
+        @RequestBody Map<String, Double> location
+    ) {
+        Double lat = location.get("lat"),
+            lng = location.get("lng");
+        if (
+            lat == null ||
+            lng == null ||
+            !Double.isFinite(lat) ||
+            !Double.isFinite(lng) ||
+            Math.abs(lat) > 90 ||
+            Math.abs(lng) > 180
+        ) throw new IllegalArgumentException("Invalid GPS coordinates");
         FleetVehicle vehicle = fleetRepository.findByAgentId(agentId).orElse(new FleetVehicle());
         if (vehicle.getAgent() == null) {
             User agent = userRepository.findById(agentId).orElseThrow();
@@ -42,29 +63,32 @@ public class DeliveryLogisticsController {
         fleetRepository.save(vehicle);
         return ResponseEntity.ok().build();
     }
-    
+
     @PostMapping("/route-optimization")
     public ResponseEntity<?> optimizeRoute(@RequestBody Map<String, Object> request) {
-        // Mock route optimization logic that would normally call Google Maps Directions API
-        Integer agentId = (Integer) request.get("agentId");
-        
-        DeliveryRoute route = new DeliveryRoute();
-        route.setAgent(userRepository.findById(agentId).orElseThrow());
-        route.setOptimizedPolyline("mock_polyline_xyz");
-        route.setTotalDistanceMeters(15000);
-        route.setEstimatedDurationSeconds(1800);
-        
-        routeRepository.save(route);
-        return ResponseEntity.ok(route);
+        return ResponseEntity.ok(routing.optimize(request));
     }
-    
+
+    @GetMapping("/routes")
+    public Object routes() {
+        return routing.list();
+    }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<?> verifyOTP(@RequestBody Map<String, String> request) {
-        // Logic for delivery OTP verification
-        String otp = request.get("otp");
-        if ("123456".equals(otp)) {
-            return ResponseEntity.ok(Map.of("success", true, "message", "Delivery verified"));
-        }
-        return ResponseEntity.badRequest().body("Invalid OTP");
+        if (request.get("deliveryId") == null) throw new IllegalArgumentException(
+            "deliveryId is required"
+        );
+        var delivery = deliveries
+            .findById(Integer.valueOf(request.get("deliveryId")))
+            .orElseThrow();
+        if (
+            !accessPolicy.canUpdateDelivery(delivery.getOrder().getId())
+        ) throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.FORBIDDEN,
+            "Access denied"
+        );
+        boolean verified = handover.verify(delivery.getOrder().getId(), request.get("otp"));
+        return ResponseEntity.status(verified ? 200 : 400).body(Map.of("success", verified));
     }
 }

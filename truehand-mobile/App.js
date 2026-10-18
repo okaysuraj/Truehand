@@ -1,28 +1,31 @@
 import 'react-native-gesture-handler';
 import React from 'react';
 import { StatusBar } from 'expo-status-bar';
-import { LogBox } from 'react-native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { useAuthStore } from './src/store/useAuthStore';
 import { StripeProvider } from '@stripe/stripe-react-native';
+import { useCartStore } from './src/store/useCartStore';
 
-LogBox.ignoreLogs([
-  'InteractionManager has been deprecated',
-  'SafeAreaView has been deprecated',
-]);
+import { useFonts } from 'expo-font';
+import { EBGaramond_400Regular } from '@expo-google-fonts/eb-garamond/400Regular';
+import { EBGaramond_500Medium } from '@expo-google-fonts/eb-garamond/500Medium';
+import { HankenGrotesk_400Regular } from '@expo-google-fonts/hanken-grotesk/400Regular';
+import { HankenGrotesk_500Medium } from '@expo-google-fonts/hanken-grotesk/500Medium';
+import { HankenGrotesk_600SemiBold } from '@expo-google-fonts/hanken-grotesk/600SemiBold';
 
-const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_KEY || 'pk_test_TYooMQauvdEDq54NiTphI7jx';
-
-import { useFonts, EBGaramond_500Medium, EBGaramond_400Regular } from '@expo-google-fonts/eb-garamond';
-import { HankenGrotesk_400Regular, HankenGrotesk_500Medium, HankenGrotesk_600SemiBold } from '@expo-google-fonts/hanken-grotesk';
+const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_KEY || '';
 
 export default function App() {
   const initAuth = useAuthStore((state) => state.initAuth);
   const loading = useAuthStore((state) => state.loading);
+  const userId = useAuthStore((state) => state.user?.id);
+  React.useEffect(() => {
+    useCartStore.getState().syncForUser(userId);
+  }, [userId]);
 
   React.useEffect(() => {
     initAuth();
-  }, []);
+  }, [initAuth]);
 
   const [fontsLoaded] = useFonts({
     EBGaramond_400Regular,
@@ -33,7 +36,8 @@ export default function App() {
   });
 
   if (!fontsLoaded || loading) {
-    return null; // Could return a splash screen component here
+    // Navigation starts only after the persisted session and fonts are ready.
+    return null;
   }
 
   return (
@@ -43,4 +47,3 @@ export default function App() {
     </StripeProvider>
   );
 }
-

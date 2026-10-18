@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class FirebaseLoginRequest {
+
     private String idToken;
     private String role;
 }

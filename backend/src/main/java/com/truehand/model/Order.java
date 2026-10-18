@@ -1,21 +1,25 @@
 package com.truehand.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "orders")
-@Data
+@lombok.Getter
+@lombok.Setter
+@lombok.ToString(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Order {
+
+    @lombok.ToString.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -37,8 +41,19 @@ public class Order {
     @JoinColumn(name = "address_id")
     private Address deliveryAddress;
 
+    @Column(columnDefinition = "TEXT")
+    private String deliveryAddressSnapshot;
+
     @Column(columnDefinition = "VARCHAR(50) DEFAULT 'PENDING'")
     private String paymentStatus;
+
+    @Column(unique = true)
+    private String paymentIntentId;
+
+    @Column(unique = true)
+    private String checkoutKey;
+
+    private LocalDateTime paymentExpiresAt;
 
     @Column(columnDefinition = "TEXT")
     private String specialInstructions;
@@ -46,6 +61,7 @@ public class Order {
     @Column(updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
+
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 

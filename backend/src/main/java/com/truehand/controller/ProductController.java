@@ -2,19 +2,23 @@ package com.truehand.controller;
 
 import com.truehand.dto.ProductDTO;
 import com.truehand.service.ProductService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/products")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:3000")
 public class ProductController {
+
     private final ProductService productService;
+    private final com.truehand.security.AccessPolicy accessPolicy;
+    private final com.truehand.service.MarketplaceFeatureService features;
+    private final com.truehand.service.ProductImportService imports;
+    private final com.truehand.service.IndexedMediaService media;
 
     @GetMapping
     public ResponseEntity<Page<ProductDTO>> getAllProducts(Pageable pageable) {
@@ -22,8 +26,25 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDTO> getProduct(@PathVariable Integer id) {
-        return ResponseEntity.ok(productService.getProduct(id));
+    public ResponseEntity<ProductDTO> getProduct(
+        @PathVariable Integer id,
+        org.springframework.security.core.Authentication authentication
+    ) {
+        var product = productService.getProduct(id);
+        boolean owner =
+            authentication != null &&
+            authentication.getPrincipal() instanceof com.truehand.model.User user &&
+            ("ADMIN".equals(user.getRole()) ||
+                (product.getSellerId() != null && product.getSellerId().equals(user.getId())));
+        if (
+            (!"APPROVED".equals(product.getStatus()) ||
+                !Boolean.TRUE.equals(product.getIsAvailable())) &&
+            !owner
+        ) throw new org.springframework.web.server.ResponseStatusException(
+            org.springframework.http.HttpStatus.NOT_FOUND,
+            "Product not found"
+        );
+        return ResponseEntity.ok(product);
     }
 
     @GetMapping("/trending")
@@ -32,8 +53,13 @@ public class ProductController {
     }
 
     @GetMapping("/flash-sale")
-    public ResponseEntity<List<ProductDTO>> getFlashSaleProducts() {
-        return ResponseEntity.ok(productService.getFlashSaleProducts());
+    public ResponseEntity<?> getFlashSaleProducts(
+        @RequestParam(defaultValue = "false") boolean paged,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(productService.getFlashSaleProducts(pageable), paged)
+        );
     }
 
     @GetMapping("/{id}/recommendations")
@@ -42,68 +68,128 @@ public class ProductController {
     }
 
     @GetMapping("/recently-viewed/{userId}")
+    @org.springframework.security.access.prepost.PreAuthorize("@accessPolicy.isOwner(#userId)")
     public ResponseEntity<List<ProductDTO>> getRecentlyViewed(@PathVariable Integer userId) {
-        // Return empty list for now since browsing history tracking isn't implemented. Replaces mock data.
-        return ResponseEntity.ok(new java.util.ArrayList<>());
+        return ResponseEntity.ok(features.recent(userId));
     }
 
     @GetMapping("/filter")
     public ResponseEntity<Page<ProductDTO>> getFilteredProducts(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String category,
-            @RequestParam(required = false) java.math.BigDecimal minPrice,
-            @RequestParam(required = false) java.math.BigDecimal maxPrice,
-            @RequestParam(required = false) Double minRating,
-            Pageable pageable) {
-        return ResponseEntity.ok(productService.getFilteredProducts(search, category, minPrice, maxPrice, minRating, pageable));
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) String category,
+        @RequestParam(required = false) java.math.BigDecimal minPrice,
+        @RequestParam(required = false) java.math.BigDecimal maxPrice,
+        @RequestParam(required = false) Double minRating,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            productService.getFilteredProducts(
+                search,
+                category,
+                minPrice,
+                maxPrice,
+                minRating,
+                pageable
+            )
+        );
     }
 
     @GetMapping("/search/{name}")
-    public ResponseEntity<?> searchByName(@PathVariable String name) {
-        return ResponseEntity.ok(productService.searchByName(name));
+    public ResponseEntity<?> searchByName(
+        @PathVariable String name,
+        @RequestParam(defaultValue = "false") boolean paged,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(
+                productService.getFilteredProducts(name, null, null, null, null, pageable),
+                paged
+            )
+        );
     }
 
     @GetMapping("/category/{category}")
-    public ResponseEntity<?> getByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(productService.getByCategory(category));
+    public ResponseEntity<?> getByCategory(
+        @PathVariable String category,
+        @RequestParam(defaultValue = "false") boolean paged,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(
+            PagedResponses.body(
+                productService.getFilteredProducts(null, category, null, null, null, pageable),
+                paged
+            )
+        );
     }
 
     @GetMapping("/seller/{sellerId}")
-    public ResponseEntity<?> getProductsBySeller(@PathVariable Integer sellerId) {
-        return ResponseEntity.ok(productService.getProductsBySeller(sellerId));
+    public ResponseEntity<?> getProductsBySeller(
+        @PathVariable Integer sellerId,
+        org.springframework.security.core.Authentication authentication,
+        @RequestParam(defaultValue = "false") boolean paged,
+        @RequestParam(required = false) String search,
+        Pageable pageable
+    ) {
+        boolean owner =
+            authentication != null &&
+            authentication.getPrincipal() instanceof com.truehand.model.User user &&
+            ("ADMIN".equals(user.getRole()) || user.getId().equals(sellerId));
+        return ResponseEntity.ok(
+            PagedResponses.body(
+                productService.getProductsBySeller(sellerId, owner, search, pageable),
+                paged
+            )
+        );
     }
 
     @PostMapping
     public ResponseEntity<ProductDTO> createProduct(@RequestBody ProductDTO productDTO) {
-        return ResponseEntity.ok(productService.createProduct(productDTO));
+        return ResponseEntity.ok(
+            productService.createProduct(productDTO, accessPolicy.currentUser().getId())
+        );
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductDTO> updateProduct(@PathVariable Integer id, @RequestBody ProductDTO productDTO) {
+    @org.springframework.security.access.prepost.PreAuthorize("@accessPolicy.canEditProduct(#id)")
+    public ResponseEntity<ProductDTO> updateProduct(
+        @PathVariable Integer id,
+        @RequestBody ProductDTO productDTO
+    ) {
         return ResponseEntity.ok(productService.updateProduct(id, productDTO));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("@accessPolicy.canEditProduct(#id)")
     public ResponseEntity<Void> deleteProduct(@PathVariable Integer id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/bulk-upload")
-    public ResponseEntity<java.util.Map<String, String>> bulkUploadProducts(@org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
-        // Stub for bulk upload processing (Phase 2 advanced feature)
-        java.util.Map<String, String> response = new java.util.HashMap<>();
-        response.put("message", "Bulk upload functionality is currently a stub.");
-        response.put("status", "pending_implementation");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> bulkUploadProducts(
+        @org.springframework.web.bind.annotation.RequestParam(
+            "file"
+        ) org.springframework.web.multipart.MultipartFile file,
+        @RequestParam(defaultValue = "true") boolean preview,
+        @RequestParam(required = false) String requestKey
+    ) throws java.io.IOException {
+        var result = imports.upload(file, preview, requestKey);
+        return ResponseEntity.status(Boolean.TRUE.equals(result.get("valid")) ? 200 : 400).body(
+            result
+        );
     }
 
     @PostMapping("/image-search")
-    public ResponseEntity<java.util.Map<String, String>> imageSearch(@org.springframework.web.bind.annotation.RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
-        // Stub for image search processing
-        java.util.Map<String, String> response = new java.util.HashMap<>();
-        response.put("message", "Image search is currently a stub.");
-        response.put("status", "pending_implementation");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<?> imageSearch(
+        @org.springframework.web.bind.annotation.RequestParam(
+            "file"
+        ) org.springframework.web.multipart.MultipartFile file
+    ) throws java.io.IOException {
+        return ResponseEntity.ok(media.search(file));
+    }
+
+    @GetMapping("/image-search/history")
+    public Object imageSearchHistory() {
+        return media.history();
     }
 }

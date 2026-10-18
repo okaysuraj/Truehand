@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class EmailService {
+
     private final JavaMailSender mailSender;
 
     @Value("${spring.mail.from}")
@@ -28,5 +29,16 @@ public class EmailService {
         } catch (MessagingException ex) {
             throw new RuntimeException("Failed to send email", ex);
         }
+    }
+
+    public String sendTextEmail(String to, String subject, String body) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, "utf-8");
+        helper.setFrom(from);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(body, false);
+        mailSender.send(message);
+        return message.getMessageID();
     }
 }

@@ -1,0 +1,38 @@
+[
+  {
+    "key": "minPrice",
+    "label": "Minimum price in INR",
+    "type": "money",
+    "optional": true,
+    "min": 0
+  },
+  {
+    "key": "maxPrice",
+    "label": "Maximum price in INR",
+    "type": "money",
+    "optional": true,
+    "min": 0
+  },
+  {
+    "key": "minRating",
+    "label": "Minimum rating (0 to 5)",
+    "type": "number",
+    "optional": true,
+    "min": 0,
+    "max": 5
+  },
+  {
+    "key": "sort",
+    "label": "Sort products",
+    "type": "select",
+    "optional": true,
+    "options": [
+      { "value": "id,asc", "label": "Catalog order" },
+      { "value": "price,asc", "label": "Price: low to high" },
+      { "value": "price,desc", "label": "Price: high to low" },
+      { "value": "averageRating,desc", "label": "Highest rated" },
+      { "value": "createdAt,desc", "label": "Newest products" },
+      { "value": "name,asc", "label": "Name: A to Z" }
+    ]
+  }
+]

@@ -7,11 +7,10 @@ import com.truehand.model.Wishlist;
 import com.truehand.repository.ProductRepository;
 import com.truehand.repository.UserRepository;
 import com.truehand.repository.WishlistRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -23,27 +22,41 @@ public class WishlistService {
     private final ProductService productService; // to map to DTO
 
     public List<ProductDTO> getUserWishlist(Integer userId) {
-        return wishlistRepository.findByUserId(userId).stream()
-                .map(w -> productService.getProduct(w.getProduct().getId()))
-                .collect(Collectors.toList());
+        return wishlistRepository
+            .findByUserId(userId)
+            .stream()
+            .map(w -> productService.getProduct(w.getProduct().getId()))
+            .collect(Collectors.toList());
     }
 
     public void addProductToWishlist(Integer userId, Integer productId) {
         if (wishlistRepository.findByUserIdAndProductId(userId, productId).isPresent()) {
             return; // Already in wishlist
         }
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+        User user = userRepository
+            .findById(userId)
+            .orElseThrow(() ->
+                new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND,
+                    "User not found"
+                )
+            );
+        Product product = productRepository
+            .findById(productId)
+            .orElseThrow(() ->
+                new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.NOT_FOUND,
+                    "Product not found"
+                )
+            );
 
-        Wishlist wishlist = Wishlist.builder()
-                .user(user)
-                .product(product)
-                .build();
+        Wishlist wishlist = Wishlist.builder().user(user).product(product).build();
         wishlistRepository.save(wishlist);
     }
 
     public void removeProductFromWishlist(Integer userId, Integer productId) {
-        wishlistRepository.findByUserIdAndProductId(userId, productId)
-                .ifPresent(wishlistRepository::delete);
+        wishlistRepository
+            .findByUserIdAndProductId(userId, productId)
+            .ifPresent(wishlistRepository::delete);
     }
 }

@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class DeliveryPersonnelDTO {
+
     private String vehicleType;
     private String vehicleRegistrationNumber;
     private String drivingLicenseNumber;
