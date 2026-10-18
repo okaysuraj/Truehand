@@ -2,8 +2,10 @@ package com.truehand;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration;
 
-@SpringBootApplication
+// FirebaseAuthenticationFilter supplies authenticated users; no default local user is needed.
+@SpringBootApplication(exclude = UserDetailsServiceAutoConfiguration.class)
 @org.springframework.scheduling.annotation.EnableScheduling
 public class TruehandApiApplication {
 

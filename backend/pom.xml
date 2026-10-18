@@ -23,6 +23,8 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <!-- Keep core and the PostgreSQL module aligned; this version supports PostgreSQL 18. -->
+        <flyway.version>11.20.3</flyway.version>
         <jackson-bom.version>2.21.7</jackson-bom.version>
         <tomcat.version>10.1.60</tomcat.version>
         <postgresql.version>42.7.13</postgresql.version>
